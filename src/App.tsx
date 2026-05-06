@@ -12,6 +12,7 @@ import {
 } from './api/auth';
 import { AuthHeader } from './components/AuthHeader';
 import { StatusMessage } from './components/StatusMessage';
+import { ThemeToggle } from './components/ThemeToggle';
 import { AuthPanel } from './components/auth/AuthPanel';
 import { Dashboard } from './components/dashboard/Dashboard';
 import type { AuthMode, Status, User } from './types';
@@ -19,6 +20,16 @@ import type { AuthMode, Status, User } from './types';
 const emptyLogin = { email: '', password: '' };
 const emptyRegister = { name: '', email: '', password: '' };
 const emptyPassword = { current_password: '', password: '', password_confirmation: '' };
+const THEME_KEY = 'nextact_theme';
+
+type ThemeMode = 'dark' | 'light';
+
+function initialTheme(): ThemeMode {
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored === 'dark' || stored === 'light') return stored;
+
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
 
 function getErrorMessage(error: unknown) {
   if (error instanceof ApiError) {
@@ -39,6 +50,7 @@ export default function App() {
   const [status, setStatus] = useState<Status>(null);
   const [loading, setLoading] = useState(false);
   const [booting, setBooting] = useState(true);
+  const [theme, setTheme] = useState<ThemeMode>(initialTheme);
 
   const token = tokenStore.get();
   const isAuthenticated = Boolean(user && token);
@@ -54,6 +66,15 @@ export default function App() {
       .catch(() => tokenStore.clear())
       .finally(() => setBooting(false));
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
+  }
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -130,23 +151,7 @@ export default function App() {
     }
   }
 
-  async function handleRefresh() {
-    setLoading(true);
-    setStatus(null);
-
-    try {
-      const authorization = await refreshToken();
-      setStatus({
-        type: 'success',
-        text: `Token refreshed. Expires in ${authorization?.expires_in ?? 'unknown'} seconds.`,
-      });
-    } catch (error) {
-      setStatus({ type: 'error', text: getErrorMessage(error) });
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  
   async function handleLogout() {
     setLoading(true);
     await logout();
@@ -171,14 +176,18 @@ export default function App() {
         onPasswordChange={setPasswordForm}
         onProfileSubmit={handleProfile}
         onPasswordSubmit={handlePassword}
-        onRefresh={handleRefresh}
         onLogout={handleLogout}
+        theme={theme}
+        onThemeToggle={toggleTheme}
       />
     );
   }
 
   return (
     <main className="shell">
+      <div className="theme-toggle-wrap">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+      </div>
       <section className="auth-panel">
         <AuthHeader />
         <StatusMessage status={status} />
