@@ -9,7 +9,7 @@ export type User = {
 
 export type AuthMode = 'login' | 'register';
 
-export type Status = { type: 'success' | 'error' | 'info'; text: string } | null;
+export type Status = { type: 'success' | 'error' | 'info' | 'failed'; text: string } | null;
 
 export type LoginFormValues = {
   email: string;
@@ -50,6 +50,15 @@ export type Supplier = {
   updated_at?: string;
 };
 
+export type Client = {
+  id: number;
+  name: string;
+  phone?: string | null;
+  address?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type Product = {
   id: number;
   reference: string;
@@ -67,9 +76,67 @@ export type Product = {
   updated_at?: string;
 };
 
+export type PurchaseStatus = 'pending' | 'confirmed';
+
+export type Purchase = {
+  id: number;
+  supplier_id: number;
+  total?: string | number | null;
+  status: PurchaseStatus;
+  supplier?: Supplier | null;
+  items?: PurchaseItem[];
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PurchaseItem = {
+  id: number;
+  purchase_id: number;
+  product_id: number;
+  price: string | number;
+  quantity: number;
+  total?: string | number | null;
+  purchase?: Purchase | null;
+  product?: Product | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type SaleStatus = 'paid' | 'unpaid' | 'refunded';
+
+export type Sale = {
+  id: number;
+  client_id: number;
+  total?: string | number | null;
+  status: SaleStatus;
+  client?: Client | null;
+  items?: SaleItem[];
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type SaleItem = {
+  id: number;
+  sale_id: number;
+  product_id: number;
+  price: string | number;
+  quantity: number;
+  total?: string | number | null;
+  sale?: Sale | null;
+  product?: Product | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type CategoryFormValues = {
   name: string;
   description: string;
+};
+
+export type ContactFormValues = {
+  name: string;
+  phone: string;
+  address: string;
 };
 
 export type ProductFormValues = {
@@ -83,6 +150,29 @@ export type ProductFormValues = {
   category_id: string;
   supplier_id: string;
   image: File | null;
+};
+
+export type PurchaseFormValues = {
+  supplier_id: string;
+  status: PurchaseStatus;
+};
+
+export type PurchaseItemFormValues = {
+  purchase_id: string;
+  product_id: string;
+  price: string;
+  quantity: string;
+};
+
+export type SaleFormValues = {
+  client_id: string;
+  status: SaleStatus;
+};
+
+export type SaleItemFormValues = {
+  sale_id: string;
+  product_id: string;
+  quantity: string;
 };
 
 export type AuthPayload = {
