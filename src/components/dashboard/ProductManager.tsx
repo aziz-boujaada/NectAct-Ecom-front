@@ -37,11 +37,8 @@ function lowStock(product: Product) {
   return hasLowStock;
 }
 
-function outOfStock(product : Product){
-  let outStock = true 
-  if(product.stock === 0){
-    return outStock = true
-  }
+function outOfStock(product: Product) {
+  return product.stock === 0;
 }
 export function ProductManager({
   categories,
@@ -60,7 +57,7 @@ export function ProductManager({
 }: ProductManagerProps) {
   const missingRelations = categories.length === 0 || suppliers.length === 0;
   const showForm = isAdding || editingProduct !== null;
-
+  
   return (
     <section className="admin-section">
       <div className="section-heading">

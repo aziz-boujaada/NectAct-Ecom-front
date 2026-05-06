@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { AccountCard } from './AccountCard';
 import { AdminCatalog } from './AdminCatalog';
+import { DashboardStats } from './DashboardStats';
 import { PasswordForm } from './PasswordForm';
 import { ProfileForm } from './ProfileForm';
 import { StatusMessage } from '../StatusMessage';
@@ -22,6 +23,7 @@ type DashboardProps = {
 };
 
 export type TabOption =
+  | 'overview'
   | 'categories'
   | 'products'
   | 'purchases'
@@ -29,6 +31,7 @@ export type TabOption =
   | 'refunds'
   | 'suppliers'
   | 'clients'
+  | 'stock'
   | 'profile'
   | 'security';
 
@@ -47,9 +50,9 @@ export function Dashboard({
   onLogout,
   onThemeToggle,
 }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<TabOption>('products');
+  const [activeTab, setActiveTab] = useState<TabOption>('overview');
 
-  const showCatalog = ['categories', 'products', 'purchases', 'sales', 'refunds', 'suppliers', 'clients'].includes(activeTab);
+  const showCatalog = ['categories', 'products', 'purchases', 'sales', 'refunds', 'suppliers', 'clients', 'stock'].includes(activeTab);
 
   return (
     <div className="dashboard-layout">
@@ -68,9 +71,15 @@ export function Dashboard({
           <StatusMessage status={status} />
         </div>
 
+        {activeTab === 'overview' && (
+          <div className="fade-in">
+            <DashboardStats />
+          </div>
+        )}
+
         {showCatalog && (
           <div className="fade-in">
-            <AdminCatalog activeTab={activeTab as 'categories' | 'products' | 'purchases' | 'sales' | 'refunds' | 'suppliers' | 'clients'} />
+            <AdminCatalog activeTab={activeTab as 'categories' | 'products' | 'purchases' | 'sales' | 'refunds' | 'suppliers' | 'clients' | 'stock'} />
           </div>
         )}
         {activeTab === 'profile' && (
