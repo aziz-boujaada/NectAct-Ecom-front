@@ -12,13 +12,17 @@ export function StatusMessage({ status }: StatusMessageProps) {
   useEffect(() => {
     if (!status) return;
 
-    setVisible(true);
-
-    const timer = setTimeout(() => {
+    const showTimer = setTimeout(() => {
+      setVisible(true);
+    }, 0);
+    const hideTimer = setTimeout(() => {
       setVisible(false);
     }, 5000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
   }, [status]);
 
   if (!status || !visible) return null;

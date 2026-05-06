@@ -1,25 +1,35 @@
-import { RefreshCw } from 'lucide-react';
-import { StatusMessage } from '../StatusMessage';
-import { CategoryManager } from './CategoryManager';
-import { ContactManager } from './ContactManager';
-import { ProductManager } from './ProductManager';
-import { PurchaseManager } from './PurchaseManager';
-import { RefundManager } from './RefundManager';
-import { SaleManager } from './SaleManager';
-import { useAdminCatalog } from './useAdminCatalog';
+import { RefreshCw } from "lucide-react";
+import { StatusMessage } from "../StatusMessage";
+import { CategoryManager } from "./CategoryManager";
+import { ContactManager } from "./ContactManager";
+import { ProductManager } from "./ProductManager";
+import { PurchaseManager } from "./PurchaseManager";
+import { RefundManager } from "./RefundManager";
+import { SaleManager } from "./SaleManager";
+import { useAdminCatalog } from "./useAdminCatalog";
+import StockMovements from "./StockHistory";
 
 type AdminCatalogProps = {
-  activeTab: 'categories' | 'products' | 'purchases' | 'sales' | 'refunds' | 'suppliers' | 'clients';
+  activeTab:
+    | "categories"
+    | "products"
+    | "purchases"
+    | "sales"
+    | "refunds"
+    | "suppliers"
+    | "clients"
+    | "stock";
 };
 
-const titles: Record<AdminCatalogProps['activeTab'], string> = {
-  categories: 'Categories',
-  products: 'Products',
-  purchases: 'Purchases',
-  sales: 'Sales',
-  refunds: 'Refunds',
-  suppliers: 'Suppliers',
-  clients: 'Clients',
+const titles: Record<AdminCatalogProps["activeTab"], string> = {
+  categories: "Categories",
+  products: "Products",
+  purchases: "Purchases",
+  sales: "Sales",
+  refunds: "Refunds",
+  suppliers: "Suppliers",
+  clients: "Clients",
+  stock: "Stock",
 };
 
 export function AdminCatalog({ activeTab }: AdminCatalogProps) {
@@ -32,7 +42,12 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           <p className="eyebrow">Catalog Management</p>
           <h2>{titles[activeTab]}</h2>
         </div>
-        <button className="secondary-action" disabled={catalog.loading} onClick={() => void catalog.loadCatalog()} type="button">
+        <button
+          className="secondary-action"
+          disabled={catalog.loading}
+          onClick={() => void catalog.loadCatalog()}
+          type="button"
+        >
           <RefreshCw size={17} aria-hidden="true" />
           Reload
         </button>
@@ -41,7 +56,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
       <StatusMessage status={catalog.status} />
 
       <div className="admin-grid fade-in" key={activeTab}>
-        {activeTab === 'categories' && (
+        {activeTab === "categories" && (
           <CategoryManager
             categories={catalog.categories}
             editingCategory={catalog.editingCategory}
@@ -57,7 +72,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           />
         )}
 
-        {activeTab === 'products' && (
+        {activeTab === "products" && (
           <ProductManager
             categories={catalog.categories}
             editingProduct={catalog.editingProduct}
@@ -75,7 +90,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           />
         )}
 
-        {activeTab === 'purchases' && (
+        {activeTab === "purchases" && (
           <PurchaseManager
             editingPurchase={catalog.editingPurchase}
             editingPurchaseItem={catalog.editingPurchaseItem}
@@ -103,7 +118,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           />
         )}
 
-        {activeTab === 'sales' && (
+        {activeTab === "sales" && (
           <SaleManager
             clients={catalog.clients}
             editingSale={catalog.editingSale}
@@ -131,7 +146,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           />
         )}
 
-        {activeTab === 'refunds' && (
+        {activeTab === "refunds" && (
           <RefundManager
             isAddingRefund={catalog.isAddingRefund}
             loading={catalog.loading}
@@ -146,7 +161,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           />
         )}
 
-        {activeTab === 'suppliers' && (
+        {activeTab === "suppliers" && (
           <ContactManager
             contacts={catalog.suppliers}
             createLabel="Create supplier"
@@ -168,7 +183,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           />
         )}
 
-        {activeTab === 'clients' && (
+        {activeTab === "clients" && (
           <ContactManager
             contacts={catalog.clients}
             createLabel="Create client"
@@ -188,6 +203,19 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
             onEdit={catalog.editClient}
             onSubmit={catalog.handleClientSubmit}
           />
+        )}
+
+        {activeTab === "stock" && (
+          <div className="admin-section fade-in">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Inventory</p>
+                <h2>Stock Movements</h2>
+              </div>
+            </div>
+
+            <StockMovements />
+          </div>
         )}
       </div>
     </div>
