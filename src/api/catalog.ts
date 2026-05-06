@@ -10,6 +10,8 @@ import type {
   PurchaseFormValues,
   PurchaseItem,
   PurchaseItemFormValues,
+  Refund,
+  RefundFormValues,
   Sale,
   SaleFormValues,
   SaleItem,
@@ -55,6 +57,7 @@ type PurchaseItemResponse = {
 type SaleResponse = {
   status: string;
   message?: string;
+  data?: Sale | Sale[];
   sale?: Sale;
   sales?: Sale[];
 };
@@ -64,6 +67,14 @@ type SaleItemResponse = {
   message?: string;
   sale_item?: SaleItem;
   sale_items?: SaleItem[];
+};
+
+type RefundResponse = {
+  status: string;
+  message?: string;
+  data?: Refund | Refund[];
+  refund?: Refund;
+  refunds?: Refund[];
 };
 
 type ClientResponse = {
@@ -104,6 +115,17 @@ function saleItemPayload(payload: SaleItemFormValues) {
     sale_id: Number(payload.sale_id),
     product_id: Number(payload.product_id),
     quantity: Number(payload.quantity),
+  };
+}
+
+function refundPayload(payload: RefundFormValues) {
+  return {
+    sale_id: Number(payload.sale_id),
+    reason: cleanNullable(payload.reason),
+    items: payload.items.map((item) => ({
+      product_id: Number(item.product_id),
+      quantity: Number(item.quantity),
+    })),
   };
 }
 
@@ -252,7 +274,7 @@ export async function deletePurchaseItem(id: number) {
 
 export async function listSales() {
   const data = await request<SaleResponse>('/sales', { token: authToken() });
-  return data.sales ?? [];
+  return data.sales ?? (Array.isArray(data.data) ? data.data : []);
 }
 
 export async function createSale(payload: SaleFormValues) {
@@ -261,7 +283,7 @@ export async function createSale(payload: SaleFormValues) {
     token: authToken(),
     body: salePayload(payload),
   });
-  return data.sale;
+  return data.sale ?? (!Array.isArray(data.data) ? data.data : undefined);
 }
 
 export async function updateSale(id: number, payload: SaleFormValues) {
@@ -270,7 +292,7 @@ export async function updateSale(id: number, payload: SaleFormValues) {
     token: authToken(),
     body: salePayload(payload),
   });
-  return data.sale;
+  return data.sale ?? (!Array.isArray(data.data) ? data.data : undefined);
 }
 
 export async function deleteSale(id: number) {
@@ -302,6 +324,24 @@ export async function updateSaleItem(id: number, payload: SaleItemFormValues) {
 
 export async function deleteSaleItem(id: number) {
   return request<SaleItemResponse>(`/sale-items/${id}`, { method: 'DELETE', token: authToken() });
+}
+
+export async function listRefunds() {
+  const data = await request<RefundResponse>('/refunds', { token: authToken() });
+  return data.refunds ?? (Array.isArray(data.data) ? data.data : []);
+}
+
+export async function createRefund(payload: RefundFormValues) {
+  const data = await request<RefundResponse>('/refunds', {
+    method: 'POST',
+    token: authToken(),
+    body: refundPayload(payload),
+  });
+  return data.refund ?? (!Array.isArray(data.data) ? data.data : undefined);
+}
+
+export async function deleteRefund(id: number) {
+  return request<RefundResponse>(`/refunds/${id}`, { method: 'DELETE', token: authToken() });
 }
 
 export async function listSuppliers() {

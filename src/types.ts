@@ -111,6 +111,7 @@ export type Sale = {
   status: SaleStatus;
   client?: Client | null;
   items?: SaleItem[];
+  refunds?: Refund[];
   created_at?: string;
   updated_at?: string;
 };
@@ -126,6 +127,28 @@ export type SaleItem = {
   product?: Product | null;
   created_at?: string;
   updated_at?: string;
+};
+
+export type Refund = {
+  id: number;
+  sale_id: number;
+  total?: string | number | null;
+  reason?: string | null;
+  sale?: Sale | null;
+  items?: RefundItem[];
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type RefundItem = {
+  id: number;
+  refund_id: number;
+  product_id: number;
+  price: string | number;
+  quantity: number;
+  total?: string | number | null;
+  refund?: Refund | null;
+  product?: Product | null;
 };
 
 export type CategoryFormValues = {
@@ -173,6 +196,17 @@ export type SaleItemFormValues = {
   sale_id: string;
   product_id: string;
   quantity: string;
+};
+
+export type RefundItemFormValues = {
+  product_id: string;
+  quantity: string;
+};
+
+export type RefundFormValues = {
+  sale_id: string;
+  reason: string;
+  items: RefundItemFormValues[];
 };
 
 export type AuthPayload = {
