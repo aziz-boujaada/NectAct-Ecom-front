@@ -151,6 +151,76 @@ export type RefundItem = {
   product?: Product | null;
 };
 
+export type StockMovement = {
+  id: number;
+  product_id: number;
+  quantity: number;
+  type: 'in' | 'out' | string;
+  source?: 'purchase' | 'sale' | 'refund' | string | null;
+  reference_id?: number | null;
+  product?: Product | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DashboardStats = {
+  summary: {
+    gross_sales: string;
+    total_refunds: string;
+    net_sales: string;
+    total_purchases: string;
+    estimated_profit: string;
+  };
+  counts: {
+    sales: number;
+    refunds: number;
+    purchases: number;
+    products: number;
+    clients: number;
+    suppliers: number;
+    low_stock_products: number;
+  };
+  today: {
+    sales: number;
+    sales_total: string;
+    refunds: number;
+    refunds_total: string;
+  };
+  current_month: {
+    sales_total: string;
+    refunds_total: string;
+    purchases_total: string;
+  };
+  sales_by_status: Record<SaleStatus, number>;
+  purchases_by_status: Record<PurchaseStatus, number>;
+  top_selling_products: Array<{
+    id: number;
+    reference?: string | null;
+    name: string;
+    quantity_sold: number;
+    sales_total: string;
+  }>;
+  low_stock_products: Array<{
+    id: number;
+    reference?: string | null;
+    name: string;
+    stock: number | null;
+    min_stock: number | null;
+  }>;
+  recent_sales: Array<Pick<Sale, 'id' | 'client_id' | 'total' | 'status' | 'created_at'> & {
+    reference?: string | null;
+    client?: Pick<Client, 'id' | 'name'> | null;
+  }>;
+  recent_refunds: Array<Pick<Refund, 'id' | 'sale_id' | 'total' | 'reason' | 'created_at'> & {
+    sale?: {
+      id: number;
+      reference?: string | null;
+      client_id: number;
+      client?: Pick<Client, 'id' | 'name'> | null;
+    } | null;
+  }>;
+};
+
 export type CategoryFormValues = {
   name: string;
   description: string;

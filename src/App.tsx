@@ -4,7 +4,6 @@ import {
   fetchMe,
   login,
   logout,
-  refreshToken,
   register,
   tokenStore,
   updatePassword,

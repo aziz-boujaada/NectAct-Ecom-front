@@ -4,6 +4,7 @@ import type {
   CategoryFormValues,
   Client,
   ContactFormValues,
+  DashboardStats,
   Product,
   ProductFormValues,
   Purchase,
@@ -16,6 +17,7 @@ import type {
   SaleFormValues,
   SaleItem,
   SaleItemFormValues,
+  StockMovement,
   Supplier,
 } from '../types';
 
@@ -82,6 +84,33 @@ type ClientResponse = {
   message?: string;
   client?: Client;
   clients?: Client[];
+};
+
+type Paginator<T> = {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  next_page_url?: string | null;
+  prev_page_url?: string | null;
+};
+
+export type PaginatedStockMovements = {
+  movements: StockMovement[];
+  currentPage: number;
+  lastPage: number;
+};
+
+type StockMovementResponse = {
+  status: string;
+  message?: string;
+  stock?: Paginator<StockMovement>;
+  data?: Paginator<StockMovement> | StockMovement[];
+};
+
+type DashboardStatsResponse = {
+  status: string;
+  message?: string;
+  data: DashboardStats;
 };
 
 function authToken() {
@@ -194,6 +223,30 @@ export async function deleteCategory(id: number) {
 export async function listProducts() {
   const data = await request<ProductResponse>('/products', { token: authToken() });
   return data.products ?? [];
+}
+
+export async function listStockMovements(page = 1): Promise<PaginatedStockMovements> {
+  const data = await request<StockMovementResponse>(`/stock-movements?page=${page}`, { token: authToken() });
+  const paginated = data.stock ?? (!Array.isArray(data.data) ? data.data : undefined);
+
+  if (paginated) {
+    return {
+      movements: paginated.data ?? [],
+      currentPage: paginated.current_page ?? page,
+      lastPage: paginated.last_page ?? 1,
+    };
+  }
+
+  return {
+    movements: Array.isArray(data.data) ? data.data : [],
+    currentPage: page,
+    lastPage: 1,
+  };
+}
+
+export async function getDashboardStats() {
+  const data = await request<DashboardStatsResponse>('/admin/dashboard', { token: authToken() });
+  return data.data;
 }
 
 export async function createProduct(payload: ProductFormValues) {

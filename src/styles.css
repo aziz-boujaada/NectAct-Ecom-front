@@ -642,6 +642,12 @@ input:focus, select:focus, textarea:focus {
   padding: 14px 16px;
 }
 
+.helper-note.error-text {
+  background: var(--error-bg);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: var(--error-text);
+}
+
 .data-list {
   display: grid;
   gap: 12px;
@@ -783,6 +789,61 @@ td span {
   margin-top: 6px;
   max-width: 280px;
 }
+
+.stock-movements {
+  display: grid;
+  gap: 16px;
+}
+
+.stock-product-cell {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.movement-pill {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 800;
+  gap: 6px;
+  line-height: 1;
+  margin-top: 0;
+  max-width: none;
+  padding: 7px 10px;
+  text-transform: uppercase;
+}
+
+.movement-pill.in {
+  background: var(--success-bg);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--success-text);
+}
+
+.movement-pill.out {
+  background: var(--error-bg);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--error-text);
+}
+
+.pagination-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.pagination-row button {
+  min-height: 40px;
+}
+
+.pagination-row span {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
 .low-stock-badge {
   text-align: center;
   background: #f8c620;
@@ -803,6 +864,146 @@ td span {
   padding: 2px 6px;
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.dashboard-stats {
+  display: grid;
+  gap: 24px;
+}
+
+.stats-layout {
+  display: grid;
+  gap: 24px;
+}
+
+.stats-card-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+}
+
+.stats-card-grid.compact {
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+
+.metric-card {
+  align-items: center;
+  background: var(--panel-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  display: flex;
+  gap: 14px;
+  min-height: 112px;
+  padding: 18px;
+}
+
+.metric-card.warning .metric-icon {
+  background: rgba(248, 198, 32, 0.14);
+  color: #f8c620;
+}
+
+.metric-icon {
+  align-items: center;
+  background: var(--info-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--info-text);
+  display: flex;
+  flex: 0 0 42px;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+}
+
+.metric-card span,
+.period-grid span {
+  color: var(--text-muted);
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.metric-card strong {
+  color: var(--text-main);
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.stats-split {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.period-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.period-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.period-grid div,
+.status-breakdown-row {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.period-grid strong {
+  color: var(--text-main);
+  display: block;
+  font-size: 1.15rem;
+}
+
+.period-grid p {
+  color: var(--text-muted);
+  font-weight: 700;
+  margin: 8px 0 0;
+}
+
+.status-breakdown {
+  display: grid;
+  gap: 10px;
+}
+
+.status-breakdown-row {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.status-breakdown-row strong {
+  font-size: 1.1rem;
+}
+
+.status-pill.paid {
+  background: var(--success-bg);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--success-text);
+}
+
+.status-pill.unpaid,
+.status-pill.refunded {
+  background: var(--error-bg);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--error-text);
+}
+
+.compact-table table {
+  min-width: 520px;
+}
+
+.compact-table th,
+.compact-table td {
+  padding: 14px;
 }
 @media (max-width: 900px) {
   .dashboard-layout {
@@ -848,6 +1049,17 @@ td span {
   
   .admin-dashboard, .forms-stack form {
     padding: 20px;
+  }
+
+  .stats-card-grid,
+  .stats-card-grid.compact,
+  .stats-split {
+    grid-template-columns: 1fr;
+  }
+
+  .period-grid,
+  .period-grid.three {
+    grid-template-columns: 1fr;
   }
 }
 
