@@ -1,9 +1,12 @@
-import { LogOut, RefreshCw } from 'lucide-react';
+import { LogOut, RefreshCw, UserCircle, Shield, Package, ShoppingCart, Tags, Truck, Users, ReceiptText } from 'lucide-react';
 import type { User } from '../../types';
+import type { TabOption } from './Dashboard';
 
 type AccountCardProps = {
   user: User;
   loading: boolean;
+  activeTab: TabOption;
+  onTabChange: (tab: TabOption) => void;
   onRefresh: () => void;
   onLogout: () => void;
 };
@@ -17,22 +20,100 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-export function AccountCard({ user, loading, onRefresh, onLogout }: AccountCardProps) {
+export function AccountCard({ user, loading, activeTab, onTabChange, onRefresh, onLogout }: AccountCardProps) {
   return (
-    <aside className="account-card">
-      <div className="avatar">{getInitials(user.name)}</div>
-      <h2>{user.name}</h2>
-      <p>{user.email}</p>
-      {user.role && <span>{user.role}</span>}
-      <div className="account-actions">
-        <button onClick={onRefresh} disabled={loading} type="button">
-          <RefreshCw size={17} aria-hidden="true" />
-          Refresh token
+    <aside className="sidebar">
+      <div className="sidebar-header">
+        <div className="brand-logo">NA</div>
+        <h2>NectAct Panel</h2>
+      </div>
+
+      <nav className="sidebar-nav">
+        <p className="sidebar-label">CATALOG</p>
+        <button
+          className={`nav-item ${activeTab === 'products' ? 'active' : ''}`}
+          onClick={() => onTabChange('products')}
+          type="button"
+        >
+          <Package size={20} />
+          <span>Products</span>
         </button>
-        <button onClick={onLogout} disabled={loading} type="button">
-          <LogOut size={17} aria-hidden="true" />
-          Logout
+        <button
+          className={`nav-item ${activeTab === 'purchases' ? 'active' : ''}`}
+          onClick={() => onTabChange('purchases')}
+          type="button"
+        >
+          <ShoppingCart size={20} />
+          <span>Purchases</span>
         </button>
+        <button
+          className={`nav-item ${activeTab === 'sales' ? 'active' : ''}`}
+          onClick={() => onTabChange('sales')}
+          type="button"
+        >
+          <ReceiptText size={20} />
+          <span>Sales</span>
+        </button>
+        <button
+          className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`}
+          onClick={() => onTabChange('categories')}
+          type="button"
+        >
+          <Tags size={20} />
+          <span>Categories</span>
+        </button>
+        <button
+          className={`nav-item ${activeTab === 'suppliers' ? 'active' : ''}`}
+          onClick={() => onTabChange('suppliers')}
+          type="button"
+        >
+          <Truck size={20} />
+          <span>Suppliers</span>
+        </button>
+        <button
+          className={`nav-item ${activeTab === 'clients' ? 'active' : ''}`}
+          onClick={() => onTabChange('clients')}
+          type="button"
+        >
+          <Users size={20} />
+          <span>Clients</span>
+        </button>
+
+        <p className="sidebar-label" style={{ marginTop: '16px' }}>SETTINGS</p>
+        <button
+          className={`nav-item ${activeTab === 'profile' ? 'active' : ''}`}
+          onClick={() => onTabChange('profile')}
+          type="button"
+        >
+          <UserCircle size={20} />
+          <span>Profile</span>
+        </button>
+        <button
+          className={`nav-item ${activeTab === 'security' ? 'active' : ''}`}
+          onClick={() => onTabChange('security')}
+          type="button"
+        >
+          <Shield size={20} />
+          <span>Security</span>
+        </button>
+      </nav>
+
+      <div className="sidebar-footer">
+        <div className="user-profile">
+          <div className="avatar">{getInitials(user.name)}</div>
+          <div className="user-info">
+            <span className="user-name">{user.name}</span>
+            <span className="user-role">{user.role || 'Admin'}</span>
+          </div>
+        </div>
+        <div className="account-actions">
+          <button onClick={onRefresh} disabled={loading} type="button" className="action-btn" title="Refresh token">
+            <RefreshCw size={17} aria-hidden="true" />
+          </button>
+          <button onClick={onLogout} disabled={loading} type="button" className="action-btn danger-action" title="Logout">
+            <LogOut size={17} aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </aside>
   );

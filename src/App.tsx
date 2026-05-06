@@ -159,38 +159,41 @@ export default function App() {
     return <main className="shell loading-screen">Loading auth session...</main>;
   }
 
+  if (isAuthenticated) {
+    return (
+      <Dashboard
+        user={user}
+        status={status}
+        profileForm={profileForm}
+        passwordForm={passwordForm}
+        loading={loading}
+        onProfileChange={setProfileForm}
+        onPasswordChange={setPasswordForm}
+        onProfileSubmit={handleProfile}
+        onPasswordSubmit={handlePassword}
+        onRefresh={handleRefresh}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
   return (
     <main className="shell">
       <section className="auth-panel">
         <AuthHeader />
         <StatusMessage status={status} />
 
-        {!isAuthenticated ? (
-          <AuthPanel
-            mode={mode}
-            loginForm={loginForm}
-            registerForm={registerForm}
-            loading={loading}
-            onModeChange={setMode}
-            onLoginChange={setLoginForm}
-            onRegisterChange={setRegisterForm}
-            onLoginSubmit={handleLogin}
-            onRegisterSubmit={handleRegister}
-          />
-        ) : (
-          <Dashboard
-            user={user}
-            profileForm={profileForm}
-            passwordForm={passwordForm}
-            loading={loading}
-            onProfileChange={setProfileForm}
-            onPasswordChange={setPasswordForm}
-            onProfileSubmit={handleProfile}
-            onPasswordSubmit={handlePassword}
-            onRefresh={handleRefresh}
-            onLogout={handleLogout}
-          />
-        )}
+        <AuthPanel
+          mode={mode}
+          loginForm={loginForm}
+          registerForm={registerForm}
+          loading={loading}
+          onModeChange={setMode}
+          onLoginChange={setLoginForm}
+          onRegisterChange={setRegisterForm}
+          onLoginSubmit={handleLogin}
+          onRegisterSubmit={handleRegister}
+        />
       </section>
     </main>
   );
