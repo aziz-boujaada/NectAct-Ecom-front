@@ -1,0 +1,159 @@
+import { FormEvent } from 'react';
+import { Building2, Edit3, Plus, Trash2, Users, X } from 'lucide-react';
+import type { ContactFormValues } from '../../types';
+
+type Contact = {
+  id: number;
+  name: string;
+  phone?: string | null;
+  address?: string | null;
+};
+
+type ContactManagerProps<TContact extends Contact> = {
+  eyebrow: string;
+  title: string;
+  icon: 'building' | 'users';
+  createLabel: string;
+  updateLabel: string;
+  emptyText: string;
+  contacts: TContact[];
+  editingContact: TContact | null;
+  form: ContactFormValues;
+  loading: boolean;
+  isAdding: boolean;
+  onAdd: () => void;
+  onCancelEdit: () => void;
+  onChange: (form: ContactFormValues) => void;
+  onDelete: (contact: TContact) => void;
+  onEdit: (contact: TContact) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+};
+
+export function ContactManager<TContact extends Contact>({
+  eyebrow,
+  title,
+  icon,
+  createLabel,
+  updateLabel,
+  emptyText,
+  contacts,
+  editingContact,
+  form,
+  loading,
+  isAdding,
+  onAdd,
+  onCancelEdit,
+  onChange,
+  onDelete,
+  onEdit,
+  onSubmit,
+}: ContactManagerProps<TContact>) {
+  const showForm = isAdding || editingContact !== null;
+
+  return (
+    <section className="admin-section">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2>{title}</h2>
+        </div>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <span>{contacts.length} total</span>
+          {!showForm && (
+            <button className="primary-action" onClick={onAdd} type="button">
+              <Plus size={17} /> {createLabel}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showForm ? (
+        <form className="manager-form contact-form fade-in" onSubmit={onSubmit}>
+          <label>
+            Name
+            <input value={form.name} onChange={(event) => onChange({ ...form, name: event.target.value })} required />
+          </label>
+          <label>
+            Phone
+            <input value={form.phone} onChange={(event) => onChange({ ...form, phone: event.target.value })} />
+          </label>
+          <label className="full-field">
+            Address
+            <textarea
+              value={form.address}
+              onChange={(event) => onChange({ ...form, address: event.target.value })}
+              rows={3}
+            />
+          </label>
+          <div className="form-actions full-field">
+            <button className="primary-action" disabled={loading} type="submit">
+              {editingContact ? <Edit3 size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
+              {editingContact ? updateLabel : createLabel}
+            </button>
+            <button className="secondary-action" disabled={loading} onClick={onCancelEdit} type="button">
+              <X size={17} aria-hidden="true" />
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="table-wrap fade-in">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Contact</th>
+                <th aria-label="Actions" />
+              </tr>
+            </thead>
+            <tbody>
+              {contacts.length === 0 ? (
+                <tr>
+                  <td colSpan={3}>{emptyText}</td>
+                </tr>
+              ) : (
+                [...contacts].sort((a, b) => b.id - a.id).map((contact) => (
+                  <tr key={contact.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {icon === 'building' ? (
+                          <Building2 size={18} className="text-muted" aria-hidden="true" />
+                        ) : (
+                          <Users size={18} className="text-muted" aria-hidden="true" />
+                        )}
+                        <strong>{contact.name}</strong>
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        <span>{contact.phone || 'No phone'}</span>
+                        <br />
+                        <span className="text-muted">{contact.address || 'No address'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="row-actions">
+                        <button aria-label={`Edit ${contact.name}`} disabled={loading} onClick={() => onEdit(contact)} type="button">
+                          <Edit3 size={16} aria-hidden="true" />
+                        </button>
+                        <button
+                          aria-label={`Delete ${contact.name}`}
+                          className="danger-action"
+                          disabled={loading}
+                          onClick={() => onDelete(contact)}
+                          type="button"
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
