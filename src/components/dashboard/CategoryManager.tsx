@@ -1,6 +1,7 @@
 import { FormEvent } from 'react';
-import { Edit3, Folder, Plus, Trash2, X } from 'lucide-react';
+import { Edit3, Folder, Plus, Trash2 } from 'lucide-react';
 import type { Category, CategoryFormValues } from '../../types';
+import { CategoryForm } from './forms/CategoryForm';
 
 type CategoryManagerProps = {
   categories: Category[];
@@ -49,30 +50,14 @@ export function CategoryManager({
       </div>
 
       {showForm ? (
-        <form className="manager-form fade-in" onSubmit={onSubmit}>
-          <label>
-            Name
-            <input value={form.name} onChange={(event) => onChange({ ...form, name: event.target.value })} required />
-          </label>
-          <label>
-            Description
-            <textarea
-              value={form.description}
-              onChange={(event) => onChange({ ...form, description: event.target.value })}
-              rows={3}
-            />
-          </label>
-          <div className="form-actions">
-            <button className="primary-action" disabled={loading} type="submit">
-              {editingCategory ? <Edit3 size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
-              {editingCategory ? 'Update category' : 'Create category'}
-            </button>
-            <button className="secondary-action" disabled={loading} onClick={onCancelEdit} type="button">
-              <X size={17} aria-hidden="true" />
-              Cancel
-            </button>
-          </div>
-        </form>
+        <CategoryForm
+          editingCategory={editingCategory}
+          form={form}
+          loading={loading}
+          onCancelEdit={onCancelEdit}
+          onChange={onChange}
+          onSubmit={onSubmit}
+        />
       ) : (
         <div className="table-wrap fade-in">
           <table>

@@ -1,4 +1,5 @@
-import { LogOut, RefreshCw, UserCircle, Shield, Package, ShoppingCart, Tags, Truck, Users, ReceiptText } from 'lucide-react';
+import { LogOut, RefreshCw, UserCircle, Shield, Package, ShoppingCart, Tags, Truck, Users, ReceiptText, RotateCcw } from 'lucide-react';
+import { ThemeToggle } from '../ThemeToggle';
 import type { User } from '../../types';
 import type { TabOption } from './Dashboard';
 
@@ -6,9 +7,11 @@ type AccountCardProps = {
   user: User;
   loading: boolean;
   activeTab: TabOption;
+  theme: 'dark' | 'light';
   onTabChange: (tab: TabOption) => void;
-  onRefresh: () => void;
+  
   onLogout: () => void;
+  onThemeToggle: () => void;
 };
 
 function getInitials(name: string) {
@@ -20,7 +23,15 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-export function AccountCard({ user, loading, activeTab, onTabChange, onRefresh, onLogout }: AccountCardProps) {
+export function AccountCard({
+  user,
+  loading,
+  activeTab,
+  theme,
+  onTabChange,
+  onLogout,
+  onThemeToggle,
+}: AccountCardProps) {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
@@ -53,6 +64,14 @@ export function AccountCard({ user, loading, activeTab, onTabChange, onRefresh, 
         >
           <ReceiptText size={20} />
           <span>Sales</span>
+        </button>
+        <button
+          className={`nav-item ${activeTab === 'refunds' ? 'active' : ''}`}
+          onClick={() => onTabChange('refunds')}
+          type="button"
+        >
+          <RotateCcw size={20} />
+          <span>Refunds</span>
         </button>
         <button
           className={`nav-item ${activeTab === 'categories' ? 'active' : ''}`}
@@ -99,6 +118,7 @@ export function AccountCard({ user, loading, activeTab, onTabChange, onRefresh, 
       </nav>
 
       <div className="sidebar-footer">
+        <ThemeToggle theme={theme} onToggle={onThemeToggle} />
         <div className="user-profile">
           <div className="avatar">{getInitials(user.name)}</div>
           <div className="user-info">
@@ -107,9 +127,6 @@ export function AccountCard({ user, loading, activeTab, onTabChange, onRefresh, 
           </div>
         </div>
         <div className="account-actions">
-          <button onClick={onRefresh} disabled={loading} type="button" className="action-btn" title="Refresh token">
-            <RefreshCw size={17} aria-hidden="true" />
-          </button>
           <button onClick={onLogout} disabled={loading} type="button" className="action-btn danger-action" title="Logout">
             <LogOut size={17} aria-hidden="true" />
           </button>

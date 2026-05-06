@@ -2,11 +2,9 @@ import { FormEvent } from "react";
 import {
   ClipboardList,
   Edit3,
-  PackagePlus,
   Plus,
   ShoppingCart,
   Trash2,
-  X,
 } from "lucide-react";
 import type {
   Product,
@@ -16,6 +14,8 @@ import type {
   PurchaseItemFormValues,
   Supplier,
 } from "../../types";
+import { PurchaseEntryForm } from "./forms/PurchaseEntryForm";
+import { PurchaseItemEntryForm } from "./forms/PurchaseItemEntryForm";
 
 type PurchaseManagerProps = {
   editingPurchase: Purchase | null;
@@ -46,10 +46,6 @@ type PurchaseManagerProps = {
 function money(value: string | number | null | undefined) {
   const amount = Number(value ?? 0);
   return Number.isFinite(amount) ? amount.toFixed(2) : value;
-}
-
-function purchaseLabel(purchase: Purchase) {
-  return `#${purchase.id} - ${purchase.supplier?.name ?? `Supplier ${purchase.supplier_id}`}`;
 }
 
 export function PurchaseManager({
@@ -89,9 +85,6 @@ export function PurchaseManager({
         (product) => product.supplier_id === selectedPurchase.supplier_id,
       )
     : [];
-  const missingPurchaseProducts =
-    Boolean(selectedPurchase) && purchaseProducts.length === 0;
-
   const formatDate = (date : string | Date) => {
     return new Date(date).toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -131,70 +124,16 @@ export function PurchaseManager({
         )}
 
         {showPurchaseForm ? (
-          <form
-            className="manager-form purchase-form fade-in"
+          <PurchaseEntryForm
+            editingPurchase={editingPurchase}
+            form={purchaseForm}
+            loading={loading}
+            missingRelations={missingPurchaseRelations}
+            suppliers={suppliers}
+            onCancelEdit={onCancelPurchaseEdit}
+            onChange={onChangePurchase}
             onSubmit={onSubmitPurchase}
-          >
-            <label>
-              Supplier
-              <select
-                value={purchaseForm.supplier_id}
-                onChange={(event) =>
-                  onChangePurchase({
-                    ...purchaseForm,
-                    supplier_id: event.target.value,
-                  })
-                }
-                required
-              >
-                <option value="">Select supplier</option>
-                {suppliers.map((supplier) => (
-                  <option key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Status
-              <select
-                value={purchaseForm.status}
-                onChange={(event) =>
-                  onChangePurchase({
-                    ...purchaseForm,
-                    status: event.target.value as PurchaseFormValues["status"],
-                  })
-                }
-                required
-              >
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-              </select>
-            </label>
-            <div className="form-actions full-field">
-              <button
-                className="primary-action"
-                disabled={loading || missingPurchaseRelations}
-                type="submit"
-              >
-                {editingPurchase ? (
-                  <Edit3 size={17} aria-hidden="true" />
-                ) : (
-                  <Plus size={17} aria-hidden="true" />
-                )}
-                {editingPurchase ? "Update purchase" : "Create purchase"}
-              </button>
-              <button
-                className="secondary-action"
-                disabled={loading}
-                onClick={onCancelPurchaseEdit}
-                type="button"
-              >
-                <X size={17} aria-hidden="true" />
-                Cancel
-              </button>
-            </div>
-          </form>
+          />
         ) : (
           <div className="table-wrap fade-in">
             <table>
@@ -309,135 +248,19 @@ export function PurchaseManager({
         )}
 
         {showItemForm ? (
-          <form
-            className="manager-form purchase-item-form fade-in"
+          <PurchaseItemEntryForm
+            editingPurchaseItem={editingPurchaseItem}
+            form={purchaseItemForm}
+            loading={loading}
+            missingItemRelations={missingItemRelations}
+            products={products}
+            purchases={purchases}
+            purchaseProducts={purchaseProducts}
+            selectedPurchase={selectedPurchase}
+            onCancelEdit={onCancelPurchaseItemEdit}
+            onChange={onChangePurchaseItem}
             onSubmit={onSubmitPurchaseItem}
-          >
-            <label>
-              Purchase
-              <select
-                value={purchaseItemForm.purchase_id}
-                onChange={(event) => {
-                  const nextPurchase = purchases.find(
-                    (purchase) => purchase.id === Number(event.target.value),
-                  );
-                  const currentProduct = products.find(
-                    (product) =>
-                      product.id === Number(purchaseItemForm.product_id),
-                  );
-                  const keepProduct =
-                    nextPurchase &&
-                    currentProduct &&
-                    currentProduct.supplier_id === nextPurchase.supplier_id;
-
-                  onChangePurchaseItem({
-                    ...purchaseItemForm,
-                    purchase_id: event.target.value,
-                    product_id: keepProduct ? purchaseItemForm.product_id : "",
-                    price: keepProduct ? purchaseItemForm.price : "",
-                  });
-                }}
-                required
-              >
-                <option value="">Select purchase</option>
-                {purchases.map((purchase) => (
-                  <option key={purchase.id} value={purchase.id}>
-                    {purchaseLabel(purchase)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Product
-              <select
-                value={purchaseItemForm.product_id}
-                onChange={(event) => {
-                  const product = products.find(
-                    (item) => item.id === Number(event.target.value),
-                  );
-                  onChangePurchaseItem({
-                    ...purchaseItemForm,
-                    product_id: event.target.value,
-                    price: product
-                      ? String(product.price)
-                      : purchaseItemForm.price,
-                  });
-                }}
-                disabled={!selectedPurchase}
-                required
-              >
-                <option value="">
-                  {selectedPurchase
-                    ? "Select product"
-                    : "Select purchase first"}
-                </option>
-                {purchaseProducts.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {missingPurchaseProducts && (
-              <p className="helper-note full-field">
-                No products found for this purchase supplier.
-              </p>
-            )}
-            <label>
-              Price
-              <input
-                min="0"
-                step="0.01"
-                type="number"
-                value={purchaseItemForm.price}
-                onChange={(event) =>
-                  onChangePurchaseItem({
-                    ...purchaseItemForm,
-                    price: event.target.value,
-                  })
-                }
-                required
-              />
-            </label>
-            <label>
-              Quantity
-              <input
-                min="1"
-                type="number"
-                value={purchaseItemForm.quantity}
-                onChange={(event) =>
-                  onChangePurchaseItem({
-                    ...purchaseItemForm,
-                    quantity: event.target.value,
-                  })
-                }
-                required
-              />
-            </label>
-            <div className="form-actions full-field">
-              <button
-                className="primary-action"
-                disabled={loading || missingItemRelations}
-                type="submit"
-              >
-                {editingPurchaseItem ? (
-                  <Edit3 size={17} aria-hidden="true" />
-                ) : (
-                  <PackagePlus size={17} aria-hidden="true" />
-                )}
-                {editingPurchaseItem ? "Update item" : "Create item"}
-              </button>
-              <button
-                className="secondary-action"
-                disabled={loading}
-                onClick={onCancelPurchaseItemEdit}
-                type="button"
-              >
-                <X size={17} aria-hidden="true" />
-                Cancel
-              </button>
-            </div>
-          </form>
+          />
         ) : (
           <div className="table-wrap fade-in">
             <table>

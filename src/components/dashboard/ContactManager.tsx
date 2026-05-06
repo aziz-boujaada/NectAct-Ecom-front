@@ -1,6 +1,7 @@
 import { FormEvent } from 'react';
-import { Building2, Edit3, Plus, Trash2, Users, X } from 'lucide-react';
+import { Building2, Edit3, Plus, Trash2, Users } from 'lucide-react';
 import type { ContactFormValues } from '../../types';
+import { ContactForm } from './forms/ContactForm';
 
 type Contact = {
   id: number;
@@ -68,34 +69,16 @@ export function ContactManager<TContact extends Contact>({
       </div>
 
       {showForm ? (
-        <form className="manager-form contact-form fade-in" onSubmit={onSubmit}>
-          <label>
-            Name
-            <input value={form.name} onChange={(event) => onChange({ ...form, name: event.target.value })} required />
-          </label>
-          <label>
-            Phone
-            <input value={form.phone} onChange={(event) => onChange({ ...form, phone: event.target.value })} />
-          </label>
-          <label className="full-field">
-            Address
-            <textarea
-              value={form.address}
-              onChange={(event) => onChange({ ...form, address: event.target.value })}
-              rows={3}
-            />
-          </label>
-          <div className="form-actions full-field">
-            <button className="primary-action" disabled={loading} type="submit">
-              {editingContact ? <Edit3 size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
-              {editingContact ? updateLabel : createLabel}
-            </button>
-            <button className="secondary-action" disabled={loading} onClick={onCancelEdit} type="button">
-              <X size={17} aria-hidden="true" />
-              Cancel
-            </button>
-          </div>
-        </form>
+        <ContactForm
+          createLabel={createLabel}
+          hasEditingContact={editingContact !== null}
+          form={form}
+          loading={loading}
+          updateLabel={updateLabel}
+          onCancelEdit={onCancelEdit}
+          onChange={onChange}
+          onSubmit={onSubmit}
+        />
       ) : (
         <div className="table-wrap fade-in">
           <table>

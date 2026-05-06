@@ -1,6 +1,8 @@
 import { FormEvent } from 'react';
-import { ClipboardList, Edit3, PackageCheck, Plus, ReceiptText, Trash2, X } from 'lucide-react';
+import { ClipboardList, Edit3, Plus, ReceiptText, Trash2 } from 'lucide-react';
 import type { Client, Product, Sale, SaleFormValues, SaleItem, SaleItemFormValues } from '../../types';
+import { SaleEntryForm } from './forms/SaleEntryForm';
+import { SaleItemEntryForm } from './forms/SaleItemEntryForm';
 
 type SaleManagerProps = {
   editingSale: Sale | null;
@@ -31,14 +33,6 @@ type SaleManagerProps = {
 function money(value: string | number | null | undefined) {
   const amount = Number(value ?? 0);
   return Number.isFinite(amount) ? amount.toFixed(2) : value;
-}
-
-function saleLabel(sale: Sale) {
-  return `#${sale.id} - ${sale.client?.name ?? `Client ${sale.client_id}`}`;
-}
-
-function productLabel(product: Product) {
-  return `${product.name} (${product.stock ?? 0} in stock)`;
 }
 
 export function SaleManager({
@@ -111,47 +105,16 @@ export function SaleManager({
         )}
 
         {showSaleForm ? (
-          <form className="manager-form purchase-form fade-in" onSubmit={onSubmitSale}>
-            <label>
-              Client
-              <select
-                value={saleForm.client_id}
-                onChange={(event) => onChangeSale({ ...saleForm, client_id: event.target.value })}
-                required
-              >
-                <option value="">Select client</option>
-                {clients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Status
-              <select
-                value={saleForm.status}
-                onChange={(event) =>
-                  onChangeSale({ ...saleForm, status: event.target.value as SaleFormValues['status'] })
-                }
-                required
-              >
-                <option value="unpaid">Unpaid</option>
-                <option value="paid">Paid</option>
-                <option value="refunded">Refunded</option>
-              </select>
-            </label>
-            <div className="form-actions full-field">
-              <button className="primary-action" disabled={loading || missingSaleRelations} type="submit">
-                {editingSale ? <Edit3 size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}
-                {editingSale ? 'Update sale' : 'Create sale'}
-              </button>
-              <button className="secondary-action" disabled={loading} onClick={onCancelSaleEdit} type="button">
-                <X size={17} aria-hidden="true" />
-                Cancel
-              </button>
-            </div>
-          </form>
+          <SaleEntryForm
+            clients={clients}
+            editingSale={editingSale}
+            form={saleForm}
+            loading={loading}
+            missingRelations={missingSaleRelations}
+            onCancelEdit={onCancelSaleEdit}
+            onChange={onChangeSale}
+            onSubmit={onSubmitSale}
+          />
         ) : (
           <div className="table-wrap fade-in">
             <table>
@@ -240,62 +203,19 @@ export function SaleManager({
         )}
 
         {showItemForm ? (
-          <form className="manager-form purchase-item-form fade-in" onSubmit={onSubmitSaleItem}>
-            <label>
-              Sale
-              <select
-                value={saleItemForm.sale_id}
-                onChange={(event) => onChangeSaleItem({ ...saleItemForm, sale_id: event.target.value })}
-                required
-              >
-                <option value="">Select sale</option>
-                {sales.map((sale) => (
-                  <option key={sale.id} value={sale.id}>
-                    {saleLabel(sale)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Product
-              <select
-                value={saleItemForm.product_id}
-                onChange={(event) => onChangeSaleItem({ ...saleItemForm, product_id: event.target.value })}
-                required
-              >
-                <option value="">Select product</option>
-                {products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {productLabel(product)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {selectedProduct && (
-              <p className="helper-note full-field">Available stock: {availableStock}</p>
-            )}
-            <label>
-              Quantity
-              <input
-                max={selectedProduct ? availableStock : undefined}
-                min="1"
-                type="number"
-                value={saleItemForm.quantity}
-                onChange={(event) => onChangeSaleItem({ ...saleItemForm, quantity: event.target.value })}
-                required
-              />
-            </label>
-            <div className="form-actions full-field">
-              <button className="primary-action" disabled={loading || !canSubmitItem} type="submit">
-                {editingSaleItem ? <Edit3 size={17} aria-hidden="true" /> : <PackageCheck size={17} aria-hidden="true" />}
-                {editingSaleItem ? 'Update item' : 'Create item'}
-              </button>
-              <button className="secondary-action" disabled={loading} onClick={onCancelSaleItemEdit} type="button">
-                <X size={17} aria-hidden="true" />
-                Cancel
-              </button>
-            </div>
-          </form>
+          <SaleItemEntryForm
+            availableStock={availableStock}
+            canSubmitItem={canSubmitItem}
+            editingSaleItem={editingSaleItem}
+            form={saleItemForm}
+            loading={loading}
+            products={products}
+            sales={sales}
+            selectedProduct={selectedProduct}
+            onCancelEdit={onCancelSaleItemEdit}
+            onChange={onChangeSaleItem}
+            onSubmit={onSubmitSaleItem}
+          />
         ) : (
           <div className="table-wrap fade-in">
             <table>

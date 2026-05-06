@@ -12,15 +12,25 @@ type DashboardProps = {
   profileForm: ProfileFormValues;
   passwordForm: PasswordFormValues;
   loading: boolean;
+  theme: 'dark' | 'light';
   onProfileChange: (form: ProfileFormValues) => void;
   onPasswordChange: (form: PasswordFormValues) => void;
   onProfileSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onPasswordSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  onRefresh: () => void;
   onLogout: () => void;
+  onThemeToggle: () => void;
 };
 
-export type TabOption = 'categories' | 'products' | 'purchases' | 'sales' | 'suppliers' | 'clients' | 'profile' | 'security';
+export type TabOption =
+  | 'categories'
+  | 'products'
+  | 'purchases'
+  | 'sales'
+  | 'refunds'
+  | 'suppliers'
+  | 'clients'
+  | 'profile'
+  | 'security';
 
 export function Dashboard({
   user,
@@ -28,16 +38,18 @@ export function Dashboard({
   profileForm,
   passwordForm,
   loading,
+  theme,
   onProfileChange,
   onPasswordChange,
   onProfileSubmit,
   onPasswordSubmit,
-  onRefresh,
+
   onLogout,
+  onThemeToggle,
 }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<TabOption>('products');
 
-  const showCatalog = ['categories', 'products', 'purchases', 'sales', 'suppliers', 'clients'].includes(activeTab);
+  const showCatalog = ['categories', 'products', 'purchases', 'sales', 'refunds', 'suppliers', 'clients'].includes(activeTab);
 
   return (
     <div className="dashboard-layout">
@@ -45,9 +57,10 @@ export function Dashboard({
         user={user}
         loading={loading}
         activeTab={activeTab}
+        theme={theme}
         onTabChange={setActiveTab}
-        onRefresh={onRefresh}
         onLogout={onLogout}
+        onThemeToggle={onThemeToggle}
       />
 
       <div className="main-content-stack">
@@ -57,7 +70,7 @@ export function Dashboard({
 
         {showCatalog && (
           <div className="fade-in">
-            <AdminCatalog activeTab={activeTab as 'categories' | 'products' | 'purchases' | 'sales' | 'suppliers' | 'clients'} />
+            <AdminCatalog activeTab={activeTab as 'categories' | 'products' | 'purchases' | 'sales' | 'refunds' | 'suppliers' | 'clients'} />
           </div>
         )}
         {activeTab === 'profile' && (
