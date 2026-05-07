@@ -2,10 +2,12 @@ export type User = {
   id: number;
   name: string;
   email: string;
-  role?: string;
+  role?: UserRole;
   created_at?: string;
   updated_at?: string;
 };
+
+export type UserRole = 'admin' | 'employee';
 
 export type AuthMode = 'login' | 'register';
 
@@ -25,6 +27,7 @@ export type RegisterFormValues = {
 export type ProfileFormValues = {
   name: string;
   email: string;
+  role: UserRole;
 };
 
 export type PasswordFormValues = {
@@ -252,6 +255,12 @@ export type PurchaseFormValues = {
 
 export type PurchaseItemFormValues = {
   purchase_id: string;
+  product_id: string;
+  price: string;
+  quantity: string;
+};
+
+export type PurchaseItemDraftValues = {
   product_id: string;
   price: string;
   quantity: string;

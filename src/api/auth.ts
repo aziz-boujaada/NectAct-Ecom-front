@@ -1,4 +1,4 @@
-import type { AuthPayload, AuthResponse, User } from '../types';
+import type { AuthPayload, AuthResponse, ProfileFormValues } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api';
 const TOKEN_KEY = 'nextact_auth_token';
@@ -84,7 +84,7 @@ export async function fetchMe(token = tokenStore.get()) {
   return data.user ?? null;
 }
 
-export async function updateProfile(payload: Pick<User, 'name' | 'email'>, token = tokenStore.get()) {
+export async function updateProfile(payload: ProfileFormValues, token = tokenStore.get()) {
   const data = await request<AuthResponse>('/profile', { method: 'PUT', body: payload, token });
   return data.user;
 }

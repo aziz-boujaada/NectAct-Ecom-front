@@ -10,6 +10,7 @@ import type {
   Purchase,
   PurchaseFormValues,
   PurchaseItem,
+  PurchaseItemDraftValues,
   PurchaseItemFormValues,
   Refund,
   RefundFormValues,
@@ -128,6 +129,15 @@ function purchaseItemPayload(payload: PurchaseItemFormValues) {
   return {
     purchase_id: Number(payload.purchase_id),
     product_id: Number(payload.product_id),
+    price: Number(payload.price),
+    quantity: Number(payload.quantity),
+  };
+}
+
+function purchaseItemDraftPayload(payload: PurchaseItemDraftValues) {
+  return {
+    product_id: Number(payload.product_id),
+    price: Number(payload.price),
     quantity: Number(payload.quantity),
   };
 }
@@ -281,6 +291,18 @@ export async function createPurchase(payload: PurchaseFormValues) {
     method: 'POST',
     token: authToken(),
     body: purchasePayload(payload),
+  });
+  return data.purchase;
+}
+
+export async function createPurchaseWithItems(payload: PurchaseFormValues, items: PurchaseItemDraftValues[]) {
+  const data = await request<PurchaseResponse>('/purchases', {
+    method: 'POST',
+    token: authToken(),
+    body: {
+      ...purchasePayload(payload),
+      items: items.map(purchaseItemDraftPayload),
+    },
   });
   return data.purchase;
 }
