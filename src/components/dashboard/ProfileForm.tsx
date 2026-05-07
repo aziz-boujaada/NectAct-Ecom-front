@@ -25,6 +25,16 @@ export function ProfileForm({ form, loading, onChange, onSubmit }: ProfileFormPr
           required
         />
       </label>
+      <label>
+        Role
+        <select
+          value={form.role}
+          onChange={(event) => onChange({ ...form, role: event.target.value as ProfileFormValues['role'] })}
+        >
+          <option value="employee">Employee</option>
+          <option value="admin">Admin</option>
+        </select>
+      </label>
       <button className="primary-action" disabled={loading} type="submit">
         Save profile
       </button>

@@ -142,9 +142,9 @@ export function useAdminCatalog() {
   });
 
   const purchaseManagement = usePurchaseManagement({
+    products,
     setPurchases,
     setPurchaseItems,
-    setProducts,
     setLoading,
     setStatus,
     refreshPurchases,

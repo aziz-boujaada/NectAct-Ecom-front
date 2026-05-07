@@ -9,7 +9,7 @@ import {
   updatePassword,
   updateProfile,
 } from './api/auth';
-import { AuthHeader } from './components/AuthHeader';
+
 import { StatusMessage } from './components/StatusMessage';
 import { ThemeToggle } from './components/ThemeToggle';
 import { AuthPanel } from './components/auth/AuthPanel';
@@ -18,6 +18,7 @@ import type { AuthMode, Status, User } from './types';
 
 const emptyLogin = { email: '', password: '' };
 const emptyRegister = { name: '', email: '', password: '' };
+const emptyProfile = { name: '', email: '', role: 'employee' as const };
 const emptyPassword = { current_password: '', password: '', password_confirmation: '' };
 const THEME_KEY = 'nextact_theme';
 
@@ -39,12 +40,20 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'Something went wrong';
 }
 
+function profileFromUser(user: User) {
+  return {
+    name: user.name,
+    email: user.email,
+    role: user.role ?? 'employee',
+  };
+}
+
 export default function App() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [user, setUser] = useState<User | null>(null);
   const [loginForm, setLoginForm] = useState(emptyLogin);
   const [registerForm, setRegisterForm] = useState(emptyRegister);
-  const [profileForm, setProfileForm] = useState({ name: '', email: '' });
+  const [profileForm, setProfileForm] = useState(emptyProfile);
   const [passwordForm, setPasswordForm] = useState(emptyPassword);
   const [status, setStatus] = useState<Status>(null);
   const [loading, setLoading] = useState(false);
@@ -59,7 +68,7 @@ export default function App() {
       .then((currentUser) => {
         setUser(currentUser);
         if (currentUser) {
-          setProfileForm({ name: currentUser.name, email: currentUser.email });
+          setProfileForm(profileFromUser(currentUser));
         }
       })
       .catch(() => tokenStore.clear())
@@ -84,7 +93,7 @@ export default function App() {
       const data = await login(loginForm);
       if (data.user) {
         setUser(data.user);
-        setProfileForm({ name: data.user.name, email: data.user.email });
+        setProfileForm(profileFromUser(data.user));
       }
       setLoginForm(emptyLogin);
       setStatus({ type: 'success', text: data.message ?? 'Login successful' });
@@ -104,7 +113,7 @@ export default function App() {
       const data = await register(registerForm);
       if (data.user) {
         setUser(data.user);
-        setProfileForm({ name: data.user.name, email: data.user.email });
+        setProfileForm(profileFromUser(data.user));
       }
       setRegisterForm(emptyRegister);
       setStatus({ type: 'success', text: data.message ?? 'Account created successfully' });
@@ -124,7 +133,7 @@ export default function App() {
       const updatedUser = await updateProfile(profileForm);
       if (updatedUser) {
         setUser(updatedUser);
-        setProfileForm({ name: updatedUser.name, email: updatedUser.email });
+        setProfileForm(profileFromUser(updatedUser));
       }
       setStatus({ type: 'success', text: 'Profile updated successfully' });
     } catch (error) {
@@ -188,7 +197,7 @@ export default function App() {
         <ThemeToggle theme={theme} onToggle={toggleTheme} />
       </div>
       <section className="auth-panel">
-        <AuthHeader />
+        
         <StatusMessage status={status} />
 
         <AuthPanel

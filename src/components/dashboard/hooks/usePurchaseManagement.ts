@@ -1,25 +1,25 @@
 import { FormEvent, useState } from 'react';
 import {
-  createPurchase,
-  createPurchaseItem,
+  createPurchaseWithItems,
   deletePurchase,
   deletePurchaseItem,
   updatePurchase,
   updatePurchaseItem,
 } from '../../../api/catalog';
-import type { Product, Purchase, PurchaseItem, Status } from '../../../types';
+import type { Product, Purchase, PurchaseItem, PurchaseItemDraftValues, Status } from '../../../types';
 import {
   emptyPurchaseForm,
   emptyPurchaseItemForm,
+  emptyPurchaseItemDraft,
   formFromPurchase,
   formFromPurchaseItem,
 } from '../adminCatalogForms';
 import { errorMessage } from './adminCatalogUtils';
 
 type PurchaseManagementOptions = {
+  products: Product[];
   setPurchases: React.Dispatch<React.SetStateAction<Purchase[]>>;
   setPurchaseItems: React.Dispatch<React.SetStateAction<PurchaseItem[]>>;
-  setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setStatus: React.Dispatch<React.SetStateAction<Status>>;
   refreshPurchases: () => Promise<void>;
@@ -27,6 +27,7 @@ type PurchaseManagementOptions = {
 };
 
 export function usePurchaseManagement({
+  products,
   setPurchases,
   setPurchaseItems,
   setLoading,
@@ -36,10 +37,59 @@ export function usePurchaseManagement({
 }: PurchaseManagementOptions) {
   const [purchaseForm, setPurchaseForm] = useState(emptyPurchaseForm);
   const [purchaseItemForm, setPurchaseItemForm] = useState(emptyPurchaseItemForm);
+  const [purchaseItemDrafts, setPurchaseItemDrafts] = useState<PurchaseItemDraftValues[]>([emptyPurchaseItemDraft]);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [editingPurchaseItem, setEditingPurchaseItem] = useState<PurchaseItem | null>(null);
   const [isAddingPurchase, setIsAddingPurchase] = useState(false);
-  const [isAddingPurchaseItem, setIsAddingPurchaseItem] = useState(false);
+
+  function resetPurchaseItemDrafts() {
+    setPurchaseItemDrafts([{ ...emptyPurchaseItemDraft }]);
+  }
+
+  function handlePurchaseChange(nextForm: typeof emptyPurchaseForm) {
+    setPurchaseForm((current) => {
+      if (current.supplier_id !== nextForm.supplier_id && !editingPurchase) {
+        resetPurchaseItemDrafts();
+      }
+
+      return nextForm;
+    });
+  }
+
+  function addPurchaseItemDraft() {
+    setPurchaseItemDrafts((current) => [...current, { ...emptyPurchaseItemDraft }]);
+  }
+
+  function updatePurchaseItemDraft(index: number, field: keyof PurchaseItemDraftValues, value: string) {
+    setPurchaseItemDrafts((current) =>
+      current.map((item, itemIndex) => {
+        if (itemIndex !== index) {
+          return item;
+        }
+
+        if (field === 'product_id') {
+          const product = value ? products.find((entry) => entry.id === Number(value)) : undefined;
+          return {
+            ...item,
+            product_id: value,
+            price: product ? String(product.price) : item.price,
+          };
+        }
+
+        return {
+          ...item,
+          [field]: value,
+        };
+      }),
+    );
+  }
+
+  function removePurchaseItemDraft(index: number) {
+    setPurchaseItemDrafts((current) => {
+      const nextItems = current.filter((_, itemIndex) => itemIndex !== index);
+      return nextItems.length > 0 ? nextItems : [{ ...emptyPurchaseItemDraft }];
+    });
+  }
 
   async function handlePurchaseSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,16 +104,25 @@ export function usePurchaseManagement({
         }
         setStatus({ type: 'success', text: 'Purchase updated successfully' });
       } else {
-        const purchase = await createPurchase(purchaseForm);
+        const purchase = await createPurchaseWithItems(
+          purchaseForm,
+          purchaseItemDrafts.filter((item) => item.product_id && item.price && item.quantity),
+        );
         if (purchase) {
           setPurchases((current) => [purchase, ...current]);
+          if (purchase.items?.length) {
+            setPurchaseItems((current) => [...purchase.items!, ...current]);
+          }
         }
         setStatus({ type: 'success', text: 'Purchase created successfully' });
       }
 
       setEditingPurchase(null);
       setPurchaseForm(emptyPurchaseForm);
+      resetPurchaseItemDrafts();
       setIsAddingPurchase(false);
+      await refreshPurchases();
+      await refreshProducts();
     } catch (error) {
       setStatus({ type: 'error', text: errorMessage(error) });
     } finally {
@@ -83,17 +142,10 @@ export function usePurchaseManagement({
           setPurchaseItems((current) => current.map((item) => (item.id === purchaseItem.id ? purchaseItem : item)));
         }
         setStatus({ type: 'success', text: 'Purchase item updated successfully' });
-      } else {
-        const purchaseItem = await createPurchaseItem(purchaseItemForm);
-        if (purchaseItem) {
-          setPurchaseItems((current) => [purchaseItem, ...current]);
-        }
-        setStatus({ type: 'success', text: 'Purchase item created successfully' });
       }
 
       setEditingPurchaseItem(null);
       setPurchaseItemForm(emptyPurchaseItemForm);
-      setIsAddingPurchaseItem(false);
       await refreshPurchases();
       await refreshProducts();
     } catch (error) {
@@ -149,10 +201,10 @@ export function usePurchaseManagement({
   return {
     purchaseForm,
     purchaseItemForm,
+    purchaseItemDrafts,
     editingPurchase,
     editingPurchaseItem,
     isAddingPurchase,
-    isAddingPurchaseItem,
     setPurchaseForm,
     setPurchaseItemForm,
     handlePurchaseSubmit,
@@ -160,16 +212,15 @@ export function usePurchaseManagement({
     handleDeletePurchase,
     handleDeletePurchaseItem,
     startAddingPurchase: () => setIsAddingPurchase(true),
-    startAddingPurchaseItem: () => setIsAddingPurchaseItem(true),
     cancelPurchaseEdit: () => {
       setEditingPurchase(null);
       setPurchaseForm(emptyPurchaseForm);
       setIsAddingPurchase(false);
+      resetPurchaseItemDrafts();
     },
     cancelPurchaseItemEdit: () => {
       setEditingPurchaseItem(null);
       setPurchaseItemForm(emptyPurchaseItemForm);
-      setIsAddingPurchaseItem(false);
     },
     editPurchase: (purchase: Purchase) => {
       setEditingPurchase(purchase);
@@ -179,5 +230,9 @@ export function usePurchaseManagement({
       setEditingPurchaseItem(purchaseItem);
       setPurchaseItemForm(formFromPurchaseItem(purchaseItem));
     },
+    handlePurchaseChange,
+    addPurchaseItemDraft,
+    updatePurchaseItemDraft,
+    removePurchaseItemDraft,
   };
 }

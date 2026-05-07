@@ -8,6 +8,7 @@ import type {
   Purchase,
   PurchaseFormValues,
   PurchaseItem,
+  PurchaseItemDraftValues,
   PurchaseItemFormValues,
   Refund,
   RefundFormValues,
@@ -43,6 +44,12 @@ export const emptyPurchaseForm: PurchaseFormValues = {
 
 export const emptyPurchaseItemForm: PurchaseItemFormValues = {
   purchase_id: '',
+  product_id: '',
+  price: '',
+  quantity: '1',
+};
+
+export const emptyPurchaseItemDraft: PurchaseItemDraftValues = {
   product_id: '',
   price: '',
   quantity: '1',

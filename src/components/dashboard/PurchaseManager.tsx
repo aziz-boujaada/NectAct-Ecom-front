@@ -11,6 +11,7 @@ import type {
   Purchase,
   PurchaseFormValues,
   PurchaseItem,
+  PurchaseItemDraftValues,
   PurchaseItemFormValues,
   Supplier,
 } from "../../types";
@@ -21,24 +22,26 @@ type PurchaseManagerProps = {
   editingPurchase: Purchase | null;
   editingPurchaseItem: PurchaseItem | null;
   isAddingPurchase: boolean;
-  isAddingPurchaseItem: boolean;
   loading: boolean;
   products: Product[];
   purchaseForm: PurchaseFormValues;
   purchaseItemForm: PurchaseItemFormValues;
+  purchaseItemDrafts: PurchaseItemDraftValues[];
   purchaseItems: PurchaseItem[];
   purchases: Purchase[];
   suppliers: Supplier[];
   onAddPurchase: () => void;
-  onAddPurchaseItem: () => void;
   onCancelPurchaseEdit: () => void;
   onCancelPurchaseItemEdit: () => void;
   onChangePurchase: (form: PurchaseFormValues) => void;
   onChangePurchaseItem: (form: PurchaseItemFormValues) => void;
+  onChangePurchaseItemDraft: (index: number, field: keyof PurchaseItemDraftValues, value: string) => void;
   onDeletePurchase: (purchase: Purchase) => void;
   onDeletePurchaseItem: (purchaseItem: PurchaseItem) => void;
   onEditPurchase: (purchase: Purchase) => void;
   onEditPurchaseItem: (purchaseItem: PurchaseItem) => void;
+  onAddPurchaseItemDraft: () => void;
+  onRemovePurchaseItemDraft: (index: number) => void;
   onSubmitPurchase: (event: FormEvent<HTMLFormElement>) => void;
   onSubmitPurchaseItem: (event: FormEvent<HTMLFormElement>) => void;
 };
@@ -52,31 +55,34 @@ export function PurchaseManager({
   editingPurchase,
   editingPurchaseItem,
   isAddingPurchase,
-  isAddingPurchaseItem,
   loading,
   products,
   purchaseForm,
   purchaseItemForm,
+  purchaseItemDrafts,
   purchaseItems,
   purchases,
   suppliers,
   onAddPurchase,
-  onAddPurchaseItem,
   onCancelPurchaseEdit,
   onCancelPurchaseItemEdit,
   onChangePurchase,
   onChangePurchaseItem,
+  onChangePurchaseItemDraft,
   onDeletePurchase,
   onDeletePurchaseItem,
   onEditPurchase,
   onEditPurchaseItem,
+  onAddPurchaseItemDraft,
+  onRemovePurchaseItemDraft,
   onSubmitPurchase,
   onSubmitPurchaseItem,
 }: PurchaseManagerProps) {
   const showPurchaseForm = isAddingPurchase || editingPurchase !== null;
-  const showItemForm = isAddingPurchaseItem || editingPurchaseItem !== null;
+  const showItemForm = editingPurchaseItem !== null;
   const missingPurchaseRelations = suppliers.length === 0;
-  const missingItemRelations = purchases.length === 0 || products.length === 0;
+  const purchaseById = new Map(purchases.map((purchase) => [purchase.id, purchase]));
+  const productById = new Map(products.map((product) => [product.id, product]));
   const selectedPurchase = purchases.find(
     (purchase) => purchase.id === Number(purchaseItemForm.purchase_id),
   );
@@ -85,7 +91,11 @@ export function PurchaseManager({
         (product) => product.supplier_id === selectedPurchase.supplier_id,
       )
     : [];
-  const formatDate = (date : string | Date) => {
+  const formatDate = (date?: string) => {
+    if (!date) {
+      return 'Not set';
+    }
+
     return new Date(date).toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "short",
@@ -127,11 +137,16 @@ export function PurchaseManager({
           <PurchaseEntryForm
             editingPurchase={editingPurchase}
             form={purchaseForm}
+            items={purchaseItemDrafts}
+            products={products}
             loading={loading}
             missingRelations={missingPurchaseRelations}
             suppliers={suppliers}
+            onAddItem={onAddPurchaseItemDraft}
             onCancelEdit={onCancelPurchaseEdit}
             onChange={onChangePurchase}
+            onChangeItem={onChangePurchaseItemDraft}
+            onRemoveItem={onRemovePurchaseItemDraft}
             onSubmit={onSubmitPurchase}
           />
         ) : (
@@ -228,31 +243,15 @@ export function PurchaseManager({
           </div>
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
             <span>{purchaseItems.length} total</span>
-            {!showItemForm && (
-              <button
-                className="primary-action"
-                onClick={onAddPurchaseItem}
-                type="button"
-              >
-                <Plus size={17} /> Add item
-              </button>
-            )}
           </div>
         </div>
-
-        {missingItemRelations && showItemForm && (
-          <p className="helper-note">
-            Create at least one purchase and one product before saving purchase
-            items.
-          </p>
-        )}
 
         {showItemForm ? (
           <PurchaseItemEntryForm
             editingPurchaseItem={editingPurchaseItem}
             form={purchaseItemForm}
             loading={loading}
-            missingItemRelations={missingItemRelations}
+            missingItemRelations={purchases.length === 0 || products.length === 0}
             products={products}
             purchases={purchases}
             purchaseProducts={purchaseProducts}
@@ -283,61 +282,56 @@ export function PurchaseManager({
                 ) : (
                   [...purchaseItems]
                     .sort((a, b) => b.id - a.id)
-                    .map((purchaseItem) => (
-                      <tr key={purchaseItem.id}>
-                        <td>#{purchaseItem.id}</td>
-                        <td>{purchaseItem.purchase?.supplier?.name}</td>
-                        <td>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "12px",
-                            }}
-                          >
-                            <ClipboardList
-                              size={18}
-                              className="text-muted"
-                              aria-hidden="true"
-                            />
-                            <div>
-                              <strong>
-                                {purchaseItem.product?.name ??
-                                  purchaseItem.product_id}
-                              </strong>
-                              <span>
-                                {purchaseItem.product?.reference.slice(0, 15) ??
-                                  "No reference"}
-                              </span>
+                    .map((purchaseItem) => {
+                      const resolvedPurchase = purchaseItem.purchase ?? purchaseById.get(purchaseItem.purchase_id);
+                      const resolvedProduct = purchaseItem.product ?? productById.get(purchaseItem.product_id);
+
+                      return (
+                        <tr key={purchaseItem.id}>
+                          <td>#{purchaseItem.id}</td>
+                          <td>{resolvedPurchase?.supplier?.name ?? resolvedPurchase?.supplier_id ?? purchaseItem.purchase_id}</td>
+                          <td>
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                              }}
+                            >
+                              <ClipboardList size={18} className="text-muted" aria-hidden="true" />
+                              <div>
+                                <strong>{resolvedProduct?.name ?? purchaseItem.product_id}</strong>
+                                <span>{resolvedProduct?.reference?.slice(0, 15) ?? 'No reference'}</span>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td>{money(purchaseItem.price)}</td>
-                        <td>{purchaseItem.quantity}</td>
-                        <td>{money(purchaseItem.total)}</td>
-                        <td>
-                          <div className="row-actions">
-                            <button
-                              aria-label={`Edit purchase item ${purchaseItem.id}`}
-                              disabled={loading}
-                              onClick={() => onEditPurchaseItem(purchaseItem)}
-                              type="button"
-                            >
-                              <Edit3 size={16} aria-hidden="true" />
-                            </button>
-                            <button
-                              aria-label={`Delete purchase item ${purchaseItem.id}`}
-                              className="danger-action"
-                              disabled={loading}
-                              onClick={() => onDeletePurchaseItem(purchaseItem)}
-                              type="button"
-                            >
-                              <Trash2 size={16} aria-hidden="true" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                          </td>
+                          <td>{money(purchaseItem.price)}</td>
+                          <td>{purchaseItem.quantity}</td>
+                          <td>{money(purchaseItem.total)}</td>
+                          <td>
+                            <div className="row-actions">
+                              <button
+                                aria-label={`Edit purchase item ${purchaseItem.id}`}
+                                disabled={loading}
+                                onClick={() => onEditPurchaseItem(purchaseItem)}
+                                type="button"
+                              >
+                                <Edit3 size={16} aria-hidden="true" />
+                              </button>
+                              <button
+                                aria-label={`Delete purchase item ${purchaseItem.id}`}
+                                className="danger-action"
+                                disabled={loading}
+                                onClick={() => onDeletePurchaseItem(purchaseItem)}
+                                type="button"
+                              >
+                                <Trash2 size={16} aria-hidden="true" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                 )}
               </tbody>
             </table>
