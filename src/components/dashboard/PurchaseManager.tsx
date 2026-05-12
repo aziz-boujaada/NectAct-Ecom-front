@@ -1,7 +1,7 @@
 import { FormEvent } from "react";
 import {
-  ClipboardList,
   Edit3,
+  Eye,
   Plus,
   ShoppingCart,
   Trash2,
@@ -17,6 +17,9 @@ import type {
 } from "../../types";
 import { PurchaseEntryForm } from "./forms/PurchaseEntryForm";
 import { PurchaseItemEntryForm } from "./forms/PurchaseItemEntryForm";
+import { PurchaseDetails } from "./PurchaseDetails";
+import { usePagination } from "./hooks/usePagination";
+import { PaginationControls } from "./PaginationControls";
 
 type PurchaseManagerProps = {
   editingPurchase: Purchase | null;
@@ -30,6 +33,7 @@ type PurchaseManagerProps = {
   purchaseItems: PurchaseItem[];
   purchases: Purchase[];
   suppliers: Supplier[];
+  viewingPurchase: Purchase | null;
   onAddPurchase: () => void;
   onCancelPurchaseEdit: () => void;
   onCancelPurchaseItemEdit: () => void;
@@ -44,6 +48,7 @@ type PurchaseManagerProps = {
   onRemovePurchaseItemDraft: (index: number) => void;
   onSubmitPurchase: (event: FormEvent<HTMLFormElement>) => void;
   onSubmitPurchaseItem: (event: FormEvent<HTMLFormElement>) => void;
+  onSetViewingPurchase: (purchase: Purchase | null) => void;
 };
 
 function money(value: string | number | null | undefined) {
@@ -63,6 +68,7 @@ export function PurchaseManager({
   purchaseItems,
   purchases,
   suppliers,
+  viewingPurchase,
   onAddPurchase,
   onCancelPurchaseEdit,
   onCancelPurchaseItemEdit,
@@ -77,10 +83,12 @@ export function PurchaseManager({
   onRemovePurchaseItemDraft,
   onSubmitPurchase,
   onSubmitPurchaseItem,
+  onSetViewingPurchase,
 }: PurchaseManagerProps) {
   const showPurchaseForm = isAddingPurchase || editingPurchase !== null;
   const showItemForm = editingPurchaseItem !== null;
   const missingPurchaseRelations = suppliers.length === 0;
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(purchases);
   const purchaseById = new Map(purchases.map((purchase) => [purchase.id, purchase]));
   const productById = new Map(products.map((product) => [product.id, product]));
   const selectedPurchase = purchases.find(
@@ -150,8 +158,9 @@ export function PurchaseManager({
             onSubmit={onSubmitPurchase}
           />
         ) : (
-          <div className="table-wrap fade-in">
-            <table>
+          <>
+            <div className="table-wrap fade-in">
+              <table>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -169,7 +178,7 @@ export function PurchaseManager({
                     <td colSpan={6}>No purchases found.</td>
                   </tr>
                 ) : (
-                  [...purchases]
+                  [...paginatedData]
                     .sort((a, b) => b.id - a.id)
                     .map((purchase) => (
                       <tr key={purchase.id}>
@@ -208,6 +217,14 @@ export function PurchaseManager({
                         <td>
                           <div className="row-actions">
                             <button
+                              aria-label={`View purchase ${purchase.id}`}
+                              disabled={loading}
+                              onClick={() => onSetViewingPurchase(purchase)}
+                              type="button"
+                            >
+                              <Eye size={16} aria-hidden="true" />
+                            </button>
+                            <button
                               aria-label={`Edit purchase ${purchase.id}`}
                               disabled={loading}
                               onClick={() => onEditPurchase(purchase)}
@@ -232,21 +249,26 @@ export function PurchaseManager({
               </tbody>
             </table>
           </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={prevPage}
+            onNext={nextPage}
+            onPageChange={goToPage}
+          />
+          </>
         )}
       </section>
 
-      <section className="admin-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Purchase Lines</p>
-            <h2>Purchase Items</h2>
+      {showItemForm && (
+        <section className="admin-section">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Edit Purchase Item</p>
+              <h2>Item Details</h2>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-            <span>{purchaseItems.length} total</span>
-          </div>
-        </div>
 
-        {showItemForm ? (
           <PurchaseItemEntryForm
             editingPurchaseItem={editingPurchaseItem}
             form={purchaseItemForm}
@@ -260,84 +282,23 @@ export function PurchaseManager({
             onChange={onChangePurchaseItem}
             onSubmit={onSubmitPurchaseItem}
           />
-        ) : (
-          <div className="table-wrap fade-in">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Purchase</th>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Total</th>
-                  <th aria-label="Actions" />
-                </tr>
-              </thead>
-              <tbody>
-                {purchaseItems.length === 0 ? (
-                  <tr>
-                    <td colSpan={7}>No purchase items found.</td>
-                  </tr>
-                ) : (
-                  [...purchaseItems]
-                    .sort((a, b) => b.id - a.id)
-                    .map((purchaseItem) => {
-                      const resolvedPurchase = purchaseItem.purchase ?? purchaseById.get(purchaseItem.purchase_id);
-                      const resolvedProduct = purchaseItem.product ?? productById.get(purchaseItem.product_id);
+        </section>
+      )}
 
-                      return (
-                        <tr key={purchaseItem.id}>
-                          <td>#{purchaseItem.id}</td>
-                          <td>{resolvedPurchase?.supplier?.name ?? resolvedPurchase?.supplier_id ?? purchaseItem.purchase_id}</td>
-                          <td>
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                              }}
-                            >
-                              <ClipboardList size={18} className="text-muted" aria-hidden="true" />
-                              <div>
-                                <strong>{resolvedProduct?.name ?? purchaseItem.product_id}</strong>
-                                <span>{resolvedProduct?.reference?.slice(0, 15) ?? 'No reference'}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td>{money(purchaseItem.price)}</td>
-                          <td>{purchaseItem.quantity}</td>
-                          <td>{money(purchaseItem.total)}</td>
-                          <td>
-                            <div className="row-actions">
-                              <button
-                                aria-label={`Edit purchase item ${purchaseItem.id}`}
-                                disabled={loading}
-                                onClick={() => onEditPurchaseItem(purchaseItem)}
-                                type="button"
-                              >
-                                <Edit3 size={16} aria-hidden="true" />
-                              </button>
-                              <button
-                                aria-label={`Delete purchase item ${purchaseItem.id}`}
-                                className="danger-action"
-                                disabled={loading}
-                                onClick={() => onDeletePurchaseItem(purchaseItem)}
-                                type="button"
-                              >
-                                <Trash2 size={16} aria-hidden="true" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+      {viewingPurchase && (
+        <PurchaseDetails
+          purchase={viewingPurchase}
+          purchaseItems={purchaseItems}
+          products={products}
+          suppliers={suppliers}
+          loading={loading}
+          onClose={() => onSetViewingPurchase(null)}
+          onEdit={onEditPurchase}
+          onDelete={onDeletePurchase}
+          onEditItem={onEditPurchaseItem}
+          onDeleteItem={onDeletePurchaseItem}
+        />
+      )}
     </div>
   );
 }

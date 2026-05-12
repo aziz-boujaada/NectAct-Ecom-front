@@ -1,7 +1,10 @@
 import { FormEvent } from 'react';
-import { ClipboardList, Plus, ReceiptText, Trash2 } from 'lucide-react';
+import { Eye, Plus, ReceiptText, Trash2 } from 'lucide-react';
 import type { Refund, RefundFormValues, RefundItem, Sale, SaleItem } from '../../types';
 import { RefundEntryForm } from './forms/RefundEntryForm';
+import { RefundDetails } from './RefundDetails';
+import { usePagination } from './hooks/usePagination';
+import { PaginationControls } from './PaginationControls';
 
 type RefundManagerProps = {
   isAddingRefund: boolean;
@@ -9,11 +12,13 @@ type RefundManagerProps = {
   refundForm: RefundFormValues;
   refunds: Refund[];
   sales: Sale[];
+  viewingRefund: Refund | null;
   onAddRefund: () => void;
   onCancelRefundEdit: () => void;
   onChangeRefund: (form: RefundFormValues) => void;
   onDeleteRefund: (refund: Refund) => void;
   onSubmitRefund: (event: FormEvent<HTMLFormElement>) => void;
+  onSetViewingRefund: (refund: Refund | null) => void;
 };
 
 function money(value: string | number | null | undefined) {
@@ -87,11 +92,13 @@ export function RefundManager({
   refundForm,
   refunds,
   sales,
+  viewingRefund,
   onAddRefund,
   onCancelRefundEdit,
   onChangeRefund,
   onDeleteRefund,
   onSubmitRefund,
+  onSetViewingRefund,
 }: RefundManagerProps) {
   const selectedSale = sales.find((sale) => sale.id === Number(refundForm.sale_id));
   const soldItems = getSoldItems(selectedSale);
@@ -99,6 +106,7 @@ export function RefundManager({
   const items = refundItems(refunds);
   const missingRelations = sales.length === 0;
   const canSubmit = canSubmitRefund(refundForm, availableByProduct);
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(refunds);
 
   return (
     <div className="purchase-workspace">
@@ -137,8 +145,9 @@ export function RefundManager({
             onSubmit={onSubmitRefund}
           />
         ) : (
-          <div className="table-wrap fade-in">
-            <table>
+          <>
+            <div className="table-wrap fade-in">
+              <table>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -157,7 +166,7 @@ export function RefundManager({
                     <td colSpan={8}>No refunds found.</td>
                   </tr>
                 ) : (
-                  [...refunds]
+                  [...paginatedData]
                     .sort((a, b) => b.id - a.id)
                     .map((refund) => (
                       <tr key={refund.id}>
@@ -176,6 +185,14 @@ export function RefundManager({
                         <td>
                           <div className="row-actions">
                             <button
+                              aria-label={`View refund ${refund.id}`}
+                              disabled={loading}
+                              onClick={() => onSetViewingRefund(refund)}
+                              type="button"
+                            >
+                              <Eye size={16} aria-hidden="true" />
+                            </button>
+                            <button
                               aria-label={`Delete refund ${refund.id}`}
                               className="danger-action"
                               disabled={loading}
@@ -192,61 +209,27 @@ export function RefundManager({
               </tbody>
             </table>
           </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={prevPage}
+            onNext={nextPage}
+            onPageChange={goToPage}
+          />
+          </>
         )}
       </section>
 
-      <section className="admin-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Refund Lines</p>
-            <h2>Refund Items</h2>
-          </div>
-          <span>{items.length} total</span>
-        </div>
-
-        <div className="table-wrap fade-in">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Refund</th>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.length === 0 ? (
-                <tr>
-                  <td colSpan={6}>No refund items found.</td>
-                </tr>
-              ) : (
-                items
-                  .sort((a, b) => b.id - a.id)
-                  .map((item: RefundItem) => (
-                    <tr key={`${item.refund_id}-${item.id}`}>
-                      <td>#{item.id}</td>
-                      <td>#{item.refund_id}</td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <ClipboardList size={18} className="text-muted" aria-hidden="true" />
-                          <div>
-                            <strong>{item.product?.name ?? item.product_id}</strong>
-                            <span>{item.product?.reference.slice(0, 15) ?? 'No reference'}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{money(item.price)}</td>
-                      <td>{item.quantity}</td>
-                      <td>{money(item.total)}</td>
-                    </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {viewingRefund && (
+        <RefundDetails
+          loading={loading}
+          refund={viewingRefund}
+          refunds={refunds}
+          sales={sales}
+          onClose={() => onSetViewingRefund(null)}
+          onDelete={onDeleteRefund}
+        />
+      )}
     </div>
   );
 }

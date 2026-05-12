@@ -24,6 +24,7 @@ export function useRefundManagement({
 }: RefundManagementOptions) {
   const [refundForm, setRefundForm] = useState<RefundFormValues>(emptyRefundForm);
   const [isAddingRefund, setIsAddingRefund] = useState(false);
+  const [viewingRefund, setViewingRefund] = useState<Refund | null>(null);
 
   async function handleRefundSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,6 +58,9 @@ export function useRefundManagement({
     try {
       await deleteRefund(refund.id);
       setRefunds((current) => current.filter((item) => item.id !== refund.id));
+      if (viewingRefund?.id === refund.id) {
+        setViewingRefund(null);
+      }
       await refreshSales();
       await refreshProducts();
       setStatus({ type: 'success', text: 'Refund deleted successfully' });
@@ -78,5 +82,7 @@ export function useRefundManagement({
       setRefundForm(emptyRefundForm);
       setIsAddingRefund(false);
     },
+    viewingRefund,
+    setViewingRefund,
   };
 }

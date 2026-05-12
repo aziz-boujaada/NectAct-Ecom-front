@@ -1,15 +1,20 @@
 import { FormEvent } from 'react';
-import { Edit3, Plus, X } from 'lucide-react';
-import type { Client, Sale, SaleFormValues } from '../../../types';
+import { Edit3, Minus, Plus, X } from 'lucide-react';
+import type { Client, Product, Sale, SaleFormValues, SaleItemDraftValues } from '../../../types';
 
 type SaleEntryFormProps = {
   clients: Client[];
   editingSale: Sale | null;
   form: SaleFormValues;
+  items: SaleItemDraftValues[];
+  products: Product[];
   loading: boolean;
   missingRelations: boolean;
+  onAddItem: () => void;
   onCancelEdit: () => void;
   onChange: (form: SaleFormValues) => void;
+  onChangeItem: (index: number, field: keyof SaleItemDraftValues, value: string) => void;
+  onRemoveItem: (index: number) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };
 
@@ -17,12 +22,19 @@ export function SaleEntryForm({
   clients,
   editingSale,
   form,
+  items,
+  products,
   loading,
   missingRelations,
+  onAddItem,
   onCancelEdit,
   onChange,
+  onChangeItem,
+  onRemoveItem,
   onSubmit,
 }: SaleEntryFormProps) {
+  const saleProducts = products;
+
   return (
     <form className="manager-form purchase-form fade-in" onSubmit={onSubmit}>
       <label>
@@ -48,6 +60,73 @@ export function SaleEntryForm({
           <option value="refunded">Refunded</option>
         </select>
       </label>
+      {editingSale === null && (
+        <div className="full-field" style={{ display: 'grid', gap: '14px' }}>
+          <div className="section-heading" style={{ margin: 0 }}>
+            <div>
+              <p className="eyebrow">Sale Items</p>
+              <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Items</h3>
+            </div>
+            <button className="secondary-action compact-action" disabled={loading || !form.client_id} onClick={onAddItem} type="button">
+              <Plus size={16} aria-hidden="true" />
+              Add item
+            </button>
+          </div>
+
+          {!form.client_id && <p className="helper-note full-field">Choose a client before adding items.</p>}
+
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {items.map((item, index) => (
+              <div
+                key={`${index}-${item.product_id || 'new'}`}
+                style={{
+                  display: 'grid',
+                  gap: '12px',
+                  gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr) auto',
+                  alignItems: 'end',
+                }}
+              >
+                <label>
+                  Product
+                  <select
+                    value={item.product_id}
+                    onChange={(event) => onChangeItem(index, 'product_id', event.target.value)}
+                    disabled={!form.client_id}
+                    required
+                  >
+                    <option value="">Select product</option>
+                    {saleProducts.map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Quantity
+                  <input
+                    min="1"
+                    type="number"
+                    value={item.quantity}
+                    onChange={(event) => onChangeItem(index, 'quantity', event.target.value)}
+                    required
+                    disabled={!form.client_id}
+                  />
+                </label>
+                <button
+                  aria-label={`Remove item ${index + 1}`}
+                  className="secondary-action compact-action"
+                  disabled={loading || items.length === 1}
+                  onClick={() => onRemoveItem(index)}
+                  type="button"
+                >
+                  <Minus size={16} aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="form-actions full-field">
         <button className="primary-action" disabled={loading || missingRelations} type="submit">
           {editingSale ? <Edit3 size={17} aria-hidden="true" /> : <Plus size={17} aria-hidden="true" />}

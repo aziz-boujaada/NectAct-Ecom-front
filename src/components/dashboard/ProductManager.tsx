@@ -7,6 +7,8 @@ import type {
   Supplier,
 } from "../../types";
 import { ProductForm } from "./forms/ProductForm";
+import { usePagination } from "./hooks/usePagination";
+import { PaginationControls } from "./PaginationControls";
 
 type ProductManagerProps = {
   categories: Category[];
@@ -30,7 +32,7 @@ function money(value: string | number) {
 }
 function lowStock(product: Product) {
   let hasLowStock = false;
-  if (product.stock <= product.min_stock) {
+  if ((product.stock ?? 0) <= (product.min_stock ?? 0)) {
     hasLowStock = true;
   }
 
@@ -57,6 +59,7 @@ export function ProductManager({
 }: ProductManagerProps) {
   const missingRelations = categories.length === 0 || suppliers.length === 0;
   const showForm = isAdding || editingProduct !== null;
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(products);
   
   return (
     <section className="admin-section">
@@ -94,8 +97,9 @@ export function ProductManager({
           onSubmit={onSubmit}
         />
       ) : (
-        <div className="table-wrap fade-in">
-          <table>
+        <>
+          <div className="table-wrap fade-in">
+            <table>
             <thead>
               <tr>
                 <th>ID</th>
@@ -120,7 +124,7 @@ export function ProductManager({
                   </td>
                 </tr>
               ) : (
-                [...products]
+                [...paginatedData]
                   .sort((a, b) => b.id - a.id)
                   .map((product) => (
                     <tr key={product.id}>
@@ -223,6 +227,14 @@ export function ProductManager({
             </tbody>
           </table>
         </div>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={prevPage}
+          onNext={nextPage}
+          onPageChange={goToPage}
+        />
+        </>
       )}
     </section>
   );

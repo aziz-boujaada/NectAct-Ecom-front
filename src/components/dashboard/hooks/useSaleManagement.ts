@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react';
-import { createSale, createSaleItem, deleteSale, deleteSaleItem, updateSale, updateSaleItem } from '../../../api/catalog';
-import type { Product, Sale, SaleItem, Status } from '../../../types';
-import { emptySaleForm, emptySaleItemForm, formFromSale, formFromSaleItem } from '../adminCatalogForms';
+import { createSaleWithItems, deleteSale, deleteSaleItem, updateSale } from '../../../api/catalog';
+import type { Product, Sale, SaleItem, SaleItemDraftValues, Status } from '../../../types';
+import { emptySaleForm, emptySaleItemDraft, formFromSale } from '../adminCatalogForms';
 import { errorMessage } from './adminCatalogUtils';
 
 type SaleManagementOptions = {
@@ -23,11 +23,31 @@ export function useSaleManagement({
   refreshProducts,
 }: SaleManagementOptions) {
   const [saleForm, setSaleForm] = useState(emptySaleForm);
-  const [saleItemForm, setSaleItemForm] = useState(emptySaleItemForm);
+  const [saleItemDrafts, setSaleItemDrafts] = useState<SaleItemDraftValues[]>([{ ...emptySaleItemDraft }]);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
-  const [editingSaleItem, setEditingSaleItem] = useState<SaleItem | null>(null);
+  const [viewingSale, setViewingSale] = useState<Sale | null>(null);
   const [isAddingSale, setIsAddingSale] = useState(false);
-  const [isAddingSaleItem, setIsAddingSaleItem] = useState(false);
+
+  function resetSaleItemDrafts() {
+    setSaleItemDrafts([{ ...emptySaleItemDraft }]);
+  }
+
+  function addSaleItemDraft() {
+    setSaleItemDrafts((current) => [...current, { ...emptySaleItemDraft }]);
+  }
+
+  function updateSaleItemDraft(index: number, field: keyof SaleItemDraftValues, value: string) {
+    setSaleItemDrafts((current) =>
+      current.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item)),
+    );
+  }
+
+  function removeSaleItemDraft(index: number) {
+    setSaleItemDrafts((current) => {
+      const nextItems = current.filter((_, itemIndex) => itemIndex !== index);
+      return nextItems.length > 0 ? nextItems : [{ ...emptySaleItemDraft }];
+    });
+  }
 
   async function handleSaleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -42,46 +62,23 @@ export function useSaleManagement({
         }
         setStatus({ type: 'success', text: 'Sale updated successfully' });
       } else {
-        const sale = await createSale(saleForm);
+        const sale = await createSaleWithItems(
+          saleForm,
+          saleItemDrafts.filter((item) => item.product_id && item.quantity),
+        );
         if (sale) {
           setSales((current) => [sale, ...current]);
+          if (sale.items?.length) {
+            setSaleItems((current) => [...sale.items!, ...current]);
+          }
         }
         setStatus({ type: 'success', text: 'Sale created successfully' });
       }
 
       setEditingSale(null);
       setSaleForm(emptySaleForm);
+      resetSaleItemDrafts();
       setIsAddingSale(false);
-    } catch (error) {
-      setStatus({ type: 'error', text: errorMessage(error) });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleSaleItemSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setLoading(true);
-    setStatus(null);
-
-    try {
-      if (editingSaleItem) {
-        const saleItem = await updateSaleItem(editingSaleItem.id, saleItemForm);
-        if (saleItem) {
-          setSaleItems((current) => current.map((item) => (item.id === saleItem.id ? saleItem : item)));
-        }
-        setStatus({ type: 'success', text: 'Sale item updated successfully' });
-      } else {
-        const saleItem = await createSaleItem(saleItemForm);
-        if (saleItem) {
-          setSaleItems((current) => [saleItem, ...current]);
-        }
-        setStatus({ type: 'success', text: 'Sale item created successfully' });
-      }
-
-      setEditingSaleItem(null);
-      setSaleItemForm(emptySaleItemForm);
-      setIsAddingSaleItem(false);
       await refreshSales();
       await refreshProducts();
     } catch (error) {
@@ -100,9 +97,13 @@ export function useSaleManagement({
       await deleteSale(sale.id);
       setSales((current) => current.filter((item) => item.id !== sale.id));
       setSaleItems((current) => current.filter((item) => item.sale_id !== sale.id));
+      if (viewingSale?.id === sale.id) {
+        setViewingSale(null);
+      }
       if (editingSale?.id === sale.id) {
         setEditingSale(null);
         setSaleForm(emptySaleForm);
+        resetSaleItemDrafts();
       }
       await refreshProducts();
       setStatus({ type: 'success', text: 'Sale deleted successfully' });
@@ -121,10 +122,6 @@ export function useSaleManagement({
     try {
       await deleteSaleItem(saleItem.id);
       setSaleItems((current) => current.filter((item) => item.id !== saleItem.id));
-      if (editingSaleItem?.id === saleItem.id) {
-        setEditingSaleItem(null);
-        setSaleItemForm(emptySaleItemForm);
-      }
       await refreshSales();
       await refreshProducts();
       setStatus({ type: 'success', text: 'Sale item deleted successfully' });
@@ -137,36 +134,28 @@ export function useSaleManagement({
 
   return {
     saleForm,
-    saleItemForm,
+    saleItemDrafts,
     editingSale,
-    editingSaleItem,
     isAddingSale,
-    isAddingSaleItem,
     setSaleForm,
-    setSaleItemForm,
     handleSaleSubmit,
-    handleSaleItemSubmit,
     handleDeleteSale,
     handleDeleteSaleItem,
     startAddingSale: () => setIsAddingSale(true),
-    startAddingSaleItem: () => setIsAddingSaleItem(true),
     cancelSaleEdit: () => {
       setEditingSale(null);
       setSaleForm(emptySaleForm);
       setIsAddingSale(false);
-    },
-    cancelSaleItemEdit: () => {
-      setEditingSaleItem(null);
-      setSaleItemForm(emptySaleItemForm);
-      setIsAddingSaleItem(false);
+      resetSaleItemDrafts();
     },
     editSale: (sale: Sale) => {
       setEditingSale(sale);
       setSaleForm(formFromSale(sale));
     },
-    editSaleItem: (saleItem: SaleItem) => {
-      setEditingSaleItem(saleItem);
-      setSaleItemForm(formFromSaleItem(saleItem));
-    },
+    addSaleItemDraft,
+    updateSaleItemDraft,
+    removeSaleItemDraft,
+    viewingSale,
+    setViewingSale,
   };
 }

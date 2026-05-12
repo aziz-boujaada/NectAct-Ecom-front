@@ -1,9 +1,50 @@
 import { AlertTriangle, Banknote, Boxes, CalendarDays, CircleDollarSign, RefreshCw, RotateCcw, ShoppingCart, TrendingUp, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getDashboardStats } from '../../api/catalog';
 import type { DashboardStats as DashboardStatsType, Status } from '../../types';
 import { StatusMessage } from '../StatusMessage';
 import { errorMessage } from './hooks/adminCatalogUtils';
+import { usePagination } from './hooks/usePagination';
+import { PaginationControls } from './PaginationControls';
+
+/* Chart.js integration */
+import { Line, Pie, Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Filler,
+  Tooltip,
+  Legend,
+  Title,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend, Title);
+
+// Register filler for area under line charts
+ChartJS.register(Filler);
+
+// Theme helpers: read CSS variables and dark-mode flag to style charts appropriately
+function getChartTheme() {
+  if (typeof window === 'undefined') return {
+    text: '#0f172a', muted: '#64748b', grid: 'rgba(15,23,42,0.04)', tooltipBg: '#ffffff', tooltipColor: '#0f172a'
+  };
+
+  const root = document.documentElement;
+  const styles = getComputedStyle(root);
+  const text = (styles.getPropertyValue('--text-main') || '#0f172a').trim();
+  const muted = (styles.getPropertyValue('--text-muted') || '#64748b').trim();
+  const isDark = (root.getAttribute('data-theme') || '').trim() === 'dark';
+  const grid = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)';
+  const tooltipBg = isDark ? 'rgba(18,20,36,0.85)' : '#ffffff';
+  const tooltipColor = isDark ? '#eef0f6' : '#0f172a';
+
+  return { text, muted, grid, tooltipBg, tooltipColor };
+}
 
 function money(value: string | number | null | undefined) {
   return `${Number(value ?? 0).toFixed(2)} DH`;
@@ -24,6 +65,237 @@ const summaryCards = [
   { key: 'total_purchases', label: 'Purchases', icon: ShoppingCart },
   { key: 'estimated_profit', label: 'Estimated profit', icon: Banknote },
 ] as const;
+
+// Helper: Monthly line chart renderer. Note: backend doesn't provide historical series by default.
+function renderMonthlyLine(stats: DashboardStatsType) {
+  // If backend provides `monthly_series` (array of { month, sales_total, refunds_total, purchases_total }), use it.
+  // Otherwise fallback to a single-point chart showing current month totals.
+  const monthlySeries = (stats as any).monthly_series as
+    | Array<{ month: string; sales_total: string; refunds_total: string; purchases_total: string }>
+    | undefined;
+
+  const labels = monthlySeries
+    ? monthlySeries.map((m) => m.month)
+    : [new Date().toLocaleString('default', { month: 'short', year: 'numeric' })];
+
+  const salesData = monthlySeries ? monthlySeries.map((m) => Number(m.sales_total || 0)) : [Number(stats.current_month.sales_total || 0)];
+  const refundsData = monthlySeries ? monthlySeries.map((m) => Number(m.refunds_total || 0)) : [Number(stats.current_month.refunds_total || 0)];
+  const purchasesData = monthlySeries ? monthlySeries.map((m) => Number(m.purchases_total || 0)) : [Number(stats.current_month.purchases_total || 0)];
+
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Sales',
+        data: salesData,
+        borderColor: '#10b981',
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx as CanvasRenderingContext2D;
+          const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+          gradient.addColorStop(0, 'rgba(16,185,129,0.22)');
+          gradient.addColorStop(1, 'rgba(16,185,129,0.02)');
+          return gradient;
+        },
+        tension: 0.36,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        fill: true,
+      },
+      {
+        label: 'Refunds',
+        data: refundsData,
+        borderColor: '#ef4444',
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx as CanvasRenderingContext2D;
+          const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+          gradient.addColorStop(0, 'rgba(239,68,68,0.18)');
+          gradient.addColorStop(1, 'rgba(239,68,68,0.02)');
+          return gradient;
+        },
+        tension: 0.36,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        fill: true,
+      },
+      {
+        label: 'Purchases',
+        data: purchasesData,
+        borderColor: '#3b82f6',
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx as CanvasRenderingContext2D;
+          const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+          gradient.addColorStop(0, 'rgba(59,130,246,0.16)');
+          gradient.addColorStop(1, 'rgba(59,130,246,0.02)');
+          return gradient;
+        },
+        tension: 0.36,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        fill: true,
+      },
+    ],
+  };
+
+  const maxVal = Math.max(...salesData, ...refundsData, ...purchasesData, 0);
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' as const },
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        align: 'end' as const,
+        labels: { boxWidth: 10, usePointStyle: true, padding: 12 },
+      },
+      tooltip: {
+        padding: 10,
+        cornerRadius: 8,
+        displayColors: true,
+        titleFont: { weight: 600 as any },
+        bodyFont: { weight: 600 as any },
+        callbacks: {
+          label: (context: any) => `${Number(context.parsed.y ?? 0).toLocaleString()} DH`,
+        },
+      },
+    },
+    scales: (() => {
+      const theme = getChartTheme();
+      return {
+        x: { grid: { display: false }, ticks: { color: theme.muted, maxRotation: 0, minRotation: 0 } },
+        y: {
+          grid: { color: theme.grid },
+          ticks: { callback: (v: any) => `${Number(v).toLocaleString()}`, color: theme.muted },
+          beginAtZero: true,
+          suggestedMax: maxVal > 0 ? Math.ceil(maxVal * 1.12) : undefined,
+        },
+      };
+    })(),
+  };
+
+  return <Line data={data} options={options} />;
+}
+
+function renderStatusDoughnut(values: Record<string, number>, purchases = false) {
+  const labels = Object.keys(values);
+  const data = {
+    labels,
+    datasets: [
+      {
+        data: Object.values(values),
+        backgroundColor: labels.map((l) => {
+          if (purchases) return l === 'pending' ? '#f59e0b' : '#10b981';
+          // sales statuses
+          if (l === 'paid') return '#10b981';
+          if (l === 'unpaid') return '#f59e0b';
+          if (l === 'refunded') return '#ef4444';
+          return '#94a3b8';
+        }),
+        borderWidth: 0,
+        hoverOffset: 12,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '60%',
+    plugins: (() => {
+      const theme = getChartTheme();
+      return {
+        legend: { display: true, position: 'bottom' as const, labels: { boxWidth: 10, padding: 8, color: theme.muted } },
+        tooltip: { padding: 8, cornerRadius: 8, backgroundColor: theme.tooltipBg, titleColor: theme.tooltipColor, bodyColor: theme.tooltipColor },
+      };
+    })(),
+  };
+
+  return <Pie data={data} options={options} />;
+}
+
+function renderTopProductsBar(products: DashboardStatsType['top_selling_products']) {
+  // show only top N products to keep chart compact
+  const top = products.slice(0, 6);
+  const labels = top.map((p) => p.name);
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Quantity Sold',
+        data: top.map((p) => p.quantity_sold),
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx as CanvasRenderingContext2D;
+          const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+          gradient.addColorStop(0, 'rgba(59,130,246,0.95)');
+          gradient.addColorStop(1, 'rgba(99,102,241,0.85)');
+          return gradient;
+        },
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 36,
+      },
+    ],
+  };
+
+  const options = {
+    indexAxis: 'x' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: (() => {
+      const theme = getChartTheme();
+      return { legend: { display: false }, tooltip: { padding: 8, cornerRadius: 8, backgroundColor: theme.tooltipBg, titleColor: theme.tooltipColor, bodyColor: theme.tooltipColor } };
+    })(),
+    scales: (() => {
+      const theme = getChartTheme();
+      return {
+        x: { grid: { display: false }, ticks: { color: theme.muted, maxRotation: 0 } },
+        y: { grid: { color: theme.grid }, ticks: { precision: 0, color: theme.muted } },
+      };
+    })(),
+  };
+
+  return <Bar data={data} options={options} />;
+}
+
+function renderLowStockHorizontal(products: DashboardStatsType['low_stock_products']) {
+  const sorted = [...products].sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0)).slice(0, 6);
+  const labels = sorted.map((p) => p.name);
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Stock',
+        data: sorted.map((p) => p.stock ?? 0),
+        backgroundColor: (context: any) => {
+          const ctx = context.chart.ctx as CanvasRenderingContext2D;
+          const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+          gradient.addColorStop(0, 'rgba(239,68,68,0.95)');
+          gradient.addColorStop(1, 'rgba(245,158,11,0.85)');
+          return gradient;
+        },
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 28,
+      },
+    ],
+  };
+
+  const options = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: (() => {
+      const theme = getChartTheme();
+      return { legend: { display: false }, tooltip: { padding: 8, cornerRadius: 8, backgroundColor: theme.tooltipBg, titleColor: theme.tooltipColor, bodyColor: theme.tooltipColor } };
+    })(),
+    scales: (() => {
+      const theme = getChartTheme();
+      return { x: { grid: { color: theme.grid }, ticks: { color: theme.muted, stepSize: 1, precision: 0 }, min: 0, max: 5 }, y: { grid: { display: false }, ticks: { color: theme.muted } } };
+    })(),
+  };
+
+  return <Bar data={data} options={options} />;
+}
 
 export function DashboardStats() {
   const [stats, setStats] = useState<DashboardStatsType | null>(null);
@@ -98,95 +370,96 @@ export function DashboardStats() {
             ))}
           </section>
 
-          <section className="stats-card-grid compact">
-            <article className="metric-card">
-              <div className="metric-icon">
-                <ShoppingCart size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <span>Sales</span>
-                <strong>{stats.counts.sales}</strong>
-              </div>
-            </article>
-            <article className="metric-card">
-              <div className="metric-icon">
-                <Boxes size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <span>Products</span>
-                <strong>{stats.counts.products}</strong>
-              </div>
-            </article>
-            <article className="metric-card">
-              <div className="metric-icon">
-                <Users size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <span>Clients / Suppliers</span>
-                <strong>{stats.counts.clients} / {stats.counts.suppliers}</strong>
-              </div>
-            </article>
-            <article className="metric-card warning">
-              <div className="metric-icon">
-                <AlertTriangle size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <span>Low stock</span>
-                <strong>{stats.counts.low_stock_products}</strong>
-              </div>
-            </article>
-          </section>
-
-          <section className="stats-split">
-            <div className="admin-section">
-              <div className="section-heading">
-                <div>
-                  <p className="eyebrow">Today</p>
-                  <h2>Daily Movement</h2>
+          <section className="kpi-row">
+            <div className="kpi-card">
+              <p className="eyebrow">Today</p>
+              <h3>Daily Movement</h3>
+              <div className="kpi-values">
+                <div className="kpi-item sales">
+                  <span className="kpi-label">Sales</span>
+                  <strong className="kpi-value green">{stats.today.sales} ({money(stats.today.sales_total)})</strong>
                 </div>
-                <CalendarDays size={20} aria-hidden="true" />
-              </div>
-              <div className="period-grid">
-                <div>
-                  <span>Sales</span>
-                  <strong>{stats.today.sales}</strong>
-                  <p>{money(stats.today.sales_total)}</p>
-                </div>
-                <div>
-                  <span>Refunds</span>
-                  <strong>{stats.today.refunds}</strong>
-                  <p>{money(stats.today.refunds_total)}</p>
+                <div className="kpi-item refunds">
+                  <span className="kpi-label">Refunds</span>
+                  <strong className="kpi-value red">{stats.today.refunds} ({money(stats.today.refunds_total)})</strong>
                 </div>
               </div>
             </div>
 
-            <div className="admin-section">
+            <div className="kpi-card">
+              <p className="eyebrow">Current Month</p>
+              <h3>Monthly Totals</h3>
+              <div className="kpi-values">
+                <div className="kpi-item sales">
+                  <span className="kpi-label">Sales</span>
+                  <strong className="kpi-value green">{money(stats.current_month.sales_total)}</strong>
+                </div>
+                <div className="kpi-item refunds">
+                  <span className="kpi-label">Refunds</span>
+                  <strong className="kpi-value red">{money(stats.current_month.refunds_total)}</strong>
+                </div>
+                <div className="kpi-item purchases">
+                  <span className="kpi-label">Purchases</span>
+                  <strong className="kpi-value blue">{money(stats.current_month.purchases_total)}</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="charts-grid">
+            <div className="admin-section chart-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Current Month</p>
+                  <p className="eyebrow">Trend</p>
                   <h2>Monthly Totals</h2>
                 </div>
               </div>
-              <div className="period-grid three">
+              <div className="chart-wrap">{renderMonthlyLine(stats)}</div>
+            </div>
+
+            <div className="admin-section chart-card">
+              <div className="section-heading">
                 <div>
-                  <span>Sales</span>
-                  <strong>{money(stats.current_month.sales_total)}</strong>
+                  <p className="eyebrow">Status</p>
+                  <h2>Sales Status</h2>
                 </div>
+                <span>{Object.values(stats.sales_by_status).reduce((a,b)=>a+b,0)}</span>
+              </div>
+              <div className="chart-wrap">{renderStatusDoughnut(stats.sales_by_status)}</div>
+            </div>
+
+            <div className="admin-section chart-card">
+              <div className="section-heading">
                 <div>
-                  <span>Refunds</span>
-                  <strong>{money(stats.current_month.refunds_total)}</strong>
+                  <p className="eyebrow">Status</p>
+                  <h2>Purchases Status</h2>
                 </div>
-                <div>
-                  <span>Purchases</span>
-                  <strong>{money(stats.current_month.purchases_total)}</strong>
+                <span>{Object.values(stats.purchases_by_status).reduce((a,b)=>a+b,0)}</span>
+              </div>
+              <div className="chart-wrap">{renderStatusDoughnut(stats.purchases_by_status, true)}</div>
+            </div>
+
+            <div className="chart-pair">
+              <div className="admin-section chart-card">
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow">Products</p>
+                    <h2>Top Selling Products</h2>
+                  </div>
                 </div>
+                <div className="chart-wrap">{renderTopProductsBar(stats.top_selling_products)}</div>
+              </div>
+
+              <div className="admin-section chart-card">
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow">Inventory</p>
+                    <h2>Low Stock Products</h2>
+                  </div>
+                </div>
+                <div className="chart-wrap">{renderLowStockHorizontal(stats.low_stock_products)}</div>
               </div>
             </div>
-          </section>
-
-          <section className="stats-split">
-            <StatusBreakdown title="Sales status" values={stats.sales_by_status} />
-            <StatusBreakdown title="Purchases status" values={stats.purchases_by_status} />
           </section>
 
           <section className="stats-split">
@@ -229,6 +502,7 @@ function StatusBreakdown({ title, values }: { title: string; values: Record<stri
 }
 
 function ProductsTable({ title, products }: { title: string; products: DashboardStatsType['top_selling_products'] }) {
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(products);
   return (
     <div className="admin-section">
       <div className="section-heading">
@@ -249,7 +523,7 @@ function ProductsTable({ title, products }: { title: string; products: Dashboard
           <tbody>
             {products.length === 0 ? (
               <tr><td colSpan={3}>No sales yet.</td></tr>
-            ) : products.map((product) => (
+            ) : paginatedData.map((product) => (
               <tr key={product.id}>
                 <td>{product.name}<span>{product.reference || 'No reference'}</span></td>
                 <td>{product.quantity_sold}</td>
@@ -259,11 +533,21 @@ function ProductsTable({ title, products }: { title: string; products: Dashboard
           </tbody>
         </table>
       </div>
+      {products.length > 0 && totalPages > 1 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={prevPage}
+          onNext={nextPage}
+          onPageChange={goToPage}
+        />
+      )}
     </div>
   );
 }
 
 function LowStockTable({ products }: { products: DashboardStatsType['low_stock_products'] }) {
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(products);
   return (
     <div className="admin-section">
       <div className="section-heading">
@@ -284,7 +568,7 @@ function LowStockTable({ products }: { products: DashboardStatsType['low_stock_p
           <tbody>
             {products.length === 0 ? (
               <tr><td colSpan={3}>No low stock products.</td></tr>
-            ) : products.map((product) => (
+            ) : paginatedData.map((product) => (
               <tr key={product.id}>
                 <td>{product.name}<span>{product.reference || 'No reference'}</span></td>
                 <td>{product.stock ?? 0}</td>
@@ -294,11 +578,21 @@ function LowStockTable({ products }: { products: DashboardStatsType['low_stock_p
           </tbody>
         </table>
       </div>
+      {products.length > 0 && totalPages > 1 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={prevPage}
+          onNext={nextPage}
+          onPageChange={goToPage}
+        />
+      )}
     </div>
   );
 }
 
 function RecentSalesTable({ sales }: { sales: DashboardStatsType['recent_sales'] }) {
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(sales);
   return (
     <div className="admin-section">
       <div className="section-heading">
@@ -320,7 +614,7 @@ function RecentSalesTable({ sales }: { sales: DashboardStatsType['recent_sales']
           <tbody>
             {sales.length === 0 ? (
               <tr><td colSpan={4}>No recent sales.</td></tr>
-            ) : sales.map((sale) => (
+            ) : paginatedData.map((sale) => (
               <tr key={sale.id}>
                 <td>{sale.reference || `Sale #${sale.id}`}<span>{formatDate(sale.created_at)}</span></td>
                 <td>{sale.client?.name ?? 'Unknown client'}</td>
@@ -331,11 +625,21 @@ function RecentSalesTable({ sales }: { sales: DashboardStatsType['recent_sales']
           </tbody>
         </table>
       </div>
+      {sales.length > 0 && totalPages > 1 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={prevPage}
+          onNext={nextPage}
+          onPageChange={goToPage}
+        />
+      )}
     </div>
   );
 }
 
 function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_refunds'] }) {
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(refunds);
   return (
     <div className="admin-section">
       <div className="section-heading">
@@ -357,7 +661,7 @@ function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_r
           <tbody>
             {refunds.length === 0 ? (
               <tr><td colSpan={4}>No recent refunds.</td></tr>
-            ) : refunds.map((refund) => (
+            ) : paginatedData.map((refund) => (
               <tr key={refund.id}>
                 <td>{refund.sale?.reference || `Sale #${refund.sale_id}`}<span>{formatDate(refund.created_at)}</span></td>
                 <td>{refund.sale?.client?.name ?? 'Unknown client'}</td>
@@ -368,6 +672,15 @@ function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_r
           </tbody>
         </table>
       </div>
+      {refunds.length > 0 && totalPages > 1 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={prevPage}
+          onNext={nextPage}
+          onPageChange={goToPage}
+        />
+      )}
     </div>
   );
 }

@@ -40,6 +40,7 @@ export function usePurchaseManagement({
   const [purchaseItemDrafts, setPurchaseItemDrafts] = useState<PurchaseItemDraftValues[]>([emptyPurchaseItemDraft]);
   const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null);
   const [editingPurchaseItem, setEditingPurchaseItem] = useState<PurchaseItem | null>(null);
+  const [viewingPurchase, setViewingPurchase] = useState<Purchase | null>(null);
   const [isAddingPurchase, setIsAddingPurchase] = useState(false);
 
   function resetPurchaseItemDrafts() {
@@ -234,5 +235,7 @@ export function usePurchaseManagement({
     addPurchaseItemDraft,
     updatePurchaseItemDraft,
     removePurchaseItemDraft,
+    viewingPurchase,
+    setViewingPurchase,
   };
 }

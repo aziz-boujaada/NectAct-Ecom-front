@@ -12,8 +12,10 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
+import { ProtectedRoute } from "../permissions";
 import type { User } from "../../types";
 import type { TabOption } from "./Dashboard";
+import logoUrl from '../../../dist/assets/nxtactlogo.png';
 
 type AccountCardProps = {
   user: User;
@@ -47,8 +49,10 @@ export function AccountCard({
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <div className="brand-logo">NA</div>
-        <h2>NectAct Panel</h2>
+        <div className="brand-logo">
+          <img src={logoUrl} alt="NectAct logo" />
+        </div>
+      
       </div>
 
       <nav className="sidebar-nav">
@@ -126,6 +130,39 @@ export function AccountCard({
           <Package size={20} />
           <span>Stock Movements</span>
         </button>
+        <p className="sidebar-label" style={{ marginTop: "16px" }}>
+          ADMINISTRATION
+        </p>
+        <ProtectedRoute requiredPermissions="view_roles" fallback={null}>
+          <button
+            className={`nav-item ${activeTab === "roles" ? "active" : ""}`}
+            onClick={() => onTabChange("roles")}
+            type="button"
+          >
+            <Shield size={20} />
+            <span>Roles</span>
+          </button>
+        </ProtectedRoute>
+        <ProtectedRoute requiredPermissions="view_users" fallback={null}>
+          <button
+            className={`nav-item ${activeTab === "users" ? "active" : ""}`}
+            onClick={() => onTabChange("users")}
+            type="button"
+          >
+            <Users size={20} />
+            <span>Users</span>
+          </button>
+        </ProtectedRoute>
+        <ProtectedRoute requiredPermissions="view_permissions" fallback={null}>
+          <button
+            className={`nav-item ${activeTab === "permissions" ? "active" : ""}`}
+            onClick={() => onTabChange("permissions")}
+            type="button"
+          >
+            <Shield size={20} />
+            <span>Permissions</span>
+          </button>
+        </ProtectedRoute>
         <p className="sidebar-label" style={{ marginTop: "16px" }}>
           SETTINGS
         </p>
