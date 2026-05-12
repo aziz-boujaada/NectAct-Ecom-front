@@ -5,6 +5,7 @@ import { DashboardStats } from './DashboardStats';
 import { PasswordForm } from './PasswordForm';
 import { ProfileForm } from './ProfileForm';
 import { StatusMessage } from '../StatusMessage';
+import { UsersManager, PermissionsManager } from '../permissions';
 import type { PasswordFormValues, ProfileFormValues, Status, User } from '../../types';
 
 type DashboardProps = {
@@ -33,7 +34,9 @@ export type TabOption =
   | 'clients'
   | 'stock'
   | 'profile'
-  | 'security';
+  | 'security'
+  | 'users'
+  | 'permissions';
 
 export function Dashboard({
   user,
@@ -53,6 +56,7 @@ export function Dashboard({
   const [activeTab, setActiveTab] = useState<TabOption>('overview');
 
   const showCatalog = ['categories', 'products', 'purchases', 'sales', 'refunds', 'suppliers', 'clients', 'stock'].includes(activeTab);
+  const showAdmin = ['users', 'permissions'].includes(activeTab);
 
   return (
     <div className="dashboard-layout">
@@ -79,7 +83,7 @@ export function Dashboard({
 
         {showCatalog && (
           <div className="fade-in">
-            <AdminCatalog activeTab={activeTab as 'categories' | 'products' | 'purchases' | 'sales' | 'refunds' | 'suppliers' | 'clients' | 'stock'} />
+            <AdminCatalog activeTab={activeTab as 'categories' | 'products' | 'purchases' | 'sales' | 'refunds' | 'suppliers' | 'clients' | 'stock'} onTabChange={setActiveTab} />
           </div>
         )}
         {activeTab === 'profile' && (
@@ -89,6 +93,7 @@ export function Dashboard({
               loading={loading}
               onChange={onProfileChange}
               onSubmit={onProfileSubmit}
+              authUser={user}
             />
           </div>
         )}
@@ -100,6 +105,12 @@ export function Dashboard({
               onChange={onPasswordChange}
               onSubmit={onPasswordSubmit}
             />
+          </div>
+        )}
+        {showAdmin && (
+          <div className="fade-in">
+            {activeTab === 'users' && <UsersManager />}
+            {activeTab === 'permissions' && <PermissionsManager />}
           </div>
         )}
       </div>

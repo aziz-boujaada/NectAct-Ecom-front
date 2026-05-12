@@ -16,6 +16,7 @@ type PurchaseEntryFormProps = {
   onChangeItem: (index: number, field: keyof PurchaseItemDraftValues, value: string) => void;
   onRemoveItem: (index: number) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCreateSupplier?: () => void;
 };
 
 export function PurchaseEntryForm({
@@ -32,6 +33,7 @@ export function PurchaseEntryForm({
   onChangeItem,
   onRemoveItem,
   onSubmit,
+  onCreateSupplier,
 }: PurchaseEntryFormProps) {
   const showItemEditor = editingPurchase === null;
   const supplierProducts = form.supplier_id
@@ -51,6 +53,18 @@ export function PurchaseEntryForm({
           ))}
         </select>
       </label>
+      {suppliers.length === 0 && onCreateSupplier && (
+        <button
+          className="secondary-action"
+          disabled={loading}
+          onClick={onCreateSupplier}
+          type="button"
+          style={{ marginTop: '-10px' }}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Create supplier
+        </button>
+      )}
       <label>
         Status
         <select

@@ -20,6 +20,7 @@ import { PurchaseItemEntryForm } from "./forms/PurchaseItemEntryForm";
 import { PurchaseDetails } from "./PurchaseDetails";
 import { usePagination } from "./hooks/usePagination";
 import { PaginationControls } from "./PaginationControls";
+import { Can } from "../../context/PermissionContext";
 
 type PurchaseManagerProps = {
   editingPurchase: Purchase | null;
@@ -49,6 +50,8 @@ type PurchaseManagerProps = {
   onSubmitPurchase: (event: FormEvent<HTMLFormElement>) => void;
   onSubmitPurchaseItem: (event: FormEvent<HTMLFormElement>) => void;
   onSetViewingPurchase: (purchase: Purchase | null) => void;
+  onCreateSupplier?: () => void;
+  onTabChange?: (tab: string) => void;
 };
 
 function money(value: string | number | null | undefined) {
@@ -84,6 +87,8 @@ export function PurchaseManager({
   onSubmitPurchase,
   onSubmitPurchaseItem,
   onSetViewingPurchase,
+  onCreateSupplier,
+  onTabChange,
 }: PurchaseManagerProps) {
   const showPurchaseForm = isAddingPurchase || editingPurchase !== null;
   const showItemForm = editingPurchaseItem !== null;
@@ -99,6 +104,11 @@ export function PurchaseManager({
         (product) => product.supplier_id === selectedPurchase.supplier_id,
       )
     : [];
+
+  const handleCreateSupplier = () => {
+    onTabChange?.("suppliers");
+    onCreateSupplier?.();
+  };
   const formatDate = (date?: string) => {
     if (!date) {
       return 'Not set';
@@ -124,13 +134,15 @@ export function PurchaseManager({
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
             <span>{purchases.length} total</span>
             {!showPurchaseForm && (
-              <button
-                className="primary-action"
-                onClick={onAddPurchase}
-                type="button"
-              >
-                <Plus size={17} /> Add purchase
-              </button>
+              <Can permission="create_purchases">
+                <button
+                  className="primary-action"
+                  onClick={onAddPurchase}
+                  type="button"
+                >
+                  <Plus size={17} /> Add purchase
+                </button>
+              </Can>
             )}
           </div>
         </div>
@@ -156,6 +168,7 @@ export function PurchaseManager({
             onChangeItem={onChangePurchaseItemDraft}
             onRemoveItem={onRemovePurchaseItemDraft}
             onSubmit={onSubmitPurchase}
+            onCreateSupplier={handleCreateSupplier}
           />
         ) : (
           <>

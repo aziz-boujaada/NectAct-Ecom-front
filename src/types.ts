@@ -132,6 +132,11 @@ export type SaleItem = {
   updated_at?: string;
 };
 
+export type Invoice = {
+  sale: Sale;
+  items?: SaleItem[];
+};
+
 export type Refund = {
   id: number;
   sale_id: number;
@@ -273,6 +278,11 @@ export type SaleFormValues = {
 
 export type SaleItemFormValues = {
   sale_id: string;
+  product_id: string;
+  quantity: string;
+};
+
+export type SaleItemDraftValues = {
   product_id: string;
   quantity: string;
 };

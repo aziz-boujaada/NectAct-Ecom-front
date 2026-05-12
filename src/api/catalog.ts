@@ -16,6 +16,7 @@ import type {
   RefundFormValues,
   Sale,
   SaleFormValues,
+  SaleItemDraftValues,
   SaleItem,
   SaleItemFormValues,
   StockMovement,
@@ -152,6 +153,13 @@ function salePayload(payload: SaleFormValues) {
 function saleItemPayload(payload: SaleItemFormValues) {
   return {
     sale_id: Number(payload.sale_id),
+    product_id: Number(payload.product_id),
+    quantity: Number(payload.quantity),
+  };
+}
+
+function saleItemDraftPayload(payload: SaleItemDraftValues) {
+  return {
     product_id: Number(payload.product_id),
     quantity: Number(payload.quantity),
   };
@@ -357,6 +365,18 @@ export async function createSale(payload: SaleFormValues) {
     method: 'POST',
     token: authToken(),
     body: salePayload(payload),
+  });
+  return data.sale ?? (!Array.isArray(data.data) ? data.data : undefined);
+}
+
+export async function createSaleWithItems(payload: SaleFormValues, items: SaleItemDraftValues[]) {
+  const data = await request<SaleResponse>('/sales', {
+    method: 'POST',
+    token: authToken(),
+    body: {
+      ...salePayload(payload),
+      items: items.map(saleItemDraftPayload),
+    },
   });
   return data.sale ?? (!Array.isArray(data.data) ? data.data : undefined);
 }

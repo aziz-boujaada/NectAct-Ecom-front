@@ -14,6 +14,7 @@ import type {
   RefundFormValues,
   Sale,
   SaleFormValues,
+  SaleItemDraftValues,
   SaleItem,
   SaleItemFormValues,
   Supplier,
@@ -58,6 +59,11 @@ export const emptyPurchaseItemDraft: PurchaseItemDraftValues = {
 export const emptySaleForm: SaleFormValues = {
   client_id: '',
   status: 'unpaid',
+};
+
+export const emptySaleItemDraft: SaleItemDraftValues = {
+  product_id: '',
+  quantity: '1',
 };
 
 export const emptySaleItemForm: SaleItemFormValues = {

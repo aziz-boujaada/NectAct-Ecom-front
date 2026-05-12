@@ -9,6 +9,7 @@ import type {
 import { ProductForm } from "./forms/ProductForm";
 import { usePagination } from "./hooks/usePagination";
 import { PaginationControls } from "./PaginationControls";
+import { Can } from "../../context/PermissionContext";
 
 type ProductManagerProps = {
   categories: Category[];
@@ -24,6 +25,9 @@ type ProductManagerProps = {
   onDelete: (product: Product) => void;
   onEdit: (product: Product) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCreateCategory?: () => void;
+  onCreateSupplier?: () => void;
+  onTabChange?: (tab: string) => void;
 };
 
 function money(value: string | number) {
@@ -56,10 +60,23 @@ export function ProductManager({
   onDelete,
   onEdit,
   onSubmit,
+  onCreateCategory,
+  onCreateSupplier,
+  onTabChange,
 }: ProductManagerProps) {
   const missingRelations = categories.length === 0 || suppliers.length === 0;
   const showForm = isAdding || editingProduct !== null;
   const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(products);
+  
+  const handleCreateCategory = () => {
+    onTabChange?.("categories");
+    onCreateCategory?.();
+  };
+
+  const handleCreateSupplier = () => {
+    onTabChange?.("suppliers");
+    onCreateSupplier?.();
+  };
   
   return (
     <section className="admin-section">
@@ -95,6 +112,8 @@ export function ProductManager({
           onCancelEdit={onCancelEdit}
           onChange={onChange}
           onSubmit={onSubmit}
+          onCreateCategory={handleCreateCategory}
+          onCreateSupplier={handleCreateSupplier}
         />
       ) : (
         <>
@@ -201,24 +220,28 @@ export function ProductManager({
 
                       <td>
                         <div className="row-actions">
-                          <button
-                            aria-label={`Edit ${product.name}`}
-                            disabled={loading}
-                            onClick={() => onEdit(product)}
-                            type="button"
-                          >
-                            <Edit3 size={16} />
-                          </button>
+                          <Can permission="edit_products">
+                            <button
+                              aria-label={`Edit ${product.name}`}
+                              disabled={loading}
+                              onClick={() => onEdit(product)}
+                              type="button"
+                            >
+                              <Edit3 size={16} />
+                            </button>
+                          </Can>
 
-                          <button
-                            aria-label={`Delete ${product.name}`}
-                            className="danger-action"
-                            disabled={loading}
-                            onClick={() => onDelete(product)}
-                            type="button"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          <Can permission="delete_products">
+                            <button
+                              aria-label={`Delete ${product.name}`}
+                              className="danger-action"
+                              disabled={loading}
+                              onClick={() => onDelete(product)}
+                              type="button"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </Can>
                         </div>
                       </td>
                     </tr>

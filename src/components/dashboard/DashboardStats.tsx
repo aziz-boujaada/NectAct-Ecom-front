@@ -6,6 +6,7 @@ import { StatusMessage } from '../StatusMessage';
 import { errorMessage } from './hooks/adminCatalogUtils';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
+import { Can } from '../../context/PermissionContext';
 
 /* Chart.js integration */
 import { Line, Pie, Bar } from 'react-chartjs-2';
@@ -684,3 +685,4 @@ function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_r
     </div>
   );
 }
+

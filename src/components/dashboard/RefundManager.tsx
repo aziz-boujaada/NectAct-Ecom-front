@@ -184,23 +184,27 @@ export function RefundManager({
                         <td>{formatDate(refund.created_at)}</td>
                         <td>
                           <div className="row-actions">
-                            <button
-                              aria-label={`View refund ${refund.id}`}
-                              disabled={loading}
-                              onClick={() => onSetViewingRefund(refund)}
-                              type="button"
-                            >
-                              <Eye size={16} aria-hidden="true" />
-                            </button>
-                            <button
-                              aria-label={`Delete refund ${refund.id}`}
-                              className="danger-action"
-                              disabled={loading}
-                              onClick={() => onDeleteRefund(refund)}
-                              type="button"
-                            >
-                              <Trash2 size={16} aria-hidden="true" />
-                            </button>
+                            <Can permission="view_refunds">
+                              <button
+                                aria-label={`View refund ${refund.id}`}
+                                disabled={loading}
+                                onClick={() => onSetViewingRefund(refund)}
+                                type="button"
+                              >
+                                <Eye size={16} aria-hidden="true" />
+                              </button>
+                            </Can>
+                            <Can permission="delete_refunds">
+                              <button
+                                aria-label={`Delete refund ${refund.id}`}
+                                className="danger-action"
+                                disabled={loading}
+                                onClick={() => onDeleteRefund(refund)}
+                                type="button"
+                              >
+                                <Trash2 size={16} aria-hidden="true" />
+                              </button>
+                            </Can>
                           </div>
                         </td>
                       </tr>

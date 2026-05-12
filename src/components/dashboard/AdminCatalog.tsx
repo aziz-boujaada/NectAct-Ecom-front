@@ -19,6 +19,7 @@ type AdminCatalogProps = {
     | "suppliers"
     | "clients"
     | "stock";
+  onTabChange?: (tab: AdminCatalogProps["activeTab"]) => void;
 };
 
 const titles: Record<AdminCatalogProps["activeTab"], string> = {
@@ -32,7 +33,7 @@ const titles: Record<AdminCatalogProps["activeTab"], string> = {
   stock: "Stock",
 };
 
-export function AdminCatalog({ activeTab }: AdminCatalogProps) {
+export function AdminCatalog({ activeTab, onTabChange }: AdminCatalogProps) {
   const catalog = useAdminCatalog();
 
   return (
@@ -87,6 +88,9 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
             onDelete={catalog.handleDeleteProduct}
             onEdit={catalog.editProduct}
             onSubmit={catalog.handleProductSubmit}
+            onCreateCategory={catalog.startAddingCategory}
+            onCreateSupplier={catalog.startAddingSupplier}
+            onTabChange={onTabChange}
           />
         )}
 
@@ -103,6 +107,7 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
             purchaseItems={catalog.purchaseItems}
             purchases={catalog.purchases}
             suppliers={catalog.suppliers}
+            viewingPurchase={catalog.viewingPurchase}
             onAddPurchase={catalog.startAddingPurchase}
             onCancelPurchaseEdit={catalog.cancelPurchaseEdit}
             onCancelPurchaseItemEdit={catalog.cancelPurchaseItemEdit}
@@ -117,6 +122,9 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
             onRemovePurchaseItemDraft={catalog.removePurchaseItemDraft}
             onSubmitPurchase={catalog.handlePurchaseSubmit}
             onSubmitPurchaseItem={catalog.handlePurchaseItemSubmit}
+            onSetViewingPurchase={catalog.setViewingPurchase}
+            onCreateSupplier={catalog.startAddingSupplier}
+            onTabChange={onTabChange}
           />
         )}
 
@@ -124,27 +132,28 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
           <SaleManager
             clients={catalog.clients}
             editingSale={catalog.editingSale}
-            editingSaleItem={catalog.editingSaleItem}
             isAddingSale={catalog.isAddingSale}
-            isAddingSaleItem={catalog.isAddingSaleItem}
             loading={catalog.loading}
             products={catalog.products}
             saleForm={catalog.saleForm}
-            saleItemForm={catalog.saleItemForm}
+            saleItemDrafts={catalog.saleItemDrafts}
             saleItems={catalog.saleItems}
             sales={catalog.sales}
+            viewingSale={catalog.viewingSale}
             onAddSale={catalog.startAddingSale}
-            onAddSaleItem={catalog.startAddingSaleItem}
             onCancelSaleEdit={catalog.cancelSaleEdit}
-            onCancelSaleItemEdit={catalog.cancelSaleItemEdit}
             onChangeSale={catalog.setSaleForm}
-            onChangeSaleItem={catalog.setSaleItemForm}
             onDeleteSale={catalog.handleDeleteSale}
             onDeleteSaleItem={catalog.handleDeleteSaleItem}
             onEditSale={catalog.editSale}
-            onEditSaleItem={catalog.editSaleItem}
             onSubmitSale={catalog.handleSaleSubmit}
-            onSubmitSaleItem={catalog.handleSaleItemSubmit}
+            onAddSaleItemDraft={catalog.addSaleItemDraft}
+            onChangeSaleItemDraft={catalog.updateSaleItemDraft}
+            onRemoveSaleItemDraft={catalog.removeSaleItemDraft}
+            onSetViewingSale={catalog.setViewingSale}
+            onCreateClient={catalog.startAddingClient}
+            onCreateProduct={catalog.startAddingProduct}
+            onTabChange={onTabChange}
           />
         )}
 
@@ -155,11 +164,13 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
             refundForm={catalog.refundForm}
             refunds={catalog.refunds}
             sales={catalog.sales}
+            viewingRefund={catalog.viewingRefund}
             onAddRefund={catalog.startAddingRefund}
             onCancelRefundEdit={catalog.cancelRefundEdit}
             onChangeRefund={catalog.setRefundForm}
             onDeleteRefund={catalog.handleDeleteRefund}
             onSubmitRefund={catalog.handleRefundSubmit}
+            onSetViewingRefund={catalog.setViewingRefund}
           />
         )}
 
@@ -176,6 +187,9 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
             icon="building"
             updateLabel="Update supplier"
             isAdding={catalog.isAddingSupplier}
+            createPermission="create_suppliers"
+            editPermission="edit_suppliers"
+            deletePermission="delete_suppliers"
             onAdd={catalog.startAddingSupplier}
             onCancelEdit={catalog.cancelSupplierEdit}
             onChange={catalog.setSupplierForm}
@@ -198,6 +212,9 @@ export function AdminCatalog({ activeTab }: AdminCatalogProps) {
             icon="users"
             updateLabel="Update client"
             isAdding={catalog.isAddingClient}
+            createPermission="create_clients"
+            editPermission="edit_clients"
+            deletePermission="delete_clients"
             onAdd={catalog.startAddingClient}
             onCancelEdit={catalog.cancelClientEdit}
             onChange={catalog.setClientForm}

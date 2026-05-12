@@ -2,6 +2,10 @@ import { FormEvent } from 'react';
 import { Building2, Edit3, Plus, Trash2, Users } from 'lucide-react';
 import type { ContactFormValues } from '../../types';
 import { ContactForm } from './forms/ContactForm';
+import { usePagination } from './hooks/usePagination';
+import { PaginationControls } from './PaginationControls';
+import { Can } from "../../context/PermissionContext";
+
 
 type Contact = {
   id: number;
@@ -50,6 +54,7 @@ export function ContactManager<TContact extends Contact>({
   onSubmit,
 }: ContactManagerProps<TContact>) {
   const showForm = isAdding || editingContact !== null;
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(contacts);
 
   return (
     <section className="admin-section">
@@ -80,8 +85,9 @@ export function ContactManager<TContact extends Contact>({
           onSubmit={onSubmit}
         />
       ) : (
-        <div className="table-wrap fade-in">
-          <table>
+        <>
+          <div className="table-wrap fade-in">
+            <table>
             <thead>
               <tr>
                 <th>Name</th>
@@ -95,7 +101,7 @@ export function ContactManager<TContact extends Contact>({
                   <td colSpan={3}>{emptyText}</td>
                 </tr>
               ) : (
-                [...contacts].sort((a, b) => b.id - a.id).map((contact) => (
+                [...paginatedData].sort((a, b) => b.id - a.id).map((contact) => (
                   <tr key={contact.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -116,18 +122,22 @@ export function ContactManager<TContact extends Contact>({
                     </td>
                     <td>
                       <div className="row-actions">
-                        <button aria-label={`Edit ${contact.name}`} disabled={loading} onClick={() => onEdit(contact)} type="button">
-                          <Edit3 size={16} aria-hidden="true" />
-                        </button>
-                        <button
-                          aria-label={`Delete ${contact.name}`}
-                          className="danger-action"
-                          disabled={loading}
-                          onClick={() => onDelete(contact)}
-                          type="button"
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </button>
+                        <Can permission={editPermission ?? []}>
+                          <button aria-label={`Edit ${contact.name}`} disabled={loading} onClick={() => onEdit(contact)} type="button">
+                            <Edit3 size={16} aria-hidden="true" />
+                          </button>
+                        </Can>
+                        <Can permission={deletePermission ?? []}>
+                          <button
+                            aria-label={`Delete ${contact.name}`}
+                            className="danger-action"
+                            disabled={loading}
+                            onClick={() => onDelete(contact)}
+                            type="button"
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
+                          </button>
+                        </Can>
                       </div>
                     </td>
                   </tr>
@@ -136,7 +146,16 @@ export function ContactManager<TContact extends Contact>({
             </tbody>
           </table>
         </div>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={prevPage}
+          onNext={nextPage}
+          onPageChange={goToPage}
+        />
+        </>
       )}
     </section>
   );
 }
+

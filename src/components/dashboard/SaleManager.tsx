@@ -5,6 +5,7 @@ import { SaleEntryForm } from './forms/SaleEntryForm';
 import { SaleDetails } from './SaleDetails';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
+import { Can } from '../../context/PermissionContext';
 
 type SaleManagerProps = {
   editingSale: Sale | null;
@@ -28,6 +29,9 @@ type SaleManagerProps = {
   onChangeSaleItemDraft: (index: number, field: keyof SaleItemDraftValues, value: string) => void;
   onRemoveSaleItemDraft: (index: number) => void;
   onSetViewingSale: (sale: Sale | null) => void;
+  onCreateClient?: () => void;
+  onCreateProduct?: () => void;
+  onTabChange?: (tab: string) => void;
 };
 
 function money(value: string | number | null | undefined) {
@@ -57,6 +61,9 @@ export function SaleManager({
   onChangeSaleItemDraft,
   onRemoveSaleItemDraft,
   onSetViewingSale,
+  onCreateClient,
+  onCreateProduct,
+  onTabChange,
 }: SaleManagerProps) {
   const showSaleForm = isAddingSale || editingSale !== null;
   const missingSaleRelations = clients.length === 0;
@@ -74,6 +81,16 @@ export function SaleManager({
     });
   };
 
+  const handleCreateClient = () => {
+    onTabChange?.("clients");
+    onCreateClient?.();
+  };
+
+  const handleCreateProduct = () => {
+    onTabChange?.("products");
+    onCreateProduct?.();
+  };
+
   return (
     <div className="purchase-workspace">
       <section className="admin-section">
@@ -85,9 +102,11 @@ export function SaleManager({
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             <span>{sales.length} total</span>
             {!showSaleForm && (
-              <button className="primary-action" onClick={onAddSale} type="button">
-                <Plus size={17} /> Add sale
-              </button>
+              <Can permission="create_sales">
+                <button className="primary-action" onClick={onAddSale} type="button">
+                  <Plus size={17} /> Add sale
+                </button>
+              </Can>
             )}
           </div>
         </div>
@@ -111,6 +130,8 @@ export function SaleManager({
             onChangeItem={onChangeSaleItemDraft}
             onRemoveItem={onRemoveSaleItemDraft}
             onSubmit={onSubmitSale}
+            onCreateClient={handleCreateClient}
+            onCreateProduct={handleCreateProduct}
           />
         ) : (
           <>

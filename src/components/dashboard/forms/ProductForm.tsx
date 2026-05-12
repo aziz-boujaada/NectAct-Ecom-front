@@ -12,6 +12,8 @@ type ProductFormProps = {
   onCancelEdit: () => void;
   onChange: (form: ProductFormValues) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCreateCategory?: () => void;
+  onCreateSupplier?: () => void;
 };
 
 export function ProductForm({
@@ -24,6 +26,8 @@ export function ProductForm({
   onCancelEdit,
   onChange,
   onSubmit,
+  onCreateCategory,
+  onCreateSupplier,
 }: ProductFormProps) {
   return (
     <form className="manager-form product-form fade-in" onSubmit={onSubmit}>
@@ -66,6 +70,18 @@ export function ProductForm({
           ))}
         </select>
       </label>
+      {categories.length === 0 && onCreateCategory && (
+        <button
+          className="secondary-action"
+          disabled={loading}
+          onClick={onCreateCategory}
+          type="button"
+          style={{ marginTop: '-10px' }}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Create category
+        </button>
+      )}
       <label>
         Supplier
         <select value={form.supplier_id} onChange={(event) => onChange({ ...form, supplier_id: event.target.value })} required>
@@ -77,6 +93,18 @@ export function ProductForm({
           ))}
         </select>
       </label>
+      {suppliers.length === 0 && onCreateSupplier && (
+        <button
+          className="secondary-action"
+          disabled={loading}
+          onClick={onCreateSupplier}
+          type="button"
+          style={{ marginTop: '-10px' }}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Create supplier
+        </button>
+      )}
       <label className="full-field">
         Description
         <textarea value={form.description} onChange={(event) => onChange({ ...form, description: event.target.value })} rows={3} />

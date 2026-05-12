@@ -2,6 +2,9 @@ import { FormEvent } from 'react';
 import { Edit3, Folder, Plus, Trash2 } from 'lucide-react';
 import type { Category, CategoryFormValues } from '../../types';
 import { CategoryForm } from './forms/CategoryForm';
+import { usePagination } from './hooks/usePagination';
+import { PaginationControls } from './PaginationControls';
+import { Can } from '../../context/PermissionContext';
 
 type CategoryManagerProps = {
   categories: Category[];
@@ -31,6 +34,7 @@ export function CategoryManager({
   onSubmit,
 }: CategoryManagerProps) {
   const showForm = isAdding || editingCategory !== null;
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(categories);
 
   return (
     <section className="admin-section">
@@ -59,8 +63,9 @@ export function CategoryManager({
           onSubmit={onSubmit}
         />
       ) : (
-        <div className="table-wrap fade-in">
-          <table>
+        <>
+          <div className="table-wrap fade-in">
+            <table>
             <thead>
               <tr>
                 <th>Category</th>
@@ -74,7 +79,7 @@ export function CategoryManager({
                   <td colSpan={3}>No categories found.</td>
                 </tr>
               ) : (
-                [...categories].sort((a, b) => b.id - a.id).map((category) => (
+                [...paginatedData].sort((a, b) => b.id - a.id).map((category) => (
                   <tr key={category.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -105,6 +110,14 @@ export function CategoryManager({
             </tbody>
           </table>
         </div>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={prevPage}
+          onNext={nextPage}
+          onPageChange={goToPage}
+        />
+        </>
       )}
     </section>
   );

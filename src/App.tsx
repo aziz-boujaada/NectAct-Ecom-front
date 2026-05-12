@@ -14,6 +14,7 @@ import { StatusMessage } from './components/StatusMessage';
 import { ThemeToggle } from './components/ThemeToggle';
 import { AuthPanel } from './components/auth/AuthPanel';
 import { Dashboard } from './components/dashboard/Dashboard';
+import { PermissionProvider } from './context/PermissionContext';
 import type { AuthMode, Status, User } from './types';
 
 const emptyLogin = { email: '', password: '' };
@@ -46,6 +47,7 @@ function profileFromUser(user: User) {
     email: user.email,
     role: user.role ?? 'employee',
   };
+
 }
 
 export default function App() {
@@ -67,6 +69,7 @@ export default function App() {
     fetchMe()
       .then((currentUser) => {
         setUser(currentUser);
+        console.log("current" , currentUser)
         if (currentUser) {
           setProfileForm(profileFromUser(currentUser));
         }
@@ -174,20 +177,22 @@ export default function App() {
 
   if (isAuthenticated) {
     return (
-      <Dashboard
-        user={user}
-        status={status}
-        profileForm={profileForm}
-        passwordForm={passwordForm}
-        loading={loading}
-        onProfileChange={setProfileForm}
-        onPasswordChange={setPasswordForm}
-        onProfileSubmit={handleProfile}
-        onPasswordSubmit={handlePassword}
-        onLogout={handleLogout}
-        theme={theme}
-        onThemeToggle={toggleTheme}
-      />
+      <PermissionProvider user={user}>
+        <Dashboard
+          user={user}
+          status={status}
+          profileForm={profileForm}
+          passwordForm={passwordForm}
+          loading={loading}
+          onProfileChange={setProfileForm}
+          onPasswordChange={setPasswordForm}
+          onProfileSubmit={handleProfile}
+          onPasswordSubmit={handlePassword}
+          onLogout={handleLogout}
+          theme={theme}
+          onThemeToggle={toggleTheme}
+        />
+      </PermissionProvider>
     );
   }
 

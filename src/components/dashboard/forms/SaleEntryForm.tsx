@@ -16,6 +16,8 @@ type SaleEntryFormProps = {
   onChangeItem: (index: number, field: keyof SaleItemDraftValues, value: string) => void;
   onRemoveItem: (index: number) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onCreateClient?: () => void;
+  onCreateProduct?: () => void;
 };
 
 export function SaleEntryForm({
@@ -32,6 +34,8 @@ export function SaleEntryForm({
   onChangeItem,
   onRemoveItem,
   onSubmit,
+  onCreateClient,
+  onCreateProduct,
 }: SaleEntryFormProps) {
   const saleProducts = products;
 
@@ -48,6 +52,30 @@ export function SaleEntryForm({
           ))}
         </select>
       </label>
+      {clients.length === 0 && onCreateClient && (
+        <button
+          className="secondary-action"
+          disabled={loading}
+          onClick={onCreateClient}
+          type="button"
+          style={{ marginTop: '-10px' }}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Create client
+        </button>
+      )}
+      {products.length === 0 && onCreateProduct && (
+        <button
+          className="secondary-action"
+          disabled={loading}
+          onClick={onCreateProduct}
+          type="button"
+          style={{ marginTop: '-10px' }}
+        >
+          <Plus size={16} aria-hidden="true" />
+          Create product
+        </button>
+      )}
       <label>
         Status
         <select
