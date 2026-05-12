@@ -7,6 +7,8 @@ import { errorMessage } from './hooks/adminCatalogUtils';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
 import { Can } from '../../context/PermissionContext';
+import { PageHeader } from '../crud/PageHeader';
+import { Card } from '../common/Card';
 
 /* Chart.js integration */
 import { Line, Pie, Bar } from 'react-chartjs-2';
@@ -340,16 +342,16 @@ export function DashboardStats() {
 
   return (
     <div className="admin-dashboard dashboard-stats">
-      <div className="admin-titlebar">
-        <div>
-          <p className="eyebrow">Dashboard</p>
-          <h2>Statistics Overview</h2>
-        </div>
-        <button className="secondary-action" disabled={loading} onClick={() => void loadStats()} type="button">
-          <RefreshCw size={17} aria-hidden="true" />
-          Reload
-        </button>
-      </div>
+      <PageHeader 
+        title="Statistics Overview" 
+        eyebrow="Dashboard"
+        actions={
+          <button className="secondary-action" disabled={loading} onClick={() => void loadStats()} type="button">
+            <RefreshCw size={17} aria-hidden="true" />
+            Reload
+          </button>
+        }
+      />
 
       <StatusMessage status={status} />
 
@@ -359,22 +361,22 @@ export function DashboardStats() {
         <div className="stats-layout fade-in">
           <section className="stats-card-grid">
             {summaryCards.map(({ key, label, icon: Icon }) => (
-              <article className="metric-card" key={key}>
-                <div className="metric-icon">
-                  <Icon size={20} aria-hidden="true" />
-                </div>
-                <div>
-                  <span>{label}</span>
-                  <strong>{money(stats.summary[key])}</strong>
-                </div>
-              </article>
+              <Card className="metric-card-wrapper" key={key} noPadding>
+                <article className="metric-card">
+                  <div className="metric-icon">
+                    <Icon size={20} aria-hidden="true" />
+                  </div>
+                  <div>
+                    <span>{label}</span>
+                    <strong>{money(stats.summary[key])}</strong>
+                  </div>
+                </article>
+              </Card>
             ))}
           </section>
 
           <section className="kpi-row">
-            <div className="kpi-card">
-              <p className="eyebrow">Today</p>
-              <h3>Daily Movement</h3>
+            <Card title="Daily Movement" subtitle="Today" className="kpi-card-wrapper">
               <div className="kpi-values">
                 <div className="kpi-item sales">
                   <span className="kpi-label">Sales</span>
@@ -385,11 +387,9 @@ export function DashboardStats() {
                   <strong className="kpi-value red">{stats.today.refunds} ({money(stats.today.refunds_total)})</strong>
                 </div>
               </div>
-            </div>
+            </Card>
 
-            <div className="kpi-card">
-              <p className="eyebrow">Current Month</p>
-              <h3>Monthly Totals</h3>
+            <Card title="Monthly Totals" subtitle="Current Month" className="kpi-card-wrapper">
               <div className="kpi-values">
                 <div className="kpi-item sales">
                   <span className="kpi-label">Sales</span>
@@ -404,7 +404,7 @@ export function DashboardStats() {
                   <strong className="kpi-value blue">{money(stats.current_month.purchases_total)}</strong>
                 </div>
               </div>
-            </div>
+            </Card>
           </section>
 
           <section className="charts-grid">

@@ -26,6 +26,9 @@ type ContactManagerProps<TContact extends Contact> = {
   form: ContactFormValues;
   loading: boolean;
   isAdding: boolean;
+  createPermission?: string;
+  editPermission?: string;
+  deletePermission?: string;
   onAdd: () => void;
   onCancelEdit: () => void;
   onChange: (form: ContactFormValues) => void;
@@ -46,6 +49,9 @@ export function ContactManager<TContact extends Contact>({
   form,
   loading,
   isAdding,
+  createPermission,
+  editPermission,
+  deletePermission,
   onAdd,
   onCancelEdit,
   onChange,
@@ -66,9 +72,11 @@ export function ContactManager<TContact extends Contact>({
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <span>{contacts.length} total</span>
           {!showForm && (
-            <button className="primary-action" onClick={onAdd} type="button">
-              <Plus size={17} /> {createLabel}
-            </button>
+            <Can permission={createPermission || []}>
+              <button className="primary-action" onClick={onAdd} type="button">
+                <Plus size={17} /> {createLabel}
+              </button>
+            </Can>
           )}
         </div>
       </div>
@@ -122,12 +130,12 @@ export function ContactManager<TContact extends Contact>({
                     </td>
                     <td>
                       <div className="row-actions">
-                        <Can permission={editPermission ?? []}>
+                        <Can permission={editPermission || []}>
                           <button aria-label={`Edit ${contact.name}`} disabled={loading} onClick={() => onEdit(contact)} type="button">
                             <Edit3 size={16} aria-hidden="true" />
                           </button>
                         </Can>
-                        <Can permission={deletePermission ?? []}>
+                        <Can permission={deletePermission || []}>
                           <button
                             aria-label={`Delete ${contact.name}`}
                             className="danger-action"

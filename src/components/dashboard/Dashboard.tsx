@@ -1,11 +1,17 @@
 import { FormEvent, useState } from 'react';
-import { AccountCard } from './AccountCard';
-import { AdminCatalog } from './AdminCatalog';
+import { MainLayout } from '../../layouts/MainLayout';
+import { ModuleType, SubViewType } from '../layout/Sidebar';
 import { DashboardStats } from './DashboardStats';
-import { PasswordForm } from './PasswordForm';
-import { ProfileForm } from './ProfileForm';
 import { StatusMessage } from '../StatusMessage';
-import { UsersManager, PermissionsManager } from '../permissions';
+import { useAdminCatalog } from './useAdminCatalog';
+
+// Module Imports
+import { InventoryModule } from '../../modules/inventory/InventoryModule';
+import { SalesModule } from '../../modules/sales/SalesModule';
+import { PurchasingModule } from '../../modules/purchasing/PurchasingModule';
+import { AdminModule } from '../../modules/admin/AdminModule';
+import { ProfileModule } from '../../modules/profile/ProfileModule';
+
 import type { PasswordFormValues, ProfileFormValues, Status, User } from '../../types';
 
 type DashboardProps = {
@@ -23,97 +29,116 @@ type DashboardProps = {
   onThemeToggle: () => void;
 };
 
-export type TabOption =
-  | 'overview'
-  | 'categories'
-  | 'products'
-  | 'purchases'
-  | 'sales'
-  | 'refunds'
-  | 'suppliers'
-  | 'clients'
-  | 'stock'
-  | 'profile'
-  | 'security'
-  | 'users'
-  | 'permissions';
-
 export function Dashboard({
   user,
   status,
   profileForm,
   passwordForm,
-  loading,
+  loading: authLoading,
   theme,
   onProfileChange,
   onPasswordChange,
   onProfileSubmit,
   onPasswordSubmit,
-
   onLogout,
   onThemeToggle,
 }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<TabOption>('overview');
+  const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
+  const [activeView, setActiveView] = useState<SubViewType>('overview');
+  
+  const catalog = useAdminCatalog();
 
-  const showCatalog = ['categories', 'products', 'purchases', 'sales', 'refunds', 'suppliers', 'clients', 'stock'].includes(activeTab);
-  const showAdmin = ['users', 'permissions'].includes(activeTab);
+  const handleViewChange = (module: ModuleType, view: SubViewType) => {
+    setActiveModule(module);
+    setActiveView(view);
+  };
+
+  // Compatibility handler for components that call onTabChange
+  const handleLegacyTabChange = (tab: string) => {
+    const mapping: Record<string, { module: ModuleType; view: SubViewType }> = {
+      overview: { module: 'dashboard', view: 'overview' },
+      products: { module: 'inventory', view: 'products' },
+      categories: { module: 'inventory', view: 'categories' },
+      stock: { module: 'inventory', view: 'stock' },
+      sales: { module: 'sales', view: 'sales-list' },
+      clients: { module: 'sales', view: 'clients' },
+      refunds: { module: 'sales', view: 'refunds' },
+      purchases: { module: 'purchasing', view: 'purchases-list' },
+      suppliers: { module: 'purchasing', view: 'suppliers' },
+      users: { module: 'admin', view: 'users' },
+      permissions: { module: 'admin', view: 'permissions' },
+      profile: { module: 'profile', view: 'account' },
+      security: { module: 'profile', view: 'security' },
+    };
+
+    const target = mapping[tab];
+    if (target) {
+      setActiveModule(target.module);
+      setActiveView(target.view);
+    }
+  };
 
   return (
-    <div className="dashboard-layout">
-      <AccountCard
-        user={user}
-        loading={loading}
-        activeTab={activeTab}
-        theme={theme}
-        onTabChange={setActiveTab}
-        onLogout={onLogout}
-        onThemeToggle={onThemeToggle}
-      />
-
-      <div className="main-content-stack">
-        <div style={{ position: 'absolute', top: 32, right: 40, zIndex: 50, minWidth: 300 }}>
-          <StatusMessage status={status} />
-        </div>
-
-        {activeTab === 'overview' && (
-          <div className="fade-in">
-            <DashboardStats />
-          </div>
-        )}
-
-        {showCatalog && (
-          <div className="fade-in">
-            <AdminCatalog activeTab={activeTab as 'categories' | 'products' | 'purchases' | 'sales' | 'refunds' | 'suppliers' | 'clients' | 'stock'} onTabChange={setActiveTab} />
-          </div>
-        )}
-        {activeTab === 'profile' && (
-          <div className="fade-in forms-stack">
-            <ProfileForm
-              form={profileForm}
-              loading={loading}
-              onChange={onProfileChange}
-              onSubmit={onProfileSubmit}
-              authUser={user}
-            />
-          </div>
-        )}
-        {activeTab === 'security' && (
-          <div className="fade-in forms-stack">
-            <PasswordForm
-              form={passwordForm}
-              loading={loading}
-              onChange={onPasswordChange}
-              onSubmit={onPasswordSubmit}
-            />
-          </div>
-        )}
-        {showAdmin && (
-          <div className="fade-in">
-            {activeTab === 'users' && <UsersManager />}
-            {activeTab === 'permissions' && <PermissionsManager />}
-          </div>
-        )}
+    <MainLayout
+      user={user}
+      activeModule={activeModule}
+      activeView={activeView}
+      onViewChange={handleViewChange}
+      onLogout={onLogout}
+      theme={theme}
+      onThemeToggle={onThemeToggle}
+    >
+      <div style={{ position: 'fixed', top: 32, right: 40, zIndex: 1000, minWidth: 300 }}>
+        <StatusMessage status={status || catalog.status} />
       </div>
-    </div>
+
+      {activeModule === 'dashboard' && activeView === 'overview' && (
+        <div className="fade-in">
+          <DashboardStats />
+        </div>
+      )}
+
+      {activeModule === 'inventory' && (
+        <InventoryModule 
+          activeView={activeView} 
+          catalog={catalog} 
+          onTabChange={handleLegacyTabChange} 
+        />
+      )}
+
+      {activeModule === 'sales' && (
+        <SalesModule 
+          activeView={activeView} 
+          catalog={catalog} 
+          onTabChange={handleLegacyTabChange} 
+        />
+      )}
+
+      {activeModule === 'purchasing' && (
+        <PurchasingModule 
+          activeView={activeView} 
+          catalog={catalog} 
+          onTabChange={handleLegacyTabChange} 
+        />
+      )}
+
+      {activeModule === 'admin' && (
+        <AdminModule activeView={activeView} />
+      )}
+
+      {activeModule === 'profile' && (
+        <ProfileModule
+          activeView={activeView}
+          user={user}
+          profileForm={profileForm}
+          passwordForm={passwordForm}
+          loading={authLoading}
+          onProfileChange={onProfileChange}
+          onPasswordChange={onPasswordChange}
+          onProfileSubmit={onProfileSubmit}
+          onPasswordSubmit={onPasswordSubmit}
+        />
+      )}
+    </MainLayout>
   );
 }

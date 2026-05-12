@@ -17,6 +17,7 @@ import {
   CreditCard,
   FileText
 } from 'lucide-react';
+import { usePermission } from '../../hooks/permissions'; // Assuming path or use local context
 
 export type ModuleType = 
   | 'dashboard' 
@@ -53,58 +54,66 @@ export const Sidebar: React.FC<SidebarProps> = ({
   userName,
   userRole
 }) => {
+  const { hasPermission } = usePermission();
+
   const menuItems = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       icon: <LayoutDashboard size={20} />,
-      views: [{ id: 'overview', label: 'Overview' }]
+      permission: null, // Always visible
+      views: [{ id: 'overview', label: 'Overview', permission: null }]
     },
     {
       id: 'inventory',
       label: 'Master Data',
       icon: <Package size={20} />,
+      permission: ['view_products', 'view_categories'],
       views: [
-        { id: 'products', label: 'Products', icon: <Box size={16} /> },
-        { id: 'categories', label: 'Categories', icon: <Tags size={16} /> },
-        { id: 'stock', label: 'Stock History', icon: <History size={16} /> },
+        { id: 'products', label: 'Products', icon: <Box size={16} />, permission: 'view_products' },
+        { id: 'categories', label: 'Categories', icon: <Tags size={16} />, permission: 'view_categories' },
+        { id: 'stock', label: 'Stock History', icon: <History size={16} />, permission: 'view_products' },
       ]
     },
     {
       id: 'sales',
       label: 'Sales & CRM',
       icon: <TrendingUp size={20} />,
+      permission: ['view_sales', 'view_clients', 'view_refunds'],
       views: [
-        { id: 'sales-list', label: 'Orders', icon: <ClipboardList size={16} /> },
-        { id: 'clients', label: 'Clients', icon: <Users size={16} /> },
-        { id: 'refunds', label: 'Refunds', icon: <CreditCard size={16} /> },
+        { id: 'sales-list', label: 'Orders', icon: <ClipboardList size={16} />, permission: 'view_sales' },
+        { id: 'clients', label: 'Clients', icon: <Users size={16} />, permission: 'view_clients' },
+        { id: 'refunds', label: 'Refunds', icon: <CreditCard size={16} />, permission: 'view_refunds' },
       ]
     },
     {
       id: 'purchasing',
       label: 'Purchasing',
       icon: <Truck size={20} />,
+      permission: ['view_purchases', 'view_suppliers'],
       views: [
-        { id: 'purchases-list', label: 'Purchase Orders', icon: <FileText size={16} /> },
-        { id: 'suppliers', label: 'Suppliers', icon: <Truck size={16} /> },
+        { id: 'purchases-list', label: 'Purchase Orders', icon: <FileText size={16} />, permission: 'view_purchases' },
+        { id: 'suppliers', label: 'Suppliers', icon: <Truck size={16} />, permission: 'view_suppliers' },
       ]
     },
     {
       id: 'admin',
       label: 'Administration',
       icon: <ShieldCheck size={20} />,
+      permission: ['view_users', 'manage_permissions'],
       views: [
-        { id: 'users', label: 'Users', icon: <Users size={16} /> },
-        { id: 'permissions', label: 'Roles & Permissions', icon: <ShieldCheck size={16} /> },
+        { id: 'users', label: 'Users', icon: <Users size={16} />, permission: 'view_users' },
+        { id: 'permissions', label: 'Roles & Permissions', icon: <ShieldCheck size={16} />, permission: 'manage_permissions' },
       ]
     },
     {
       id: 'profile',
       label: 'My Account',
       icon: <UserCircle size={20} />,
+      permission: null,
       views: [
-        { id: 'account', label: 'Profile', icon: <UserCircle size={16} /> },
-        { id: 'security', label: 'Security', icon: <Settings size={16} /> },
+        { id: 'account', label: 'Profile', icon: <UserCircle size={16} />, permission: null },
+        { id: 'security', label: 'Security', icon: <Settings size={16} />, permission: null },
       ]
     }
   ];
@@ -120,32 +129,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <nav className="sidebar-nav">
-        {menuItems.map((item) => (
-          <div key={item.id} className={`nav-group ${activeModule === item.id ? 'active' : ''}`}>
-            <div 
-              className="nav-item main-link"
-              onClick={() => onViewChange(item.id as ModuleType, item.views[0].id as SubViewType)}
-            >
-              <span className="icon">{item.icon}</span>
-              <span className="label">{item.label}</span>
-            </div>
-            
-            {activeModule === item.id && item.views.length > 1 && (
-              <div className="sub-menu">
-                {item.views.map((view) => (
-                  <div 
-                    key={view.id} 
-                    className={`sub-nav-item ${activeView === view.id ? 'active' : ''}`}
-                    onClick={() => onViewChange(item.id as ModuleType, view.id as SubViewType)}
-                  >
-                    <span className="sub-icon">{view.icon}</span>
-                    <span className="sub-label">{view.label}</span>
-                  </div>
-                ))}
+        {menuItems.map((item) => {
+          if (item.permission && !hasPermission(item.permission)) return null;
+
+          return (
+            <div key={item.id} className={`nav-group ${activeModule === item.id ? 'active' : ''}`}>
+              <div 
+                className="nav-item main-link"
+                onClick={() => {
+                  const firstPermittedView = item.views.find(v => !v.permission || hasPermission(v.permission));
+                  if (firstPermittedView) {
+                    onViewChange(item.id as ModuleType, firstPermittedView.id as SubViewType);
+                  }
+                }}
+              >
+                <span className="icon">{item.icon}</span>
+                <span className="label">{item.label}</span>
               </div>
-            )}
-          </div>
-        ))}
+              
+              {activeModule === item.id && item.views.length > 1 && (
+                <div className="sub-menu">
+                  {item.views.map((view) => {
+                    if (view.permission && !hasPermission(view.permission)) return null;
+                    
+                    return (
+                      <div 
+                        key={view.id} 
+                        className={`sub-nav-item ${activeView === view.id ? 'active' : ''}`}
+                        onClick={() => onViewChange(item.id as ModuleType, view.id as SubViewType)}
+                      >
+                        <span className="sub-icon">{view.icon}</span>
+                        <span className="sub-label">{view.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       <div className="sidebar-footer">

@@ -10,6 +10,9 @@ import { ProductForm } from "./forms/ProductForm";
 import { usePagination } from "./hooks/usePagination";
 import { PaginationControls } from "./PaginationControls";
 import { Can } from "../../context/PermissionContext";
+import { PageHeader } from "../crud/PageHeader";
+import { DataTable } from "../crud/DataTable";
+import { Badge } from "../common/Badge";
 
 type ProductManagerProps = {
   categories: Category[];
@@ -34,18 +37,7 @@ function money(value: string | number) {
   const amount = Number(value);
   return Number.isFinite(amount) ? amount.toFixed(2) : value;
 }
-function lowStock(product: Product) {
-  let hasLowStock = false;
-  if ((product.stock ?? 0) <= (product.min_stock ?? 0)) {
-    hasLowStock = true;
-  }
 
-  return hasLowStock;
-}
-
-function outOfStock(product: Product) {
-  return product.stock === 0;
-}
 export function ProductManager({
   categories,
   editingProduct,
@@ -77,23 +69,25 @@ export function ProductManager({
     onTabChange?.("suppliers");
     onCreateSupplier?.();
   };
+
+  const tableHeaders = ["ID", "Image", "Reference", "Product", "Category", "Supplier", "Price", "Stock", "Actions"];
   
   return (
     <section className="admin-section">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">Inventory</p>
-          <h2>Products</h2>
-        </div>
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-          <span>{products.length} total</span>
-          {!showForm && (
-            <button className="primary-action" onClick={onAdd} type="button">
-              <Plus size={17} /> Add product
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader 
+        title="Products" 
+        eyebrow="Inventory"
+        actions={
+          <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            <span className="text-muted">{products.length} total</span>
+            {!showForm && (
+              <button className="primary-action" onClick={onAdd} type="button">
+                <Plus size={17} /> Add product
+              </button>
+            )}
+          </div>
+        }
+      />
 
       {missingRelations && showForm && (
         <p className="helper-note">
@@ -102,54 +96,44 @@ export function ProductManager({
       )}
 
       {showForm ? (
-        <ProductForm
-          categories={categories}
-          editingProduct={editingProduct}
-          form={form}
-          loading={loading}
-          missingRelations={missingRelations}
-          suppliers={suppliers}
-          onCancelEdit={onCancelEdit}
-          onChange={onChange}
-          onSubmit={onSubmit}
-          onCreateCategory={handleCreateCategory}
-          onCreateSupplier={handleCreateSupplier}
-        />
+        <div className="erp-card fade-in">
+          <div className="erp-card-body">
+            <ProductForm
+              categories={categories}
+              editingProduct={editingProduct}
+              form={form}
+              loading={loading}
+              missingRelations={missingRelations}
+              suppliers={suppliers}
+              onCancelEdit={onCancelEdit}
+              onChange={onChange}
+              onSubmit={onSubmit}
+              onCreateCategory={handleCreateCategory}
+              onCreateSupplier={handleCreateSupplier}
+            />
+          </div>
+        </div>
       ) : (
         <>
-          <div className="table-wrap fade-in">
-            <table>
-            <thead>
+          <DataTable headers={tableHeaders} loading={loading}>
+            {products.length === 0 ? (
               <tr>
-                <th>ID</th>
-                <th>Image</th>
-                <th>reference</th>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Supplier</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th aria-label="Actions" />
+                <td colSpan={9} style={{ textAlign: "center", padding: "40px" }}>
+                  <div className="empty-state">
+                    <Package size={48} className="text-muted" style={{ marginBottom: "16px" }} />
+                    <p>No products found in the catalog.</p>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {products.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={9}
-                    style={{ textAlign: "center", padding: "20px" }}
-                  >
-                    No products found.
-                  </td>
-                </tr>
-              ) : (
-                [...paginatedData]
-                  .sort((a, b) => b.id - a.id)
-                  .map((product) => (
-                    <tr key={product.id}>
-                      <td>#{product.id}</td>
+            ) : (
+              [...paginatedData]
+                .sort((a, b) => b.id - a.id)
+                .map((product) => (
+                  <tr key={product.id}>
+                    <td><span className="text-mono">#{product.id}</span></td>
 
-                      <td>
+                    <td>
+                      <div className="avatar-square">
                         <img
                           src={
                             product.image_path
@@ -157,106 +141,78 @@ export function ProductManager({
                               : "/default.png"
                           }
                           alt={product.name}
-                          style={{
-                            width: "60px",
-                            height: "60px",
-                            objectFit: "cover",
-                            borderRadius: "50%",
-                            display: "block",
-                            margin: "0 auto",
-                          }}
                         />
-                      </td>
+                      </div>
+                    </td>
 
-                      <td>{product.reference?.slice(0, 12)}</td>
+                    <td><code className="ref-tag">{product.reference?.slice(0, 12)}</code></td>
 
-                      <td>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                          }}
-                        >
-                          <Package
-                            size={18}
-                            className="text-muted"
-                            aria-hidden="true"
-                          />
-
-                          <div>
-                            <strong>{product.name}</strong>
-                            <span>
-                              {product.description || "No description"}
-                            </span>
-                          </div>
+                    <td>
+                      <div className="product-cell">
+                        <div className="product-info">
+                          <span className="product-name">{product.name}</span>
+                          <span className="product-desc">{product.description || "No description"}</span>
                         </div>
-                      </td>
+                      </div>
+                    </td>
 
-                      <td>{product.category?.name ?? product.category_id}</td>
+                    <td><Badge variant="info">{product.category?.name ?? "N/A"}</Badge></td>
 
-                      <td>{product.supplier?.name ?? product.supplier_id}</td>
+                    <td><span className="text-dark font-medium">{product.supplier?.name ?? "N/A"}</span></td>
 
-                      <td>{money(product.price)} DH</td>
+                    <td><span className="price-tag">{money(product.price)} DH</span></td>
 
-                     
-                      <td style={{ position: "relative" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "6px",
-                            alignItems: "center",
-                          }}
-                        >
-                          {product.stock ?? 0} / min {product.min_stock ?? 0}
-                          {lowStock(product) && (
-                            <span className="low-stock-badge">LOW STOCK</span>
-                          )}
-                          {outOfStock(product) && (
-                              <span className="out-stock-badge">OUT STOCK</span>
-                          )}
-                        </div>
-                      </td>
+                    <td>
+                      <div className="stock-cell">
+                        <span className="stock-count">{product.stock ?? 0}</span>
+                        {product.stock === 0 ? (
+                          <Badge variant="danger" dot>Out of stock</Badge>
+                        ) : (product.stock ?? 0) <= (product.min_stock ?? 0) ? (
+                          <Badge variant="warning" dot>Low stock</Badge>
+                        ) : (
+                          <Badge variant="success" dot>In stock</Badge>
+                        )}
+                      </div>
+                    </td>
 
-                      <td>
-                        <div className="row-actions">
-                          <Can permission="edit_products">
-                            <button
-                              aria-label={`Edit ${product.name}`}
-                              disabled={loading}
-                              onClick={() => onEdit(product)}
-                              type="button"
-                            >
-                              <Edit3 size={16} />
-                            </button>
-                          </Can>
+                    <td>
+                      <div className="row-actions">
+                        <Can permission="edit_products">
+                          <button
+                            aria-label={`Edit ${product.name}`}
+                            className="icon-btn"
+                            disabled={loading}
+                            onClick={() => onEdit(product)}
+                            type="button"
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                        </Can>
 
-                          <Can permission="delete_products">
-                            <button
-                              aria-label={`Delete ${product.name}`}
-                              className="danger-action"
-                              disabled={loading}
-                              onClick={() => onDelete(product)}
-                              type="button"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </Can>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={prevPage}
-          onNext={nextPage}
-          onPageChange={goToPage}
-        />
+                        <Can permission="delete_products">
+                          <button
+                            aria-label={`Delete ${product.name}`}
+                            className="icon-btn danger"
+                            disabled={loading}
+                            onClick={() => onDelete(product)}
+                            type="button"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </Can>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+            )}
+          </DataTable>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={prevPage}
+            onNext={nextPage}
+            onPageChange={goToPage}
+          />
         </>
       )}
     </section>

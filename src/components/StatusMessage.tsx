@@ -7,29 +7,29 @@ type StatusMessageProps = {
 };
 
 export function StatusMessage({ status }: StatusMessageProps) {
-  const [visible, setVisible] = useState(true);
+  const [displayStatus, setDisplayStatus] = useState<Status>(null);
 
   useEffect(() => {
     if (!status) return;
 
-    const showTimer = setTimeout(() => {
-      setVisible(true);
-    }, 0);
+    // Show the message immediately when status changes
+    setDisplayStatus(status);
+    
+    // Hide after 5 seconds
     const hideTimer = setTimeout(() => {
-      setVisible(false);
+      setDisplayStatus(null);
     }, 5000);
 
     return () => {
-      clearTimeout(showTimer);
       clearTimeout(hideTimer);
     };
   }, [status]);
 
-  if (!status || !visible) return null;
+  if (!displayStatus) return null;
 
   return (
-    <div className={`status ${status.type}`}>
-      {status.text}
+    <div className={`status ${displayStatus.type}`}>
+      {displayStatus.text}
     </div>
   );
 }

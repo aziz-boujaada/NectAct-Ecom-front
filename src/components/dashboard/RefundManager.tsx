@@ -5,6 +5,7 @@ import { RefundEntryForm } from './forms/RefundEntryForm';
 import { RefundDetails } from './RefundDetails';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
+import { Can } from '../../context/PermissionContext';
 
 type RefundManagerProps = {
   isAddingRefund: boolean;

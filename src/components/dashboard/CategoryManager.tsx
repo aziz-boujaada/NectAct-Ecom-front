@@ -46,9 +46,11 @@ export function CategoryManager({
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <span>{categories.length} total</span>
           {!showForm && (
-            <button className="primary-action" onClick={onAdd} type="button">
-              <Plus size={17} /> Add category
-            </button>
+            <Can permission="create_categories">
+              <button className="primary-action" onClick={onAdd} type="button">
+                <Plus size={17} /> Add category
+              </button>
+            </Can>
           )}
         </div>
       </div>
@@ -90,18 +92,22 @@ export function CategoryManager({
                     <td>{category.description || 'No description'}</td>
                     <td>
                       <div className="row-actions">
-                        <button aria-label={`Edit ${category.name}`} disabled={loading} onClick={() => onEdit(category)} type="button">
-                          <Edit3 size={16} aria-hidden="true" />
-                        </button>
-                        <button
-                          aria-label={`Delete ${category.name}`}
-                          className="danger-action"
-                          disabled={loading}
-                          onClick={() => onDelete(category)}
-                          type="button"
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </button>
+                        <Can permission="edit_categories">
+                          <button aria-label={`Edit ${category.name}`} disabled={loading} onClick={() => onEdit(category)} type="button">
+                            <Edit3 size={16} aria-hidden="true" />
+                          </button>
+                        </Can>
+                        <Can permission="delete_categories">
+                          <button
+                            aria-label={`Delete ${category.name}`}
+                            className="danger-action"
+                            disabled={loading}
+                            onClick={() => onDelete(category)}
+                            type="button"
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
+                          </button>
+                        </Can>
                       </div>
                     </td>
                   </tr>

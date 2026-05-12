@@ -111,6 +111,17 @@ export function useAdminCatalog() {
     };
   }, []);
 
+  // Auto-clear status after 5 seconds
+  useEffect(() => {
+    if (!status) return;
+
+    const timer = setTimeout(() => {
+      setStatus(null);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [status]);
+
   async function refreshProducts() {
     setProducts(await listProducts());
   }
