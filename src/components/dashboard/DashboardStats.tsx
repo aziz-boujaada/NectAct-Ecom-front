@@ -9,6 +9,7 @@ import { PaginationControls } from './PaginationControls';
 import { Can } from '../../context/PermissionContext';
 import { PageHeader } from '../crud/PageHeader';
 import { Card } from '../common/Card';
+import { formatCurrency } from '../../utils/currency';
 
 /* Chart.js integration */
 import { Line, Pie, Bar } from 'react-chartjs-2';
@@ -47,10 +48,6 @@ function getChartTheme() {
   const tooltipColor = isDark ? '#eef0f6' : '#0f172a';
 
   return { text, muted, grid, tooltipBg, tooltipColor };
-}
-
-function money(value: string | number | null | undefined) {
-  return `${Number(value ?? 0).toFixed(2)} DH`;
 }
 
 function formatDate(value?: string) {
@@ -368,7 +365,7 @@ export function DashboardStats() {
                   </div>
                   <div>
                     <span>{label}</span>
-                    <strong>{money(stats.summary[key])}</strong>
+                    <strong>{formatCurrency(stats.summary[key])}</strong>
                   </div>
                 </article>
               </Card>
@@ -380,11 +377,11 @@ export function DashboardStats() {
               <div className="kpi-values">
                 <div className="kpi-item sales">
                   <span className="kpi-label">Sales</span>
-                  <strong className="kpi-value green">{stats.today.sales} ({money(stats.today.sales_total)})</strong>
+                  <strong className="kpi-value green">{stats.today.sales} ({formatCurrency(stats.today.sales_total)})</strong>
                 </div>
                 <div className="kpi-item refunds">
                   <span className="kpi-label">Refunds</span>
-                  <strong className="kpi-value red">{stats.today.refunds} ({money(stats.today.refunds_total)})</strong>
+                  <strong className="kpi-value red">{stats.today.refunds} ({formatCurrency(stats.today.refunds_total)})</strong>
                 </div>
               </div>
             </Card>
@@ -393,15 +390,15 @@ export function DashboardStats() {
               <div className="kpi-values">
                 <div className="kpi-item sales">
                   <span className="kpi-label">Sales</span>
-                  <strong className="kpi-value green">{money(stats.current_month.sales_total)}</strong>
+                  <strong className="kpi-value green">{formatCurrency(stats.current_month.sales_total)}</strong>
                 </div>
                 <div className="kpi-item refunds">
                   <span className="kpi-label">Refunds</span>
-                  <strong className="kpi-value red">{money(stats.current_month.refunds_total)}</strong>
+                  <strong className="kpi-value red">{formatCurrency(stats.current_month.refunds_total)}</strong>
                 </div>
                 <div className="kpi-item purchases">
                   <span className="kpi-label">Purchases</span>
-                  <strong className="kpi-value blue">{money(stats.current_month.purchases_total)}</strong>
+                  <strong className="kpi-value blue">{formatCurrency(stats.current_month.purchases_total)}</strong>
                 </div>
               </div>
             </Card>
@@ -528,7 +525,7 @@ function ProductsTable({ title, products }: { title: string; products: Dashboard
               <tr key={product.id}>
                 <td>{product.name}<span>{product.reference || 'No reference'}</span></td>
                 <td>{product.quantity_sold}</td>
-                <td>{money(product.sales_total)}</td>
+                <td>{formatCurrency(product.sales_total)}</td>
               </tr>
             ))}
           </tbody>
@@ -619,7 +616,7 @@ function RecentSalesTable({ sales }: { sales: DashboardStatsType['recent_sales']
               <tr key={sale.id}>
                 <td>{sale.reference || `Sale #${sale.id}`}<span>{formatDate(sale.created_at)}</span></td>
                 <td>{sale.client?.name ?? 'Unknown client'}</td>
-                <td>{money(sale.total)}</td>
+                <td>{formatCurrency(sale.total)}</td>
                 <td><span className={`status-pill ${sale.status}`}>{sale.status}</span></td>
               </tr>
             ))}
@@ -666,7 +663,7 @@ function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_r
               <tr key={refund.id}>
                 <td>{refund.sale?.reference || `Sale #${refund.sale_id}`}<span>{formatDate(refund.created_at)}</span></td>
                 <td>{refund.sale?.client?.name ?? 'Unknown client'}</td>
-                <td>{money(refund.total)}</td>
+                <td>{formatCurrency(refund.total)}</td>
                 <td>{refund.reason || 'No reason'}</td>
               </tr>
             ))}

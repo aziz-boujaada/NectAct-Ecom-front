@@ -3,11 +3,34 @@ export type User = {
   name: string;
   email: string;
   role?: UserRole;
+  permissions?: Array<
+    | string
+    | {
+        id?: number;
+        name?: string;
+        slug?: string;
+        description?: string;
+      }
+  >;
   created_at?: string;
   updated_at?: string;
 };
 
 export type UserRole = 'admin' | 'employee';
+
+export type AlertType = 'low_stock' | 'out_of_stock' | 'warning' | 'info';
+
+export type Alert = {
+  id: number;
+  type: AlertType;
+  stock?: number | null;
+  alert_stock?: number | null;
+  product: string;
+  product_id?: number | null;
+  is_read: 0 | 1;
+  created_at: string;
+  updated_at?: string;
+};
 
 export type AuthMode = 'login' | 'register';
 
@@ -71,6 +94,7 @@ export type Product = {
   price: string | number;
   stock?: number | null;
   min_stock?: number | null;
+  security_stock?: number | null;
   category_id: number;
   supplier_id: number;
   category?: Category | null;
@@ -248,6 +272,7 @@ export type ProductFormValues = {
   price: string;
   stock: string;
   min_stock: string;
+  security_stock: string;
   category_id: string;
   supplier_id: string;
   image: File | null;
@@ -308,6 +333,15 @@ export type AuthResponse = {
   status: string;
   message?: string;
   user?: User;
+  permissions?: Array<
+    | string
+    | {
+        id?: number;
+        name?: string;
+        slug?: string;
+        description?: string;
+      }
+  >;
   authorization?: AuthPayload;
   errors?: Record<string, string[]>;
 };

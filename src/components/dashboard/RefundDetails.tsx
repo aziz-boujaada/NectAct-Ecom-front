@@ -2,6 +2,7 @@ import { Trash2, X } from 'lucide-react';
 import type { Refund, RefundItem, Sale } from '../../types';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
+import { formatCurrency } from '../../utils/currency';
 
 type RefundDetailsProps = {
   refund: Refund;
@@ -11,11 +12,6 @@ type RefundDetailsProps = {
   onClose: () => void;
   onDelete: (refund: Refund) => void;
 };
-
-function money(value: string | number | null | undefined) {
-  const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? amount.toFixed(2) : value;
-}
 
 function formatDate(date?: string) {
   if (!date) return 'Not set';
@@ -61,7 +57,7 @@ export function RefundDetails({ refund, refunds, sales, loading, onClose, onDele
               </div>
               <div className="detail-item">
                 <span className="label">Total</span>
-                <span className="value">{money(refund.total)}</span>
+                <span className="value">{formatCurrency(refund.total)}</span>
               </div>
               <div className="detail-item">
                 <span className="label">Items Count</span>
@@ -109,9 +105,9 @@ export function RefundDetails({ refund, refunds, sales, loading, onClose, onDele
                             <span>{item.product?.reference ?? 'No reference'}</span>
                           </div>
                         </td>
-                        <td>{money(item.price)}</td>
+                          <td>{formatCurrency(item.price)}</td>
                         <td>{item.quantity}</td>
-                        <td>{money(item.total)}</td>
+                          <td>{formatCurrency(item.total)}</td>
                       </tr>
                     ))}
                   </tbody>

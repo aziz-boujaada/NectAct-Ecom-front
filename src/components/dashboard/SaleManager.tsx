@@ -6,6 +6,7 @@ import { SaleDetails } from './SaleDetails';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
 import { Can } from '../../context/PermissionContext';
+import { formatCurrency } from '../../utils/currency';
 
 type SaleManagerProps = {
   editingSale: Sale | null;
@@ -33,11 +34,6 @@ type SaleManagerProps = {
   onCreateProduct?: () => void;
   onTabChange?: (tab: string) => void;
 };
-
-function money(value: string | number | null | undefined) {
-  const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? amount.toFixed(2) : value;
-}
 
 export function SaleManager({
   editingSale,
@@ -168,7 +164,7 @@ export function SaleManager({
                         <td>
                           <span className={`status-pill ${sale.status}`}>{sale.status}</span>
                         </td>
-                        <td>{money(sale.total)}</td>
+                        <td>{formatCurrency(sale.total)}</td>
                         <td>{sale.items?.length ?? saleItems.filter((item) => item.sale_id === sale.id).length}</td>
                         <td>{formatDate(sale.created_at)}</td>
                         <td>

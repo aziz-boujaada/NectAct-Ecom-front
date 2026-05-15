@@ -26,7 +26,7 @@ import { useRefundManagement } from './hooks/useRefundManagement';
 import { useSaleManagement } from './hooks/useSaleManagement';
 
 async function fetchCatalog() {
-  return Promise.all([
+  const results = await Promise.allSettled([
     listCategories(),
     listProducts(),
     listPurchases(),
@@ -37,6 +37,19 @@ async function fetchCatalog() {
     listSuppliers(),
     listClients(),
   ]);
+
+  // Keep permitted resources visible even if one or more endpoints return 403/401.
+  return results.map((result) => (result.status === 'fulfilled' ? result.value : [])) as [
+    Category[],
+    Product[],
+    Purchase[],
+    PurchaseItem[],
+    Sale[],
+    SaleItem[],
+    Refund[],
+    Supplier[],
+    Client[],
+  ];
 }
 
 export function useAdminCatalog() {

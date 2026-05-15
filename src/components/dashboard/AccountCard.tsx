@@ -20,7 +20,7 @@ import { Can } from "../../context/PermissionContext";
 import type { User } from "../../types";
 import type { TabOption } from "./Dashboard";
 
-import logoUrl from "../../assets/nxtactlogo.png";
+import logoUrl from "src/assets/NextGestCologo1.png;
 
 type AccountCardProps = {
   user: User;

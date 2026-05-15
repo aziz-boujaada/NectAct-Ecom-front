@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ThemeToggle } from '../ThemeToggle';
 import { ChevronRight, Bell, Search, HelpCircle } from 'lucide-react';
+import { useAlerts } from '../../hooks/useAlerts';
+import { AlertsPanel } from '../notifications/AlertsPanel';
 
 interface TopbarProps {
   theme: 'dark' | 'light';
@@ -15,6 +17,9 @@ export const Topbar: React.FC<TopbarProps> = ({
   moduleLabel, 
   viewLabel 
 }) => {
+  const [isAlertsPanelOpen, setIsAlertsPanelOpen] = useState(false);
+  const { alerts, unreadCount, refetch } = useAlerts();
+
   return (
     <header className="erp-topbar">
       <div className="topbar-left">
@@ -31,9 +36,26 @@ export const Topbar: React.FC<TopbarProps> = ({
           <input type="text" placeholder="Global search..." disabled />
         </div>
         
-        <button className="icon-action-btn" title="Notifications">
-          <Bell size={20} />
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button 
+            className="icon-action-btn" 
+            title="Notifications"
+            onClick={() => setIsAlertsPanelOpen(!isAlertsPanelOpen)}
+          >
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+            )}
+          </button>
+          
+          <AlertsPanel 
+            alerts={alerts}
+            isOpen={isAlertsPanelOpen}
+            onClose={() => setIsAlertsPanelOpen(false)}
+            unreadCount={unreadCount}
+            onAlertRead={refetch}
+          />
+        </div>
         
         <button className="icon-action-btn" title="Help">
           <HelpCircle size={20} />

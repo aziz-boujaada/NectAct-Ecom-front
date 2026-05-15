@@ -1,6 +1,7 @@
 import type { AuthPayload, AuthResponse, ProfileFormValues } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api';
+const meta = import.meta as any;
+export const API_BASE_URL = meta.env?.VITE_API_BASE_URL ?? 'http://localhost:8000/api';
 const TOKEN_KEY = 'nextact_auth_token';
 
 type RequestOptions = {
@@ -48,6 +49,20 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   return data as T;
 }
 
+function mergePermissionsIntoUser(data: AuthResponse) {
+  if (!data.user) return null;
+
+  const userWithPerms = { ...data.user };
+  const topLevelPermissions = data.permissions;
+
+  // Some backend responses return permissions at root level instead of user.permissions.
+  if ((!userWithPerms.permissions || userWithPerms.permissions.length === 0) && topLevelPermissions?.length) {
+    userWithPerms.permissions = topLevelPermissions;
+  }
+
+  return userWithPerms;
+}
+
 export const tokenStore = {
   get() {
     return localStorage.getItem(TOKEN_KEY);
@@ -69,19 +84,25 @@ function persistAuthorization(authorization?: AuthPayload) {
 export async function register(payload: { name: string; email: string; password: string }) {
   const data = await request<AuthResponse>('/register', { method: 'POST', body: payload });
   persistAuthorization(data.authorization);
-  return data;
+  return {
+    ...data,
+    user: mergePermissionsIntoUser(data) ?? undefined,
+  };
 }
 
 export async function login(payload: { email: string; password: string }) {
   const data = await request<AuthResponse>('/login', { method: 'POST', body: payload });
   persistAuthorization(data.authorization);
-  return data;
+  return {
+    ...data,
+    user: mergePermissionsIntoUser(data) ?? undefined,
+  };
 }
 
 export async function fetchMe(token = tokenStore.get()) {
   if (!token) return null;
   const data = await request<AuthResponse>('/me', { token });
-  return data.user ?? null;
+  return mergePermissionsIntoUser(data);
 }
 
 export async function updateProfile(payload: ProfileFormValues, token = tokenStore.get()) {

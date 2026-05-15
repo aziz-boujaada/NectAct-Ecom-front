@@ -2,6 +2,7 @@ import { X, Edit3, Trash2 } from 'lucide-react';
 import type { Product, Purchase, PurchaseItem, Supplier } from '../../types';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
+import { formatCurrency } from '../../utils/currency';
 
 type PurchaseDetailsProps = {
   purchase: Purchase;
@@ -15,11 +16,6 @@ type PurchaseDetailsProps = {
   onEditItem: (item: PurchaseItem) => void;
   onDeleteItem: (item: PurchaseItem) => void;
 };
-
-function money(value: string | number | null | undefined) {
-  const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? amount.toFixed(2) : value;
-}
 
 export function PurchaseDetails({
   purchase,
@@ -73,7 +69,7 @@ export function PurchaseDetails({
               </div>
               <div className="detail-item">
                 <span className="label">Total</span>
-                <span className="value">{money(purchase.total)}</span>
+                <span className="value">{formatCurrency(purchase.total)}</span>
               </div>
               <div className="detail-item">
                 <span className="label">Items Count</span>
@@ -124,9 +120,9 @@ export function PurchaseDetails({
                               <span>{product?.reference ?? 'No reference'}</span>
                             </div>
                           </td>
-                          <td>{money(item.price)}</td>
+                          <td>{formatCurrency(item.price)}</td>
                           <td>{item.quantity}</td>
-                          <td>{money(item.total)}</td>
+                          <td>{formatCurrency(item.total)}</td>
                           <td>
                             <div className="row-actions">
                               <button

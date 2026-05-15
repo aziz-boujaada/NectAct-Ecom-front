@@ -59,6 +59,15 @@ export function ProductForm({
           onChange={(event) => onChange({ ...form, min_stock: event.target.value })}
         />
       </label>
+        <label>
+        Security stock
+        <input
+          min="0"
+          type="number"
+          value={form.security_stock}
+          onChange={(event) => onChange({ ...form, security_stock: event.target.value })}
+        />
+      </label>
       <label>
         Category
         <select value={form.category_id} onChange={(event) => onChange({ ...form, category_id: event.target.value })} required>

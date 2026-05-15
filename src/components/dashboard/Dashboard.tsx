@@ -11,6 +11,7 @@ import { SalesModule } from '../../modules/sales/SalesModule';
 import { PurchasingModule } from '../../modules/purchasing/PurchasingModule';
 import { AdminModule } from '../../modules/admin/AdminModule';
 import { ProfileModule } from '../../modules/profile/ProfileModule';
+import { ReportsModule } from '../../modules/reports/ReportsModule';
 
 import type { PasswordFormValues, ProfileFormValues, Status, User } from '../../types';
 
@@ -69,6 +70,10 @@ export function Dashboard({
       permissions: { module: 'admin', view: 'permissions' },
       profile: { module: 'profile', view: 'account' },
       security: { module: 'profile', view: 'security' },
+      financials: { module: 'reports', view: 'financials' },
+      'inventory-report': { module: 'reports', view: 'inventory-report' },
+      'sales-report': { module: 'reports', view: 'sales-report' },
+      'purchasing-report': { module: 'reports', view: 'purchasing-report' },
     };
 
     const target = mapping[tab];
@@ -138,6 +143,10 @@ export function Dashboard({
           onProfileSubmit={onProfileSubmit}
           onPasswordSubmit={onPasswordSubmit}
         />
+      )}
+
+      {activeModule === 'reports' && (
+        <ReportsModule activeView={activeView} />
       )}
     </MainLayout>
   );

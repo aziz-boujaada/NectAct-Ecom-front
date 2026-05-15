@@ -3,6 +3,24 @@ import { getPermissions } from '../api/permissions/roles';
 import type { Permission } from '../types/permissions';
 import type { User } from '../types';
 
+type PermissionLike =
+  | Permission
+  | string
+  | {
+      id?: number;
+      name?: string;
+      slug?: string;
+      permission?: PermissionLike;
+      permission_name?: string;
+      permission_slug?: string;
+    };
+
+type UserWithPermissions = User & {
+  permissions?: PermissionLike[];
+  user_permissions?: PermissionLike[];
+  role?: string;
+};
+
 interface PermissionContextType {
   permissions: Permission[];
   userPermissions: string[];
@@ -16,7 +34,7 @@ const PermissionContext = createContext<PermissionContextType | undefined>(undef
 
 interface PermissionProviderProps {
   children: React.ReactNode;
-  user?: User | null;
+  user?: UserWithPermissions | null;
 }
 
 export function PermissionProvider({ children, user }: PermissionProviderProps) {
@@ -25,34 +43,64 @@ export function PermissionProvider({ children, user }: PermissionProviderProps) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function normalizeKey(value: string): string {
+    return value.toLowerCase().trim().replace(/\s+/g, '_').replace(/-/g, '_');
+  }
+
+  function extractPermissionKeys(rawPerms: PermissionLike[] | undefined): string[] {
+    if (!rawPerms?.length) return [];
+
+    const collected: string[] = [];
+
+    for (const p of rawPerms) {
+      if (!p) continue;
+
+      if (typeof p === 'string') {
+        collected.push(normalizeKey(p));
+        continue;
+      }
+
+      const nested = (p as { permission?: PermissionLike }).permission;
+      if (nested) {
+        if (typeof nested === 'string') {
+          collected.push(normalizeKey(nested));
+        } else {
+          if (nested.name) collected.push(normalizeKey(nested.name));
+          if (nested.slug) collected.push(normalizeKey(nested.slug));
+        }
+      }
+
+      if (p.name) collected.push(normalizeKey(p.name));
+      if (p.slug) collected.push(normalizeKey(p.slug));
+
+      const meta = p as { permission_name?: string; permission_slug?: string };
+      if (meta.permission_name) collected.push(normalizeKey(meta.permission_name));
+      if (meta.permission_slug) collected.push(normalizeKey(meta.permission_slug));
+    }
+
+    return [...new Set(collected)];
+  }
+
   // Load permissions when user changes
   useEffect(() => {
     if (!user) {
+      setPermissions([]);
       setUserPermissions([]);
+      setError(null);
       return;
     }
 
-    if (user.permissions) {
-      const permKeys = normalizePermissions(user.permissions);
+    const directPerms = user.permissions ?? user.user_permissions;
+    const permKeys = extractPermissionKeys(directPerms);
+
+    if (permKeys.length > 0) {
       setUserPermissions(permKeys);
+      setError(null);
     } else {
+      // Fallback: fetch only the catalog for admin screens; do not grant permissions from it.
       loadPermissions();
     }
   }, [user]);
-
-  function normalizePermissions(perms: Permission[]): string[] {
-    return [
-      ...new Set(
-        perms.flatMap((p) =>
-          [p.name, p.slug]
-            .filter(Boolean)
-            .map((v) =>
-              v.toLowerCase().trim().replace(/\s+/g, '_').replace(/-/g, '_')
-            )
-        )
-      ),
-    ];
-  }
 
   async function loadPermissions() {
     if (!user) return;
@@ -65,15 +113,12 @@ export function PermissionProvider({ children, user }: PermissionProviderProps) 
       const permsData = await getPermissions();
       setPermissions(permsData);
 
-      // If we are an employee, we shouldn't necessarily have ALL permissions from /permissions
-      // but if the backend returns only OUR permissions there, it works.
-      // If it returns ALL, then this logic might be too permissive for employees.
-      // However, keeping existing behavior for fetch but prioritizing user.permissions.
-      setUserPermissions(normalizePermissions(permsData));
+      // Never infer current-user permissions from the global permissions catalog.
+      setUserPermissions([]);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load permissions');
-      setUserPermissions(['view_products', 'view_clients', 'view_suppliers']);
+      setUserPermissions([]);
     } finally {
       setLoading(false);
     }
@@ -85,15 +130,15 @@ export function PermissionProvider({ children, user }: PermissionProviderProps) 
   ): boolean {
     if (!user) return false;
 
-    if (user.role === 'admin') {
+    if ((user.role ?? '').toLowerCase() === 'admin') {
       return true;
     }
 
     if (!userPermissions.length) return false;
 
     const perms = Array.isArray(permission) ? permission : [permission];
-    const normalizedUserPerms = userPermissions.map(p => p.toLowerCase().trim());
-    const normalizedReq = perms.map(p => p.toLowerCase().trim().replace(/\s+/g, '_').replace(/-/g, '_'));
+    const normalizedUserPerms = userPermissions.map((p) => normalizeKey(p));
+    const normalizedReq = perms.map((p) => normalizeKey(p));
 
     if (type === 'all') {
       return normalizedReq.every(p => normalizedUserPerms.includes(p));

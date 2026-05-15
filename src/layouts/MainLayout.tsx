@@ -39,7 +39,9 @@ const viewLabels: Record<SubViewType, string> = {
   account: 'Profile Settings',
   security: 'Security',
   financials: 'Financial Reports',
-  'inventory-report': 'Inventory Reports'
+  'inventory-report': 'Inventory Reports',
+  'sales-report': 'Sales Reports',
+  'purchasing-report': 'Purchasing Reports'
 };
 
 export const MainLayout: React.FC<MainLayoutProps> = ({

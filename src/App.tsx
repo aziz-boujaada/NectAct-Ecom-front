@@ -10,16 +10,14 @@ import {
   updateProfile,
 } from './api/auth';
 
-import { StatusMessage } from './components/StatusMessage';
-import { ThemeToggle } from './components/ThemeToggle';
-import { AuthPanel } from './components/auth/AuthPanel';
+import { LandingPage } from './components/landing/LandingPage';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { PermissionProvider } from './context/PermissionContext';
-import type { AuthMode, Status, User } from './types';
+import type { AuthMode, ProfileFormValues, Status, User } from './types';
 
 const emptyLogin = { email: '', password: '' };
 const emptyRegister = { name: '', email: '', password: '' };
-const emptyProfile = { name: '', email: '', role: 'employee' as const };
+const emptyProfile: ProfileFormValues = { name: '', email: '', role: 'employee' };
 const emptyPassword = { current_password: '', password: '', password_confirmation: '' };
 const THEME_KEY = 'nextact_theme';
 
@@ -175,7 +173,7 @@ export default function App() {
     return <main className="shell loading-screen">Loading auth session...</main>;
   }
 
-  if (isAuthenticated) {
+  if (user && token) {
     return (
       <PermissionProvider user={user}>
         <Dashboard
@@ -197,26 +195,19 @@ export default function App() {
   }
 
   return (
-    <main className="shell">
-      <div className="theme-toggle-wrap">
-        <ThemeToggle theme={theme} onToggle={toggleTheme} />
-      </div>
-      <section className="auth-panel">
-        
-        <StatusMessage status={status} />
-
-        <AuthPanel
-          mode={mode}
-          loginForm={loginForm}
-          registerForm={registerForm}
-          loading={loading}
-          onModeChange={setMode}
-          onLoginChange={setLoginForm}
-          onRegisterChange={setRegisterForm}
-          onLoginSubmit={handleLogin}
-          onRegisterSubmit={handleRegister}
-        />
-      </section>
-    </main>
+    <LandingPage
+      onTestClick={() => setMode('login')}
+      onDemoClick={() => setMode('login')}
+      mode={mode}
+      loginForm={loginForm}
+      registerForm={registerForm}
+      loading={loading}
+      status={status}
+      onModeChange={setMode}
+      onLoginChange={setLoginForm}
+      onRegisterChange={setRegisterForm}
+      onLoginSubmit={handleLogin}
+      onRegisterSubmit={handleRegister}
+    />
   );
 }

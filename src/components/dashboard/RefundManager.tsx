@@ -6,6 +6,7 @@ import { RefundDetails } from './RefundDetails';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
 import { Can } from '../../context/PermissionContext';
+import { formatCurrency } from '../../utils/currency';
 
 type RefundManagerProps = {
   isAddingRefund: boolean;
@@ -21,11 +22,6 @@ type RefundManagerProps = {
   onSubmitRefund: (event: FormEvent<HTMLFormElement>) => void;
   onSetViewingRefund: (refund: Refund | null) => void;
 };
-
-function money(value: string | number | null | undefined) {
-  const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? amount.toFixed(2) : value;
-}
 
 function formatDate(date?: string) {
   if (!date) return 'Not set';
@@ -179,7 +175,7 @@ export function RefundManager({
                             <strong>{refund.sale?.client?.name ?? refund.sale?.client_id ?? 'Unknown client'}</strong>
                           </div>
                         </td>
-                        <td>{money(refund.total)}</td>
+                        <td>{formatCurrency(refund.total)}</td>
                         <td>{refund.items?.length ?? 0}</td>
                         <td>{refund.reason || 'No reason'}</td>
                         <td>{formatDate(refund.created_at)}</td>

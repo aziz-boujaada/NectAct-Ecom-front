@@ -4,6 +4,7 @@ import { tokenStore } from '../../api/auth';
 import type { Product, Sale, SaleItem } from '../../types';
 import { usePagination } from './hooks/usePagination';
 import { PaginationControls } from './PaginationControls';
+import { formatCurrency } from '../../utils/currency';
 
 type SaleInvoiceProps = {
   sale: Sale;
@@ -13,11 +14,6 @@ type SaleInvoiceProps = {
   loading?: boolean;
   onDeleteItem?: (item: SaleItem) => void;
 };
-
-function money(value: string | number | null | undefined) {
-  const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? amount.toFixed(2) : String(value ?? '0.00');
-}
 
 function formatDate(date?: string) {
   if (!date) return 'Not set';
@@ -145,9 +141,9 @@ export function SaleInvoice({ sale, saleItems, products, clientName, loading = f
                         <strong>{product?.name ?? `Product ${item.product_id}`}</strong>
                       </td>
                       <td>{product?.reference ?? '—'}</td>
-                      <td>{money(item.price)}</td>
+                      <td>{formatCurrency(item.price)}</td>
                       <td>{item.quantity}</td>
-                      <td>{money(item.total ?? getItemAmount(item))}</td>
+                      <td>{formatCurrency(item.total ?? getItemAmount(item))}</td>
                       {onDeleteItem && (
                         <td>
                           <button aria-label={`Delete item ${item.id}`} className="danger-action" disabled={loading} onClick={() => onDeleteItem(item)} type="button">
@@ -178,11 +174,11 @@ export function SaleInvoice({ sale, saleItems, products, clientName, loading = f
         <div className="invoice-total-box">
           <div className="invoice-total-row">
             <span>Subtotal</span>
-            <strong>{money(subtotal)}</strong>
+            <strong>{formatCurrency(subtotal)}</strong>
           </div>
           <div className="invoice-total-row">
             <span>Invoice total</span>
-            <strong>{money(displayTotal)}</strong>
+            <strong>{formatCurrency(displayTotal)}</strong>
           </div>
         </div>
       </div>

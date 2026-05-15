@@ -1,4 +1,5 @@
 import React from 'react';
+import nextGestcoLogo from '../../assets/NextGestCologo1.png';
 import { 
   LayoutDashboard, 
   Package, 
@@ -15,7 +16,11 @@ import {
   History,
   TrendingUp,
   CreditCard,
-  FileText
+  FileText,
+  BarChart3,
+  LineChart,
+  BarChart,
+  Gauge
 } from 'lucide-react';
 import { usePermission } from '../../hooks/permissions'; // Assuming path or use local context
 
@@ -35,7 +40,22 @@ export type SubViewType =
   | 'purchases-list' | 'suppliers'
   | 'users' | 'permissions'
   | 'account' | 'security'
-  | 'financials' | 'inventory-report';
+  | 'financials' | 'inventory-report' | 'sales-report' | 'purchasing-report';
+
+type SidebarView = {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  permission: string | null;
+};
+
+type SidebarItem = {
+  id: ModuleType;
+  label: string;
+  icon: React.ReactNode;
+  permission: string | string[] | null;
+  views: SidebarView[];
+};
 
 interface SidebarProps {
   activeModule: ModuleType;
@@ -56,13 +76,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const { hasPermission } = usePermission();
 
-  const menuItems = [
+  const menuItems: SidebarItem[] = [
     {
       id: 'dashboard',
       label: 'Dashboard',
       icon: <LayoutDashboard size={20} />,
       permission: null, // Always visible
-      views: [{ id: 'overview', label: 'Overview', permission: null }]
+      views: [{ id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} />, permission: null }]
     },
     {
       id: 'inventory',
@@ -115,18 +135,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'account', label: 'Profile', icon: <UserCircle size={16} />, permission: null },
         { id: 'security', label: 'Security', icon: <Settings size={16} />, permission: null },
       ]
+    },
+    {
+      id: 'reports',
+      label: 'Reports',
+      icon: <BarChart3 size={20} />,
+      permission: ['view_reports', 'view_sales', 'view_purchases'],
+      views: [
+        { id: 'financials', label: 'Financial Reports', icon: <LineChart size={16} />, permission: 'view_reports' },
+        { id: 'inventory-report', label: 'Inventory Reports', icon: <Gauge size={16} />, permission: 'view_reports' },
+        { id: 'sales-report', label: 'Sales Reports', icon: <TrendingUp size={16} />, permission: 'view_sales' },
+        { id: 'purchasing-report', label: 'Purchasing Reports', icon: <BarChart size={16} />, permission: 'view_purchases' },
+      ]
     }
   ];
 
   return (
     <aside className="erp-sidebar">
-      <div className="sidebar-header">
-        <div className="logo-placeholder">NA</div>
-        <div className="brand-info">
-          <h1>NectAct</h1>
-          <span>Enterprise ERP</span>
-        </div>
-      </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <img src={nextGestcoLogo} alt="Next Gestco" className="dashboard-logo" />
+                  <div className="dashboard-brand-text">
+                    <div className="dashboard-brand-name">Next Gestco</div>
+                    <div className="dashboard-brand-tagline">Enterprise ERP</div>
+                  </div>
+                </div>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {

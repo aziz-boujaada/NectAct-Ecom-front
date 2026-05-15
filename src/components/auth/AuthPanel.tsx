@@ -28,7 +28,7 @@ export function AuthPanel({
   onRegisterSubmit,
 }: AuthPanelProps) {
   return (
-    <div className="auth-grid">
+    <div className="auth-panel auth-grid">
       <AuthTabs mode={mode} onChange={onModeChange} />
 
       {mode === 'login' ? (

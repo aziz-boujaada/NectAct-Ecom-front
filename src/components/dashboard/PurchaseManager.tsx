@@ -21,6 +21,7 @@ import { PurchaseDetails } from "./PurchaseDetails";
 import { usePagination } from "./hooks/usePagination";
 import { PaginationControls } from "./PaginationControls";
 import { Can } from "../../context/PermissionContext";
+import { formatCurrency } from "../../utils/currency";
 
 type PurchaseManagerProps = {
   editingPurchase: Purchase | null;
@@ -53,11 +54,6 @@ type PurchaseManagerProps = {
   onCreateSupplier?: () => void;
   onTabChange?: (tab: string) => void;
 };
-
-function money(value: string | number | null | undefined) {
-  const amount = Number(value ?? 0);
-  return Number.isFinite(amount) ? amount.toFixed(2) : value;
-}
 
 export function PurchaseManager({
   editingPurchase,
@@ -219,7 +215,7 @@ export function PurchaseManager({
                             {purchase.status}
                           </span>
                         </td>
-                        <td>{money(purchase.total)}</td>
+                        <td>{formatCurrency(purchase.total)}</td>
                         <td>
                           {purchase.items?.length ??
                             purchaseItems.filter(

@@ -1,5 +1,6 @@
-import { request, tokenStore } from './auth';
+import { API_BASE_URL, request, tokenStore } from './auth';
 import type {
+  Alert,
   Category,
   CategoryFormValues,
   Client,
@@ -86,6 +87,13 @@ type ClientResponse = {
   message?: string;
   client?: Client;
   clients?: Client[];
+};
+
+type AlertResponse = {
+  status: string;
+  message?: string;
+  data?: Alert[];
+  alerts?: Alert[];
 };
 
 type Paginator<T> = {
@@ -195,6 +203,7 @@ function productFormData(payload: ProductFormValues, method?: 'PUT') {
   data.append('price', payload.price);
   data.append('stock', payload.stock || '0');
   data.append('min_stock', payload.min_stock || '0');
+  data.append('security_stock', payload.security_stock || '0');
   data.append('category_id', payload.category_id);
   data.append('supplier_id', payload.supplier_id);
 
@@ -479,6 +488,51 @@ export async function listClients() {
   return data.clients ?? [];
 }
 
+export async function exportProductsCsv() {
+  const token = authToken();
+
+  const res = await fetch(`${API_BASE_URL}/products/export/csv`, {
+    method: 'GET',
+    headers: token
+      ? { Accept: 'text/csv', Authorization: `Bearer ${token}` }
+      : { Accept: 'text/csv' },
+  });
+
+  if (!res.ok) {
+    throw new Error('Export failed');
+  }
+
+  const blob = await res.blob();
+  const contentDisposition = res.headers.get('content-disposition') || '';
+  let filename = 'products.csv';
+  const match = contentDisposition.match(/filename\*=UTF-8''([^;\n\r]+)|filename=\"?([^;\n\r\"]+)\"?/i);
+  if (match) filename = decodeURIComponent(match[1] || match[2]);
+
+  return { blob, filename };
+}
+
+export async function importProductsCsv(file: File) {
+  const token = authToken();
+
+  const data = new FormData();
+  data.append('file', file);
+
+  const res = await fetch(`${API_BASE_URL}/products/import/csv`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}`, Accept: 'application/json' } : { Accept: 'application/json' },
+    body: data,
+  });
+
+  const json = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const message = json?.message ?? 'Import failed';
+    throw new Error(message);
+  }
+
+  return json;
+}
+
 export async function createClient(payload: ContactFormValues) {
   const data = await request<ClientResponse>('/clients', {
     method: 'POST',
@@ -507,4 +561,59 @@ export async function updateClient(id: number, payload: ContactFormValues) {
 
 export async function deleteClient(id: number) {
   return request<ClientResponse>(`/clients/${id}`, { method: 'DELETE', token: authToken() });
+}
+
+export async function listAlerts() {
+  const data = await request<AlertResponse>('/alerts', { token: authToken() });
+  return data.data ?? data.alerts ?? [];
+}
+
+export async function markAlertAsRead(id: number) {
+  const data = await request<AlertResponse>(`/alerts/${id}/read`, {
+    method: 'PUT',
+    token: authToken(),
+   
+  });
+  return data.data?.[0] ?? data.alerts?.[0];
+}
+
+// Reports API
+export async function fetchFinancialReport(from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (from) params.append('from', from);
+  if (to) params.append('to', to);
+  
+  return request<any>(`/reports/financial${params.toString() ? `?${params.toString()}` : ''}`, { 
+    token: authToken() 
+  });
+}
+
+export async function fetchInventoryReport(from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (from) params.append('from', from);
+  if (to) params.append('to', to);
+  
+  return request<any>(`/reports/inventory${params.toString() ? `?${params.toString()}` : ''}`, { 
+    token: authToken() 
+  });
+}
+
+export async function fetchSalesReport(from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (from) params.append('from', from);
+  if (to) params.append('to', to);
+  
+  return request<any>(`/reports/sales${params.toString() ? `?${params.toString()}` : ''}`, { 
+    token: authToken() 
+  });
+}
+
+export async function fetchPurchasingReport(from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (from) params.append('from', from);
+  if (to) params.append('to', to);
+  
+  return request<any>(`/reports/purchasing${params.toString() ? `?${params.toString()}` : ''}`, { 
+    token: authToken() 
+  });
 }
