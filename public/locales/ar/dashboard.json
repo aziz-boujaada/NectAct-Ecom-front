@@ -1,0 +1,76 @@
+{
+  "title": "لوحة القيادة",
+  "welcome": "مرحباً",
+  "statistics_overview": "نظرة عامة على الإحصائيات",
+  "reload": "إعادة تحميل",
+  "loading_stats": "جاري تحميل إحصائيات لوحة القيادة...",
+  "no_sales": "لا توجد مبيعات بعد.",
+  "no_low_stock": "لا توجد منتجات ذات مخزون منخفض.",
+  "no_recent_sales": "لا توجد مبيعات حديثة.",
+  "no_recent_refunds": "لا توجد مرتجعات حديثة.",
+  "metrics": {
+    "net_sales": "صافي المبيعات",
+    "Refunds": "المرتجعات",
+    "Purchases": "المشتريات",
+    "Estimated profit": "الربح التقديري"
+  },
+  "kpi": {
+    "daily_movement": "الحركة اليومية",
+    "monthly_totals": "المجاميع الشهرية",
+    "today": "اليوم",
+    "current_month": "الشهر الحالي",
+    "sales": "المبيعات",
+    "refunds": "المرتجعات",
+    "purchases": "المشتريات"
+  },
+  "charts": {
+    "trend": "الاتجاه",
+    "monthly_totals": "المجاميع الشهرية",
+    "status": "الحالة",
+    "sales_status": "حالة المبيعات",
+    "purchases_status": "حالة المشتريات",
+    "devis_status": "حالة العروض",
+    "top_selling_products": "المنتجات الأكثر مبيعاً",
+    "Low Stock Products": "منتجات ذات مخزون منخفض",
+    "Produits en stock faible": "منتجات ذات مخزون منخفض"
+  },
+  "tables": {
+    "product": "المنتج",
+    "sold": "المباع",
+    "total": "الإجمالي",
+    "reference": "المرجع",
+    "client": "العميل",
+    "status": "الحالة",
+    "stock": "المخزون",
+    "minimum": "الحد الأدنى",
+    "reason": "السبب",
+    "recent_sales": "المبيعات الحديثة",
+    "recent_refunds": "المرتجعات الحديثة"
+  },
+  "stats": {
+    "sales": "المبيعات",
+    "refunds": "المستردات",
+    "purchases": "المشتريات",
+    "quantitySold": "الكمية المباعة",
+    "stock": "المخزون",
+    "recentSales": "المبيعات الأخيرة",
+    "recentRefunds": "المستردات الأخيرة",
+    "products": "المنتجات",
+    "inventory": "المخزون",
+    "status": "الحالة",
+    "lowStock": "عناصر منخفضة المخزون",
+    "revenue": "الإيرادات",
+    "noSales": "لا توجد مبيعات حتى الآن.",
+    "noRefunds": "لا توجد مستردات حديثة.",
+    "noLowStock": "لا توجد منتجات منخفضة المخزون."
+  },
+  "products": {
+    "noMatch": "لا توجد منتجات تطابق الفلاتر المحددة.",
+    "notFound": "لم يتم العثور على منتجات في الكتالوج.",
+    "noDescription": "لا يوجد وصف",
+    "outOfStock": "نفد من المخزون",
+    "lowStock": "مخزون منخفض",
+    "inStock": "متوفر في المخزون",
+    "na": "غير متوفر"
+  }
+}

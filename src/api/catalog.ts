@@ -1,4 +1,4 @@
-import { API_BASE_URL, request, tokenStore } from './auth';
+import { API_BASE_URL, request, tokenStore } from "./auth";
 import type {
   Alert,
   Category,
@@ -22,7 +22,9 @@ import type {
   SaleItemFormValues,
   StockMovement,
   Supplier,
-} from '../types';
+} from "../types";
+import type { DevisReport } from "../types/reports";
+import { normalizeReferencePrefix } from "../utils/referenceSettings";
 
 type CategoryResponse = {
   status: string;
@@ -123,6 +125,12 @@ type DashboardStatsResponse = {
   data: DashboardStats;
 };
 
+type DevisReportResponse = {
+  status: string;
+  message?: string;
+  data: DevisReport["data"];
+};
+
 function authToken() {
   return tokenStore.get();
 }
@@ -151,10 +159,31 @@ function purchaseItemDraftPayload(payload: PurchaseItemDraftValues) {
   };
 }
 
+type SaleReferencePrefixes = {
+  referencePrefix?: string;
+  paymentReferencePrefix?: string;
+};
+
 function salePayload(payload: SaleFormValues) {
   return {
     client_id: Number(payload.client_id),
     status: payload.status,
+    discount: Number(payload.discount || 0),
+    tax: Number(payload.tax || 0),
+  };
+}
+
+function createSalePayload(payload: SaleFormValues, prefixes: SaleReferencePrefixes = {}) {
+  const referencePrefix = normalizeReferencePrefix(prefixes.referencePrefix || 'FAC');
+  const paymentReferencePrefix = normalizeReferencePrefix(prefixes.paymentReferencePrefix || '');
+
+  return {
+    client_id: Number(payload.client_id),
+    reference_prefix: referencePrefix,
+    ...(paymentReferencePrefix ? { payment_reference_prefix: paymentReferencePrefix } : {}),
+    status: payload.status,
+    tax_rate: Number(payload.tax || 0),
+    discount_amount: Number(payload.discount || 0),
   };
 }
 
@@ -189,39 +218,41 @@ function cleanNullable(value: string) {
   return trimmed ? trimmed : null;
 }
 
-function productFormData(payload: ProductFormValues, method?: 'PUT') {
+function productFormData(payload: ProductFormValues, method?: "PUT") {
   const data = new FormData();
 
   if (method) {
-    data.append('_method', method);
+    data.append("_method", method);
   }
 
-  data.append('reference', payload.reference.trim());
-  data.append('name', payload.name.trim());
-  data.append('description', payload.description.trim());
-  data.append('image_path', payload.image_path.trim());
-  data.append('price', payload.price);
-  data.append('stock', payload.stock || '0');
-  data.append('min_stock', payload.min_stock || '0');
-  data.append('security_stock', payload.security_stock || '0');
-  data.append('category_id', payload.category_id);
-  data.append('supplier_id', payload.supplier_id);
+  data.append("reference", payload.reference.trim());
+  data.append("name", payload.name.trim());
+  data.append("description", payload.description.trim());
+  data.append("image_path", payload.image_path.trim());
+  data.append("price", payload.price);
+  data.append("stock", payload.stock || "0");
+  data.append("min_stock", payload.min_stock || "0");
+  data.append("security_stock", payload.security_stock || "0");
+  data.append("category_id", payload.category_id);
+  data.append("supplier_id", payload.supplier_id);
 
   if (payload.image) {
-    data.append('image', payload.image);
+    data.append("image", payload.image);
   }
 
   return data;
 }
 
 export async function listCategories() {
-  const data = await request<CategoryResponse>('/categories', { token: authToken() });
+  const data = await request<CategoryResponse>("/categories", {
+    token: authToken(),
+  });
   return data.categories ?? [];
 }
 
 export async function createCategory(payload: CategoryFormValues) {
-  const data = await request<CategoryResponse>('/categories', {
-    method: 'POST',
+  const data = await request<CategoryResponse>("/categories", {
+    method: "POST",
     token: authToken(),
     body: {
       name: payload.name.trim(),
@@ -233,7 +264,7 @@ export async function createCategory(payload: CategoryFormValues) {
 
 export async function updateCategory(id: number, payload: CategoryFormValues) {
   const data = await request<CategoryResponse>(`/categories/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
     body: {
       name: payload.name.trim(),
@@ -244,17 +275,28 @@ export async function updateCategory(id: number, payload: CategoryFormValues) {
 }
 
 export async function deleteCategory(id: number) {
-  return request<CategoryResponse>(`/categories/${id}`, { method: 'DELETE', token: authToken() });
+  return request<CategoryResponse>(`/categories/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listProducts() {
-  const data = await request<ProductResponse>('/products', { token: authToken() });
+  const data = await request<ProductResponse>("/products", {
+    token: authToken(),
+  });
   return data.products ?? [];
 }
 
-export async function listStockMovements(page = 1): Promise<PaginatedStockMovements> {
-  const data = await request<StockMovementResponse>(`/stock-movements?page=${page}`, { token: authToken() });
-  const paginated = data.stock ?? (!Array.isArray(data.data) ? data.data : undefined);
+export async function listStockMovements(
+  page = 1,
+): Promise<PaginatedStockMovements> {
+  const data = await request<StockMovementResponse>(
+    `/stock-movements?page=${page}`,
+    { token: authToken() },
+  );
+  const paginated =
+    data.stock ?? (!Array.isArray(data.data) ? data.data : undefined);
 
   if (paginated) {
     return {
@@ -272,13 +314,26 @@ export async function listStockMovements(page = 1): Promise<PaginatedStockMoveme
 }
 
 export async function getDashboardStats() {
-  const data = await request<DashboardStatsResponse>('/admin/dashboard', { token: authToken() });
+  const data = await request<DashboardStatsResponse>("/admin/dashboard", {
+    token: authToken(),
+  });
+  return data.data;
+}
+
+export async function getDevisReport(period?: { from?: string; to?: string }) {
+  const qs: string[] = [];
+  if (period?.from) qs.push(`from=${encodeURIComponent(period.from)}`);
+  if (period?.to) qs.push(`to=${encodeURIComponent(period.to)}`);
+  const query = qs.length ? `?${qs.join("&")}` : "";
+  const data = await request<DevisReportResponse>(`/reports/devis${query}`, {
+    token: authToken(),
+  });
   return data.data;
 }
 
 export async function createProduct(payload: ProductFormValues) {
-  const data = await request<ProductResponse>('/products', {
-    method: 'POST',
+  const data = await request<ProductResponse>("/products", {
+    method: "POST",
     token: authToken(),
     body: productFormData(payload),
   });
@@ -287,34 +342,42 @@ export async function createProduct(payload: ProductFormValues) {
 
 export async function updateProduct(id: number, payload: ProductFormValues) {
   const data = await request<ProductResponse>(`/products/${id}`, {
-    method: 'POST',
+    method: "POST",
     token: authToken(),
-    body: productFormData(payload, 'PUT'),
+    body: productFormData(payload, "PUT"),
   });
   return data.product;
 }
 
 export async function deleteProduct(id: number) {
-  return request<ProductResponse>(`/products/${id}`, { method: 'DELETE', token: authToken() });
+  return request<ProductResponse>(`/products/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listPurchases() {
-  const data = await request<PurchaseResponse>('/purchases', { token: authToken() });
+  const data = await request<PurchaseResponse>("/purchases", {
+    token: authToken(),
+  });
   return data.purchases ?? [];
 }
 
 export async function createPurchase(payload: PurchaseFormValues) {
-  const data = await request<PurchaseResponse>('/purchases', {
-    method: 'POST',
+  const data = await request<PurchaseResponse>("/purchases", {
+    method: "POST",
     token: authToken(),
     body: purchasePayload(payload),
   });
   return data.purchase;
 }
 
-export async function createPurchaseWithItems(payload: PurchaseFormValues, items: PurchaseItemDraftValues[]) {
-  const data = await request<PurchaseResponse>('/purchases', {
-    method: 'POST',
+export async function createPurchaseWithItems(
+  payload: PurchaseFormValues,
+  items: PurchaseItemDraftValues[],
+) {
+  const data = await request<PurchaseResponse>("/purchases", {
+    method: "POST",
     token: authToken(),
     body: {
       ...purchasePayload(payload),
@@ -326,7 +389,7 @@ export async function createPurchaseWithItems(payload: PurchaseFormValues, items
 
 export async function updatePurchase(id: number, payload: PurchaseFormValues) {
   const data = await request<PurchaseResponse>(`/purchases/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
     body: purchasePayload(payload),
   });
@@ -334,26 +397,34 @@ export async function updatePurchase(id: number, payload: PurchaseFormValues) {
 }
 
 export async function deletePurchase(id: number) {
-  return request<PurchaseResponse>(`/purchases/${id}`, { method: 'DELETE', token: authToken() });
+  return request<PurchaseResponse>(`/purchases/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listPurchaseItems() {
-  const data = await request<PurchaseItemResponse>('/purchase-items', { token: authToken() });
+  const data = await request<PurchaseItemResponse>("/purchase-items", {
+    token: authToken(),
+  });
   return data.purchase_items ?? [];
 }
 
 export async function createPurchaseItem(payload: PurchaseItemFormValues) {
-  const data = await request<PurchaseItemResponse>('/purchase-items', {
-    method: 'POST',
+  const data = await request<PurchaseItemResponse>("/purchase-items", {
+    method: "POST",
     token: authToken(),
     body: purchaseItemPayload(payload),
   });
   return data.purchase_item;
 }
 
-export async function updatePurchaseItem(id: number, payload: PurchaseItemFormValues) {
+export async function updatePurchaseItem(
+  id: number,
+  payload: PurchaseItemFormValues,
+) {
   const data = await request<PurchaseItemResponse>(`/purchase-items/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
     body: purchaseItemPayload(payload),
   });
@@ -361,29 +432,36 @@ export async function updatePurchaseItem(id: number, payload: PurchaseItemFormVa
 }
 
 export async function deletePurchaseItem(id: number) {
-  return request<PurchaseItemResponse>(`/purchase-items/${id}`, { method: 'DELETE', token: authToken() });
+  return request<PurchaseItemResponse>(`/purchase-items/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listSales() {
-  const data = await request<SaleResponse>('/sales', { token: authToken() });
+  const data = await request<SaleResponse>("/sales", { token: authToken() });
   return data.sales ?? (Array.isArray(data.data) ? data.data : []);
 }
 
 export async function createSale(payload: SaleFormValues) {
-  const data = await request<SaleResponse>('/sales', {
-    method: 'POST',
+  const data = await request<SaleResponse>("/sales", {
+    method: "POST",
     token: authToken(),
-    body: salePayload(payload),
+    body: createSalePayload(payload),
   });
   return data.sale ?? (!Array.isArray(data.data) ? data.data : undefined);
 }
 
-export async function createSaleWithItems(payload: SaleFormValues, items: SaleItemDraftValues[]) {
-  const data = await request<SaleResponse>('/sales', {
-    method: 'POST',
+export async function createSaleWithItems(
+  payload: SaleFormValues,
+  items: SaleItemDraftValues[],
+  prefixes: SaleReferencePrefixes = {},
+) {
+  const data = await request<SaleResponse>("/sales", {
+    method: "POST",
     token: authToken(),
     body: {
-      ...salePayload(payload),
+      ...createSalePayload(payload, prefixes),
       items: items.map(saleItemDraftPayload),
     },
   });
@@ -392,7 +470,7 @@ export async function createSaleWithItems(payload: SaleFormValues, items: SaleIt
 
 export async function updateSale(id: number, payload: SaleFormValues) {
   const data = await request<SaleResponse>(`/sales/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
     body: salePayload(payload),
   });
@@ -400,17 +478,22 @@ export async function updateSale(id: number, payload: SaleFormValues) {
 }
 
 export async function deleteSale(id: number) {
-  return request<SaleResponse>(`/sales/${id}`, { method: 'DELETE', token: authToken() });
+  return request<SaleResponse>(`/sales/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listSaleItems() {
-  const data = await request<SaleItemResponse>('/sale-items', { token: authToken() });
+  const data = await request<SaleItemResponse>("/sale-items", {
+    token: authToken(),
+  });
   return data.sale_items ?? [];
 }
 
 export async function createSaleItem(payload: SaleItemFormValues) {
-  const data = await request<SaleItemResponse>('/sale-items', {
-    method: 'POST',
+  const data = await request<SaleItemResponse>("/sale-items", {
+    method: "POST",
     token: authToken(),
     body: saleItemPayload(payload),
   });
@@ -419,7 +502,7 @@ export async function createSaleItem(payload: SaleItemFormValues) {
 
 export async function updateSaleItem(id: number, payload: SaleItemFormValues) {
   const data = await request<SaleItemResponse>(`/sale-items/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
     body: saleItemPayload(payload),
   });
@@ -427,17 +510,22 @@ export async function updateSaleItem(id: number, payload: SaleItemFormValues) {
 }
 
 export async function deleteSaleItem(id: number) {
-  return request<SaleItemResponse>(`/sale-items/${id}`, { method: 'DELETE', token: authToken() });
+  return request<SaleItemResponse>(`/sale-items/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listRefunds() {
-  const data = await request<RefundResponse>('/refunds', { token: authToken() });
+  const data = await request<RefundResponse>("/refunds", {
+    token: authToken(),
+  });
   return data.refunds ?? (Array.isArray(data.data) ? data.data : []);
 }
 
 export async function createRefund(payload: RefundFormValues) {
-  const data = await request<RefundResponse>('/refunds', {
-    method: 'POST',
+  const data = await request<RefundResponse>("/refunds", {
+    method: "POST",
     token: authToken(),
     body: refundPayload(payload),
   });
@@ -445,17 +533,22 @@ export async function createRefund(payload: RefundFormValues) {
 }
 
 export async function deleteRefund(id: number) {
-  return request<RefundResponse>(`/refunds/${id}`, { method: 'DELETE', token: authToken() });
+  return request<RefundResponse>(`/refunds/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listSuppliers() {
-  const data = await request<SupplierResponse>('/suppliers', { token: authToken() });
+  const data = await request<SupplierResponse>("/suppliers", {
+    token: authToken(),
+  });
   return data.suppliers ?? [];
 }
 
 export async function createSupplier(payload: ContactFormValues) {
-  const data = await request<SupplierResponse>('/suppliers', {
-    method: 'POST',
+  const data = await request<SupplierResponse>("/suppliers", {
+    method: "POST",
     token: authToken(),
     body: {
       name: payload.name.trim(),
@@ -468,7 +561,7 @@ export async function createSupplier(payload: ContactFormValues) {
 
 export async function updateSupplier(id: number, payload: ContactFormValues) {
   const data = await request<SupplierResponse>(`/suppliers/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
     body: {
       name: payload.name.trim(),
@@ -480,11 +573,16 @@ export async function updateSupplier(id: number, payload: ContactFormValues) {
 }
 
 export async function deleteSupplier(id: number) {
-  return request<SupplierResponse>(`/suppliers/${id}`, { method: 'DELETE', token: authToken() });
+  return request<SupplierResponse>(`/suppliers/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listClients() {
-  const data = await request<ClientResponse>('/clients', { token: authToken() });
+  const data = await request<ClientResponse>("/clients", {
+    token: authToken(),
+  });
   return data.clients ?? [];
 }
 
@@ -492,20 +590,22 @@ export async function exportProductsCsv() {
   const token = authToken();
 
   const res = await fetch(`${API_BASE_URL}/products/export/csv`, {
-    method: 'GET',
+    method: "GET",
     headers: token
-      ? { Accept: 'text/csv', Authorization: `Bearer ${token}` }
-      : { Accept: 'text/csv' },
+      ? { Accept: "text/csv", Authorization: `Bearer ${token}` }
+      : { Accept: "text/csv" },
   });
 
   if (!res.ok) {
-    throw new Error('Export failed');
+    throw new Error("Export failed");
   }
 
   const blob = await res.blob();
-  const contentDisposition = res.headers.get('content-disposition') || '';
-  let filename = 'products.csv';
-  const match = contentDisposition.match(/filename\*=UTF-8''([^;\n\r]+)|filename=\"?([^;\n\r\"]+)\"?/i);
+  const contentDisposition = res.headers.get("content-disposition") || "";
+  let filename = "products.csv";
+  const match = contentDisposition.match(
+    /filename\*=UTF-8''([^;\n\r]+)|filename=\"?([^;\n\r\"]+)\"?/i,
+  );
   if (match) filename = decodeURIComponent(match[1] || match[2]);
 
   return { blob, filename };
@@ -515,18 +615,20 @@ export async function importProductsCsv(file: File) {
   const token = authToken();
 
   const data = new FormData();
-  data.append('file', file);
+  data.append("file", file);
 
   const res = await fetch(`${API_BASE_URL}/products/import/csv`, {
-    method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}`, Accept: 'application/json' } : { Accept: 'application/json' },
+    method: "POST",
+    headers: token
+      ? { Authorization: `Bearer ${token}`, Accept: "application/json" }
+      : { Accept: "application/json" },
     body: data,
   });
 
   const json = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const message = json?.message ?? 'Import failed';
+    const message = json?.message ?? "Import failed";
     throw new Error(message);
   }
 
@@ -534,11 +636,12 @@ export async function importProductsCsv(file: File) {
 }
 
 export async function createClient(payload: ContactFormValues) {
-  const data = await request<ClientResponse>('/clients', {
-    method: 'POST',
+  const data = await request<ClientResponse>("/clients", {
+    method: "POST",
     token: authToken(),
     body: {
       name: payload.name.trim(),
+      email: payload.email.trim(),
       phone: cleanNullable(payload.phone),
       address: cleanNullable(payload.address),
     },
@@ -548,10 +651,11 @@ export async function createClient(payload: ContactFormValues) {
 
 export async function updateClient(id: number, payload: ContactFormValues) {
   const data = await request<ClientResponse>(`/clients/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
     body: {
       name: payload.name.trim(),
+      email: payload.email.trim(),
       phone: cleanNullable(payload.phone),
       address: cleanNullable(payload.address),
     },
@@ -560,19 +664,21 @@ export async function updateClient(id: number, payload: ContactFormValues) {
 }
 
 export async function deleteClient(id: number) {
-  return request<ClientResponse>(`/clients/${id}`, { method: 'DELETE', token: authToken() });
+  return request<ClientResponse>(`/clients/${id}`, {
+    method: "DELETE",
+    token: authToken(),
+  });
 }
 
 export async function listAlerts() {
-  const data = await request<AlertResponse>('/alerts', { token: authToken() });
+  const data = await request<AlertResponse>("/alerts", { token: authToken() });
   return data.data ?? data.alerts ?? [];
 }
 
 export async function markAlertAsRead(id: number) {
   const data = await request<AlertResponse>(`/alerts/${id}/read`, {
-    method: 'PUT',
+    method: "PUT",
     token: authToken(),
-   
   });
   return data.data?.[0] ?? data.alerts?.[0];
 }
@@ -580,40 +686,65 @@ export async function markAlertAsRead(id: number) {
 // Reports API
 export async function fetchFinancialReport(from?: string, to?: string) {
   const params = new URLSearchParams();
-  if (from) params.append('from', from);
-  if (to) params.append('to', to);
-  
-  return request<any>(`/reports/financial${params.toString() ? `?${params.toString()}` : ''}`, { 
-    token: authToken() 
-  });
+  if (from) params.append("from", from);
+  if (to) params.append("to", to);
+
+  return request<any>(
+    `/reports/financial${params.toString() ? `?${params.toString()}` : ""}`,
+    {
+      token: authToken(),
+    },
+  );
 }
 
 export async function fetchInventoryReport(from?: string, to?: string) {
   const params = new URLSearchParams();
-  if (from) params.append('from', from);
-  if (to) params.append('to', to);
-  
-  return request<any>(`/reports/inventory${params.toString() ? `?${params.toString()}` : ''}`, { 
-    token: authToken() 
-  });
+  if (from) params.append("from", from);
+  if (to) params.append("to", to);
+
+  return request<any>(
+    `/reports/inventory${params.toString() ? `?${params.toString()}` : ""}`,
+    {
+      token: authToken(),
+    },
+  );
 }
 
 export async function fetchSalesReport(from?: string, to?: string) {
   const params = new URLSearchParams();
-  if (from) params.append('from', from);
-  if (to) params.append('to', to);
-  
-  return request<any>(`/reports/sales${params.toString() ? `?${params.toString()}` : ''}`, { 
-    token: authToken() 
-  });
+  if (from) params.append("from", from);
+  if (to) params.append("to", to);
+
+  return request<any>(
+    `/reports/sales${params.toString() ? `?${params.toString()}` : ""}`,
+    {
+      token: authToken(),
+    },
+  );
 }
 
 export async function fetchPurchasingReport(from?: string, to?: string) {
   const params = new URLSearchParams();
-  if (from) params.append('from', from);
-  if (to) params.append('to', to);
-  
-  return request<any>(`/reports/purchasing${params.toString() ? `?${params.toString()}` : ''}`, { 
-    token: authToken() 
-  });
+  if (from) params.append("from", from);
+  if (to) params.append("to", to);
+
+  return request<any>(
+    `/reports/purchasing${params.toString() ? `?${params.toString()}` : ""}`,
+    {
+      token: authToken(),
+    },
+  );
+}
+
+export async function fetchDevisReport(from?: string, to?: string) {
+  const params = new URLSearchParams();
+  if (from) params.append("from", from);
+  if (to) params.append("to", to);
+
+  return request<DevisReport>(
+    `/reports/devis${params.toString() ? `?${params.toString()}` : ""}`,
+    {
+      token: authToken(),
+    },
+  );
 }

@@ -12,6 +12,7 @@ import {
 
 import { LandingPage } from './components/landing/LandingPage';
 import { Dashboard } from './components/dashboard/Dashboard';
+import { OnboardingTutorial } from './components/common/OnboardingTutorial';
 import { PermissionProvider } from './context/PermissionContext';
 import type { AuthMode, ProfileFormValues, Status, User } from './types';
 
@@ -59,6 +60,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [booting, setBooting] = useState(true);
   const [theme, setTheme] = useState<ThemeMode>(initialTheme);
+  const [forceShowTutorial, setForceShowTutorial] = useState(false);
 
   const token = tokenStore.get();
   const isAuthenticated = Boolean(user && token);
@@ -67,7 +69,7 @@ export default function App() {
     fetchMe()
       .then((currentUser) => {
         setUser(currentUser);
-        console.log("current" , currentUser)
+        console.log("current", currentUser)
         if (currentUser) {
           setProfileForm(profileFromUser(currentUser));
         }
@@ -160,7 +162,7 @@ export default function App() {
     }
   }
 
-  
+
   async function handleLogout() {
     setLoading(true);
     await logout();
@@ -176,6 +178,10 @@ export default function App() {
   if (user && token) {
     return (
       <PermissionProvider user={user}>
+        <OnboardingTutorial
+          forceShow={forceShowTutorial}
+          onComplete={() => setForceShowTutorial(false)}
+        />
         <Dashboard
           user={user}
           status={status}
@@ -189,6 +195,7 @@ export default function App() {
           onLogout={handleLogout}
           theme={theme}
           onThemeToggle={toggleTheme}
+          onShowTutorial={() => setForceShowTutorial(true)}
         />
       </PermissionProvider>
     );

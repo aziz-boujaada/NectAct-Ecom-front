@@ -1,5 +1,13 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Download, Edit3, Package, Plus, Trash2, Upload } from "lucide-react";
+import {
+  Download,
+  Edit3,
+  Package,
+  Plus,
+  Trash2,
+  Upload,
+  Eye,
+} from "lucide-react";
 import type {
   Category,
   Product,
@@ -16,6 +24,8 @@ import { DataTable } from "../crud/DataTable";
 import { Badge } from "../common/Badge";
 import { formatCurrency } from "../../utils/currency";
 import { exportProductsCsv, importProductsCsv } from "../../api/catalog";
+import { useTranslation } from "react-i18next";
+import { ProductDetailsModal } from "./ProductDetailsModal";
 
 type ProductManagerProps = {
   categories: Category[];
@@ -59,6 +69,9 @@ export function ProductManager({
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [supplierFilter, setSupplierFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState("all");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { t: tCommon } = useTranslation("common");
+  const { t: tInventory } = useTranslation("inventory");
 
   const missingRelations = categories.length === 0 || suppliers.length === 0;
   const showForm = isAdding || editingProduct !== null;
@@ -77,29 +90,62 @@ export function ProductManager({
 
       const categoryMatches =
         categoryFilter === "all" ||
-        String(product.category?.id ?? product.category_id ?? "") === categoryFilter;
+        String(product.category?.id ?? product.category_id ?? "") ===
+          categoryFilter;
 
       const supplierMatches =
         supplierFilter === "all" ||
-        String(product.supplier?.id ?? product.supplier_id ?? "") === supplierFilter;
+        String(product.supplier?.id ?? product.supplier_id ?? "") ===
+          supplierFilter;
 
       const stock = Number(product.stock ?? 0);
       const minStock = Number(product.min_stock ?? 0);
       const stockStatus =
-        stock === 0 ? "out-of-stock" : stock <= minStock ? "low-stock" : "in-stock";
+        stock === 0
+          ? "out-of-stock"
+          : stock <= minStock
+            ? "low-stock"
+            : "in-stock";
 
       const stockMatches = stockFilter === "all" || stockStatus === stockFilter;
 
-      return referenceMatches && nameMatches && categoryMatches && supplierMatches && stockMatches;
+      return (
+        referenceMatches &&
+        nameMatches &&
+        categoryMatches &&
+        supplierMatches &&
+        stockMatches
+      );
     });
-  }, [products, referenceFilter, nameFilter, categoryFilter, supplierFilter, stockFilter]);
+  }, [
+    products,
+    referenceFilter,
+    nameFilter,
+    categoryFilter,
+    supplierFilter,
+    stockFilter,
+  ]);
 
-  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(filteredProducts);
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
+    goToPage,
+  } = usePagination(filteredProducts);
 
   useEffect(() => {
     goToPage(1);
-  }, [referenceFilter, nameFilter, categoryFilter, supplierFilter, stockFilter, goToPage]);
-  
+  }, [
+    referenceFilter,
+    nameFilter,
+    categoryFilter,
+    supplierFilter,
+    stockFilter,
+    goToPage,
+  ]);
+
   const handleCreateCategory = () => {
     onTabChange?.("categories");
     onCreateCategory?.();
@@ -150,67 +196,87 @@ export function ProductManager({
     setImporting(true);
     try {
       await importProductsCsv(file);
-      alert('Import successful. The page will reload to reflect changes.');
+      alert("Import successful. The page will reload to reflect changes.");
       window.location.reload();
     } catch (err: any) {
       // eslint-disable-next-line no-console
       console.error(err);
-      alert(err?.message || 'Failed to import CSV. See console for details.');
+      alert(err?.message || "Failed to import CSV. See console for details.");
     } finally {
       setImporting(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const tableHeaders = ["ID", "Image", "Reference", "Product", "Category", "Supplier", "Price", "Stock", "Actions"];
+  const tableHeaders = [
+    tCommon("common.id"),
+    tCommon("common.image"),
+    tInventory("inventory:filters.reference"),
+    tInventory("inventory:products.name"),
+    tInventory("inventory:products.category"),
+    tInventory("inventory:products.supplier"),
+    tInventory("inventory:products.price"),
+    tCommon("common.stock"),
+    tCommon("common.actions"),
+  ];
   const hasActiveFilters =
     referenceFilter.trim().length > 0 ||
     nameFilter.trim().length > 0 ||
     categoryFilter !== "all" ||
     supplierFilter !== "all" ||
     stockFilter !== "all";
-  
+
   return (
     <section className="admin-section">
-      <PageHeader 
-        title="Products" 
-        eyebrow="Inventory"
+      <PageHeader
+        title={tInventory("products.title")}
+        eyebrow={tInventory("title")}
         actions={
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
             <span className="text-muted">
-              {filteredProducts.length} shown / {products.length} total
+              {filteredProducts.length} {tCommon("common.shown")} /{" "}
+              {products.length} {tCommon("common.total")}
             </span>
             {!showForm && (
-              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                <button 
-                  type="button" 
-                  className="success-action" 
-                  onClick={handleExportCsv} 
-                  title="Download products as CSV"
+              <div
+                style={{ display: "flex", gap: "8px", alignItems: "center" }}
+              >
+                <button
+                  type="button"
+                  className="success-action"
+                  onClick={handleExportCsv}
+                  title={tInventory("import_export.export")}
                   style={{ backgroundColor: "#10b981", color: "white" }}
                 >
-                  <Download size={16} style={{ marginRight: 8 }} /> Export CSV
+                  <Download size={16} style={{ marginRight: 8 }} />{" "}
+                  {tInventory("import_export.export")}
                 </button>
                 <button
                   type="button"
                   className="info-action"
                   onClick={handleImportClick}
                   disabled={importing}
-                  title="Upload products from CSV"
+                  title={tInventory("import_export.import")}
                   style={{ backgroundColor: "#3b82f6", color: "white" }}
                 >
-                  <Upload size={16} style={{ marginRight: 8 }} /> {importing ? 'Importing...' : 'Import CSV'}
+                  <Upload size={16} style={{ marginRight: 8 }} />{" "}
+                  {importing
+                    ? tCommon("common.loading")
+                    : tInventory("import_export.import")}
                 </button>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="text/csv,application/vnd.ms-excel"
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                   onChange={handleImportChange}
                 />
-                {/* Hide add button when user lacks permission */}
-                <PermissionButton permission="create_products" className="primary-action" onClick={onAdd}>
-                  <Plus size={17} /> Add product
+                <PermissionButton
+                  permission="create_products"
+                  className="primary-action"
+                  onClick={onAdd}
+                >
+                  <Plus size={17} /> {tInventory("products.add")}
                 </PermissionButton>
               </div>
             )}
@@ -245,44 +311,77 @@ export function ProductManager({
       ) : (
         <>
           <div className="erp-card fade-in" style={{ marginBottom: "16px" }}>
-            <div className="erp-card-body" style={{ display: "grid", gap: "12px" }}>
-              <div style={{ display: "grid", gap: "12px", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+            <div
+              className="erp-card-body"
+              style={{ display: "grid", gap: "12px" }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gap: "12px",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                }}
+              >
                 <input
                   type="text"
                   value={referenceFilter}
                   onChange={(event) => setReferenceFilter(event.target.value)}
-                  placeholder="Filter by reference"
+                  placeholder={tInventory("filters.reference")}
                 />
                 <input
                   type="text"
                   value={nameFilter}
                   onChange={(event) => setNameFilter(event.target.value)}
-                  placeholder="Filter by name"
+                  placeholder={tInventory("filters.name")}
                 />
-                <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-                  <option value="all">All categories</option>
+                <select
+                  value={categoryFilter}
+                  onChange={(event) => setCategoryFilter(event.target.value)}
+                >
+                  <option value="all">
+                    {tInventory("filters.all_categories")}
+                  </option>
                   {categories.map((category) => (
                     <option key={category.id} value={String(category.id)}>
                       {category.name}
                     </option>
                   ))}
                 </select>
-                <select value={supplierFilter} onChange={(event) => setSupplierFilter(event.target.value)}>
-                  <option value="all">All suppliers</option>
+                <select
+                  value={supplierFilter}
+                  onChange={(event) => setSupplierFilter(event.target.value)}
+                >
+                  <option value="all">
+                    {tInventory("filters.all_suppliers")}
+                  </option>
                   {suppliers.map((supplier) => (
                     <option key={supplier.id} value={String(supplier.id)}>
                       {supplier.name}
                     </option>
                   ))}
                 </select>
-                <select value={stockFilter} onChange={(event) => setStockFilter(event.target.value)}>
-                  <option value="all">All stock statuses</option>
-                  <option value="in-stock">In stock</option>
-                  <option value="low-stock">Low stock</option>
-                  <option value="out-of-stock">Out of stock</option>
+                <select
+                  value={stockFilter}
+                  onChange={(event) => setStockFilter(event.target.value)}
+                >
+                  <option value="all">{tInventory("filters.all_stock")}</option>
+                  <option value="in-stock">
+                    {tInventory("stock_status.in_stock")}
+                  </option>
+                  <option value="low-stock">
+                    {tInventory("stock_status.low_stock")}
+                  </option>
+                  <option value="out-of-stock">
+                    {tInventory("stock_status.out_of_stock")}
+                  </option>
                 </select>
-                <button type="button" className="secondary-action" onClick={clearFilters} disabled={!hasActiveFilters}>
-                  Clear filters
+                <button
+                  type="button"
+                  className="secondary-action"
+                  onClick={clearFilters}
+                  disabled={!hasActiveFilters}
+                >
+                  {tCommon("common.clear_filters")}
                 </button>
               </div>
             </div>
@@ -291,9 +390,16 @@ export function ProductManager({
           <DataTable headers={tableHeaders} loading={loading}>
             {filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ textAlign: "center", padding: "40px" }}>
+                <td
+                  colSpan={9}
+                  style={{ textAlign: "center", padding: "40px" }}
+                >
                   <div className="empty-state">
-                    <Package size={48} className="text-muted" style={{ marginBottom: "16px" }} />
+                    <Package
+                      size={48}
+                      className="text-muted"
+                      style={{ marginBottom: "16px" }}
+                    />
                     <p>
                       {hasActiveFilters
                         ? "No products match the selected filters."
@@ -307,53 +413,100 @@ export function ProductManager({
                 .sort((a, b) => b.id - a.id)
                 .map((product) => (
                   <tr key={product.id}>
-                    <td><span className="text-mono">#{product.id}</span></td>
-
                     <td>
-                      <div className="avatar-square">
-                        <img
-                          src={
-                            product.image_path
-                              ? `http://127.0.0.1:8000/storage/${product.image_path}`
-                              : "/default.png"
-                          }
-                          alt={product.name}
-                        />
-                      </div>
+                      <span className="text-mono">#{product.id}</span>
                     </td>
 
-                    <td><code className="ref-tag">{product.reference?.slice(0, 12)}</code></td>
+                    <td>
+                      <button
+                        type="button"
+                        className="product-preview-btn"
+                        onClick={() => setSelectedProduct(product)}
+                      >
+                        <div className="avatar-square">
+                          <img
+                            src={
+                              product.image_path
+                                ? `http://127.0.0.1:8000/storage/${product.image_path}`
+                                : "/default.png"
+                            }
+                            alt={product.name}
+                          />
+                        </div>
+                      </button>
+                    </td>
+
+                    <td>
+                      <code className="ref-tag">
+                        {product.reference?.slice(0, 12)}
+                      </code>
+                    </td>
 
                     <td>
                       <div className="product-cell">
                         <div className="product-info">
-                          <span className="product-name">{product.name}</span>
-                          <span className="product-desc">{product.description || "No description"}</span>
+                          <span
+                            className="product-name clickable"
+                            onClick={() => setSelectedProduct(product)}
+                          >
+                            {product.name}
+                          </span>
+                          <span className="product-desc">
+                            {product.description || "No description"}
+                          </span>
                         </div>
                       </div>
                     </td>
 
-                    <td><Badge variant="info">{product.category?.name ?? "N/A"}</Badge></td>
+                    <td>
+                      <Badge variant="info">
+                        {product.category?.name ?? "N/A"}
+                      </Badge>
+                    </td>
+                    
+                    <td>
+                      <span className="product-name">
+                        {product.supplier?.name ?? "N/A"}
+                      </span>
+                    </td>
 
-                    <td><span className="text-dark font-medium">{product.supplier?.name ?? "N/A"}</span></td>
-
-                    <td><span className="price-tag">{formatCurrency(product.price)}</span></td>
+                    <td>
+                      <span className="price-tag">
+                        {formatCurrency(product.price)}
+                      </span>
+                    </td>
 
                     <td>
                       <div className="stock-cell">
-                        <span className="stock-count">{product.stock ?? 0}</span>
+                        <span className="stock-count">
+                          {product.stock ?? 0}
+                        </span>
                         {product.stock === 0 ? (
-                          <Badge variant="danger" dot>Out of stock</Badge>
-                        ) : (product.stock ?? 0) <= (product.min_stock + product.security_stock) ? (
-                          <Badge variant="warning" dot>Low stock</Badge>
+                          <Badge variant="danger" dot>
+                            {tInventory("stock_status.out_of_stock")}
+                          </Badge>
+                        ) : (product.stock ?? 0) <=
+                          product.min_stock + product.security_stock ? (
+                          <Badge variant="warning" dot>
+                            {tInventory("stock_status.low_stock")}
+                          </Badge>
                         ) : (
-                          <Badge variant="success" dot>In stock</Badge>
+                          <Badge variant="success" dot>
+                            {tInventory("stock_status.in_stock")}
+                          </Badge>
                         )}
                       </div>
                     </td>
 
                     <td>
                       <div className="row-actions">
+                        <button
+                          className="icon-btn"
+                          type="button"
+                          onClick={() => setSelectedProduct(product)}
+                        >
+                          <Eye size={16} />
+                        </button>
                         <Can permission="edit_products">
                           <button
                             aria-label={`Edit ${product.name}`}
@@ -389,6 +542,10 @@ export function ProductManager({
             onPrevious={prevPage}
             onNext={nextPage}
             onPageChange={goToPage}
+          />
+          <ProductDetailsModal
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
           />
         </>
       )}

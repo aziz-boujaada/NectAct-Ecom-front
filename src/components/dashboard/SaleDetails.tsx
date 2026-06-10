@@ -1,4 +1,5 @@
 import { Trash2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Client, Product, Sale, SaleItem } from '../../types';
 import { SaleInvoice } from './SaleInvoice';
 
@@ -25,6 +26,7 @@ export function SaleDetails({
   onDelete,
   onDeleteItem,
 }: SaleDetailsProps) {
+  const { t } = useTranslation(['sales', 'common']);
   const client = clients.find((entry) => entry.id === sale.client_id);
 
   return (
@@ -32,10 +34,10 @@ export function SaleDetails({
       <div className="modal-content sale-details-modal" onClick={(event) => event.stopPropagation()}>
         <div className="modal-header">
           <div>
-            <h2>Sale #{sale.id}</h2>
-            <p className="text-muted">Invoice view and sale actions</p>
+            <h2>{t('invoice title')} #{sale.id}</h2>
+            <p className="text-muted">{t('invoice view actions')}</p>
           </div>
-          <button aria-label="Close details" className="secondary-action" onClick={onClose} type="button">
+          <button aria-label={t('common:common.cancel')} className="secondary-action" onClick={onClose} type="button">
             <X size={20} aria-hidden="true" />
           </button>
         </div>
@@ -53,14 +55,14 @@ export function SaleDetails({
 
         <div className="modal-footer">
           <button className="secondary-action" disabled={loading} onClick={onClose} type="button">
-            Close
+            {t('common:common.cancel')}
           </button>
           <button className="primary-action" disabled={loading} onClick={() => onEdit(sale)} type="button">
-            Edit Sale
+            {t('edit sale')}
           </button>
           <button className="danger-action" disabled={loading} onClick={() => onDelete(sale)} type="button">
             <Trash2 size={17} aria-hidden="true" />
-            Delete
+            {t('common:common.delete')}
           </button>
         </div>
       </div>

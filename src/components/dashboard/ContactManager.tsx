@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
 import { Building2, Edit3, Plus, Trash2, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { ContactFormValues } from '../../types';
 import { ContactForm } from './forms/ContactForm';
 import { usePagination } from './hooks/usePagination';
@@ -59,6 +60,7 @@ export function ContactManager<TContact extends Contact>({
   onEdit,
   onSubmit,
 }: ContactManagerProps<TContact>) {
+  const { t } = useTranslation(['common', 'purchasing', 'sales']);
   const showForm = isAdding || editingContact !== null;
   const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(contacts);
 
@@ -70,7 +72,7 @@ export function ContactManager<TContact extends Contact>({
           <h2>{title}</h2>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <span>{contacts.length} total</span>
+          <span>{contacts.length} {t('common:common.total')}</span>
           {!showForm && (
             <Can permission={createPermission || []}>
               <button className="primary-action" onClick={onAdd} type="button">
@@ -98,9 +100,9 @@ export function ContactManager<TContact extends Contact>({
             <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Contact</th>
-                <th aria-label="Actions" />
+                <th>{t('purchasing:name')}</th>
+                <th>{t('purchasing:contact')}</th>
+                <th aria-label={t('common:common.actions')} />
               </tr>
             </thead>
             <tbody>
@@ -123,21 +125,21 @@ export function ContactManager<TContact extends Contact>({
                     </td>
                     <td>
                       <div>
-                        <span>{contact.phone || 'No phone'}</span>
+                        <span>{contact.phone || t('purchasing:no_phone')}</span>
                         <br />
-                        <span className="text-muted">{contact.address || 'No address'}</span>
+                        <span className="text-muted">{contact.address || t('purchasing:no_address')}</span>
                       </div>
                     </td>
                     <td>
                       <div className="row-actions">
                         <Can permission={editPermission || []}>
-                          <button aria-label={`Edit ${contact.name}`} disabled={loading} onClick={() => onEdit(contact)} type="button">
+                          <button aria-label={`${t('common:common.edit')} ${contact.name}`} disabled={loading} onClick={() => onEdit(contact)} type="button">
                             <Edit3 size={16} aria-hidden="true" />
                           </button>
                         </Can>
                         <Can permission={deletePermission || []}>
                           <button
-                            aria-label={`Delete ${contact.name}`}
+                            aria-label={`${t('common:common.delete')} ${contact.name}`}
                             className="danger-action"
                             disabled={loading}
                             onClick={() => onDelete(contact)}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SaleManager } from '../../components/dashboard/SaleManager';
 import { ContactManager } from '../../components/dashboard/ContactManager';
 import { RefundManager } from '../../components/dashboard/RefundManager';
@@ -11,6 +12,8 @@ interface SalesModuleProps {
 }
 
 export const SalesModule: React.FC<SalesModuleProps> = ({ activeView, catalog, onTabChange }) => {
+  const { t } = useTranslation(['sales', 'common']);
+
   return (
     <div className="fade-in">
       {activeView === 'sales-list' && (
@@ -45,15 +48,15 @@ export const SalesModule: React.FC<SalesModuleProps> = ({ activeView, catalog, o
       {activeView === 'clients' && (
         <ContactManager
           contacts={catalog.clients}
-          createLabel="Create client"
+          createLabel={t('sales:add_client')}
           editingContact={catalog.editingClient}
-          emptyText="No clients found."
-          eyebrow="Sales"
+          emptyText={t('common:common.no_data')}
+          eyebrow={t('sales:title')}
           form={catalog.clientForm}
           loading={catalog.loading}
-          title="Clients"
+          title={t('sales:clients')}
           icon="users"
-          updateLabel="Update client"
+          updateLabel={t('common:common.edit')}
           isAdding={catalog.isAddingClient}
           createPermission="create_clients"
           editPermission="edit_clients"

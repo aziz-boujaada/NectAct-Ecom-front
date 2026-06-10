@@ -1,0 +1,67 @@
+{
+  "title": "المخزون",
+  "stock_movements": "حركات المخزون",
+  "products": {
+    "title": "المنتجات",
+    "add": "إضافة منتج",
+    "edit": "تعديل منتج",
+    "name": "اسم المنتج",
+    "price": "السعر",
+    "quantity": "الكمية",
+    "sku": "وحدة حفظ المخزون",
+    "category": "الفئة",
+    "supplier": "المورد",
+    "description": "الوصف",
+    "save": "حفظ المنتج",
+    "delete_confirm": "هل أنت متأكد من حذف هذا المنتج؟"
+  },
+  "categories": {
+    "title": "الفئات",
+    "add": "إضافة فئة",
+    "edit": "تعديل الفئة",
+    "name": "اسم الفئة",
+    "description": "الوصف",
+    "save": "حفظ الفئة",
+    "delete_confirm": "هل أنت متأكد من حذف هذه الفئة؟"
+  },
+  "filters": {
+    "reference": "المرجع",
+    "name": "الاسم",
+    "category": "الفئة",
+    "supplier": "المورد",
+    "stock_status": "حالة المخزون",
+    "all_categories": "كل الفئات",
+    "all_suppliers": "كل الموردين",
+    "all_stock": "كل الحالات"
+  },
+  "stock_status": {
+    "in_stock": "متوفر",
+    "low_stock": "مخزون منخفض",
+    "out_of_stock": "نفذ المخزون"
+  },
+  "import_export": {
+    "import": "استيراد CSV",
+    "export": "تصدير CSV"
+  },
+  "history": {
+    "unknown": "غير معروف",
+    "stock_in": "دخول مخزون",
+    "stock_out": "خروج مخزون",
+    "manual": "يدوي",
+    "fetch_error": "فشل في جلب حركات المخزون",
+    "id": "المعرف",
+    "product": "المنتج",
+    "movement": "الحركة",
+    "quantity": "الكمية",
+    "source": "المصدر",
+    "date": "التاريخ",
+    "loading": "جاري تحميل حركات المخزون...",
+    "no_movements": "لم يتم العثور على حركات مخزون.",
+    "product_label": "منتج #{{id}}",
+    "no_reference": "لا يوجد مرجع",
+    "prev": "السابق",
+    "next": "التالي",
+    "page_info": "صفحة {{page}} / {{lastPage}}"
+  }
+}
+

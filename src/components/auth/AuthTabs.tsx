@@ -1,4 +1,5 @@
 import { KeyRound, UserPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { AuthMode } from '../../types';
 
 type AuthTabsProps = {
@@ -7,15 +8,17 @@ type AuthTabsProps = {
 };
 
 export function AuthTabs({ mode, onChange }: AuthTabsProps) {
+  const { t } = useTranslation('auth');
+
   return (
-    <div className="tabs" role="tablist" aria-label="Authentication mode">
+    <div className="tabs" role="tablist" aria-label={t('login')}>
       <button className={mode === 'login' ? 'active' : ''} onClick={() => onChange('login')} type="button">
         <KeyRound size={17} aria-hidden="true" />
-        Login
+        {t('login')}
       </button>
       <button className={mode === 'register' ? 'active' : ''} onClick={() => onChange('register')} type="button">
         <UserPlus size={17} aria-hidden="true" />
-        Register
+        {t('register')}
       </button>
     </div>
   );

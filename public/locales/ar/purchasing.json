@@ -1,0 +1,32 @@
+{
+  "title": "المشتريات",
+  "purchases": "المشتريات",
+  "purchase_orders": "طلبات الشراء",
+  "suppliers": "الموردون",
+  "add_purchase": "إضافة شراء",
+  "add_supplier": "مورد جديد",
+  "total_purchases": "إجمالي المشتريات",
+  "no_purchases_found": "لم يتم العثور على مشتريات.",
+  "helper_create_supplier": "قم بإنشاء مورد واحد على الأقل قبل حفظ المشتريات.",
+  "items_count": "الأصناف",
+  "created_at": "أنشئ في",
+  "view_purchase": "عرض الشراء",
+  "edit_purchase": "تعديل الشراء",
+  "delete_purchase": "حذف الشراء",
+  "purchase_details": "تفاصيل الشراء",
+  "details_and_items": "التفاصيل والأصناف",
+  "edit_purchase_item": "تعديل صنف الشراء",
+  "item_details": "تفاصيل الصنف",
+  "not_set": "غير محدد",
+  "supplier": "المورد",
+  "name": "الاسم",
+  "contact": "الاتصال",
+  "no_phone": "لا يوجد هاتف",
+  "no_address": "لا يوجد عنوان",
+  "status": {
+    "pending": "قيد الانتظار",
+    "confirmed": "تم التاكيد",
+    "cancelled": "ملغى",
+    "received": "مستلم"
+  }
+}

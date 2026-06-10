@@ -1,0 +1,98 @@
+{
+  "welcome": {
+    "title": "Welcome to Nexta ERP",
+    "description": "Nexta helps you manage sales, inventory, purchasing, finance and quotations in one intelligent workspace.",
+    "overview": "ERP Overview",
+    "overviewText": "A unified system to run your entire business operation smoothly.",
+    "unified": "Unified Management",
+    "unifiedText": "Connect every department and stop jumping between disconnected tools.",
+    "aiPowered": "AI-Powered",
+    "aiPoweredText": "Intelligent insights that help you make better decisions faster.",
+    "aiContext": "Nexta AI acts as your virtual business analyst, processing your real-time data."
+  },
+  "sales": {
+    "title": "Sales & CRM",
+    "description": "Sales tracks revenue, orders and customer activity to keep your business growing.",
+    "revenue": "Revenue Tracking",
+    "revenueText": "Monitor every dollar coming into your business with precise reporting.",
+    "product": "Product Performance",
+    "productText": "Identify your best-selling items and your underperforming stock.",
+    "trends": "Sales Trends",
+    "trendsText": "Visualize growth patterns and seasonal fluctuations automatically.",
+    "aiContext": "Nexta AI uses sales reports to identify growth opportunities and predict future sales patterns."
+  },
+  "inventory": {
+    "title": "Master Data & Inventory",
+    "description": "Inventory helps monitor stock levels and product availability across your warehouse.",
+    "liveStock": "Live Stock Levels",
+    "liveStockText": "Know exactly what you have on hand at any moment, updated in real-time.",
+    "lowStock": "Low Stock Alerts",
+    "lowStockText": "Get notified before you run out, ensuring you never miss a sale.",
+    "turnover": "Turnover Metrics",
+    "turnoverText": "Track how fast your inventory moves and optimize your storage space.",
+    "aiContext": "Better inventory data leads to more accurate stock recommendations and replenishment alerts."
+  },
+  "purchasing": {
+    "title": "Procurement & Purchasing",
+    "description": "Purchasing tracks supplier spending and procurement activity to optimize your costs.",
+    "supplier": "Supplier Performance",
+    "supplierText": "Evaluate your vendors based on reliability, pricing, and delivery speed.",
+    "po": "Purchase Orders",
+    "poText": "Create and track professional POs from draft to delivery confirmation.",
+    "spending": "Spending Efficiency",
+    "spendingText": "Analyze where your money goes and identify cost-saving opportunities.",
+    "aiContext": "Nexta analyzes purchasing behavior and spending efficiency to improve your profit margins."
+  },
+  "finance": {
+    "title": "Financial Intelligence",
+    "description": "Financial reports summarize business health through automated statements and P&L.",
+    "cashFlow": "Cash Flow",
+    "cashFlowText": "Monitor the movement of money in and out of your business clearly.",
+    "profitability": "Profitability",
+    "profitabilityText": "See your true net profit after accounting for all expenses and refunds.",
+    "revenueAnalytics": "Revenue Analytics",
+    "revenueAnalyticsText": "Deep dive into your income sources and financial performance trends.",
+    "aiContext": "Financial insights depend on accurate records. The cleaner your data, the better the AI's advice."
+  },
+  "devis": {
+    "title": "Quotations / Devis",
+    "description": "Devis manage your quotation pipeline and help convert leads into loyal customers.",
+    "pipeline": "Pipeline Management",
+    "pipelineText": "Track quotations from draft to sent, accepted, or rejected status.",
+    "autoConversion": "Auto-Conversion",
+    "autoConversionText": "Accepted devis are automatically converted into sales orders instantly.",
+    "opportunity": "Opportunity Analysis",
+    "opportunityText": "Identify why deals are lost and focus on the highest probability leads.",
+    "aiContext": "Nexta detects quotation performance and identifies untapped revenue opportunities in your pipeline."
+  },
+  "data": {
+    "title": "Help Nexta Understand",
+    "description": "Nexta AI does NOT invent information. It is a powerful engine that analyzes your actual business activity.",
+    "realData": "Real Data Analysis",
+    "realDataText": "The AI studies your ERP reports to find patterns you might miss.",
+    "accuracy": "Accuracy Matters",
+    "accuracyText": "Add products, track stock, and record every sale for best results.",
+    "dataDriven": "Data-Driven Quality",
+    "dataDrivenText": "AI quality depends directly on the completeness of your business data.",
+    "aiContext": "The more complete your ERP data is, the more accurate and useful the AI analysis becomes."
+  },
+  "ready": {
+    "title": "You're Ready!",
+    "description": "You now understand how Nexta works and how AI generates business insights from your data.",
+    "explore": "Start Exploring",
+    "exploreText": "The dashboard is now yours to command. Welcome aboard!",
+    "aiWaiting": "AI is Waiting",
+    "aiWaitingText": "As you add data, the AI will start providing deeper insights.",
+    "support": "Support",
+    "supportText": "Our team is always here if you need help navigating the platform.",
+    "aiContext": "Ready to transform your business data into actionable intelligence?"
+  },
+  "controls": {
+    "step": "Step {{current}} / {{total}}",
+    "skip": "Skip Tutorial",
+    "previous": "Previous",
+    "next": "Next Step",
+    "replay": "Replay Tutorial",
+    "start": "Start Using Nexta"
+  }
+}

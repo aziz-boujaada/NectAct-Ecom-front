@@ -1,18 +1,40 @@
-import { AlertTriangle, Banknote, Boxes, CalendarDays, CircleDollarSign, RefreshCw, RotateCcw, ShoppingCart, TrendingUp, Users } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
-import { getDashboardStats } from '../../api/catalog';
-import type { DashboardStats as DashboardStatsType, Status } from '../../types';
-import { StatusMessage } from '../StatusMessage';
-import { errorMessage } from './hooks/adminCatalogUtils';
-import { usePagination } from './hooks/usePagination';
-import { PaginationControls } from './PaginationControls';
-import { Can } from '../../context/PermissionContext';
-import { PageHeader } from '../crud/PageHeader';
-import { Card } from '../common/Card';
-import { formatCurrency } from '../../utils/currency';
+import { useTranslation } from "react-i18next";
+import {
+  AlertTriangle,
+  Banknote,
+  Boxes,
+  CalendarDays,
+  CircleDollarSign,
+  RefreshCw,
+  RotateCcw,
+  ShoppingCart,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { getDashboardStats } from "../../api/catalog";
+import type { DashboardStats as DashboardStatsType, Status } from "../../types";
+import { StatusMessage } from "../StatusMessage";
+import { errorMessage } from "./hooks/adminCatalogUtils";
+import { usePagination } from "./hooks/usePagination";
+import { PaginationControls } from "./PaginationControls";
+import { Can } from "../../context/PermissionContext";
+import { PageHeader } from "../crud/PageHeader";
+import { Card } from "../common/Card";
+import { formatCurrency } from "../../utils/currency";
+import i18n from "../../i18n";
 
 /* Chart.js integration */
-import { Line, Pie, Bar } from 'react-chartjs-2';
+import {
+  Line,
+  Pie,
+  Bar,
+  Doughnut,
+  Radar,
+  Bubble,
+  Scatter,
+  PolarArea,
+} from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -25,45 +47,59 @@ import {
   Tooltip,
   Legend,
   Title,
-} from 'chart.js';
+} from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend, Title);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+  Title,
+);
 
 // Register filler for area under line charts
 ChartJS.register(Filler);
 
 // Theme helpers: read CSS variables and dark-mode flag to style charts appropriately
 function getChartTheme() {
-  if (typeof window === 'undefined') return {
-    text: '#0f172a', muted: '#64748b', grid: 'rgba(15,23,42,0.04)', tooltipBg: '#ffffff', tooltipColor: '#0f172a'
-  };
+  if (typeof window === "undefined")
+    return {
+      text: "#0f172a",
+      muted: "#64748b",
+      grid: "rgba(15,23,42,0.04)",
+      tooltipBg: "#ffffff",
+      tooltipColor: "#0f172a",
+    };
 
   const root = document.documentElement;
   const styles = getComputedStyle(root);
-  const text = (styles.getPropertyValue('--text-main') || '#0f172a').trim();
-  const muted = (styles.getPropertyValue('--text-muted') || '#64748b').trim();
-  const isDark = (root.getAttribute('data-theme') || '').trim() === 'dark';
-  const grid = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)';
-  const tooltipBg = isDark ? 'rgba(18,20,36,0.85)' : '#ffffff';
-  const tooltipColor = isDark ? '#eef0f6' : '#0f172a';
+  const text = (styles.getPropertyValue("--text-main") || "#0f172a").trim();
+  const muted = (styles.getPropertyValue("--text-muted") || "#64748b").trim();
+  const isDark = (root.getAttribute("data-theme") || "").trim() === "dark";
+  const grid = isDark ? "rgba(255,255,255,0.04)" : "rgba(15,23,42,0.04)";
+  const tooltipBg = isDark ? "rgba(18,20,36,0.85)" : "#ffffff";
+  const tooltipColor = isDark ? "#eef0f6" : "#0f172a";
 
   return { text, muted, grid, tooltipBg, tooltipColor };
 }
 
 function formatDate(value?: string) {
-  if (!value) return 'N/A';
-  return new Intl.DateTimeFormat('en', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+  if (!value) return "N/A";
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeStyle: "short",
   }).format(new Date(value));
 }
 
 const summaryCards = [
-  { key: 'gross_sales', label: 'Gross sales', icon: CircleDollarSign },
-  { key: 'net_sales', label: 'Net sales', icon: TrendingUp },
-  { key: 'total_refunds', label: 'Refunds', icon: RotateCcw },
-  { key: 'total_purchases', label: 'Purchases', icon: ShoppingCart },
-  { key: 'estimated_profit', label: 'Estimated profit', icon: Banknote },
+  { key: "net_sales", label: "Net sales", icon: TrendingUp },
+  { key: "total_refunds", label: "Refunds", icon: RotateCcw },
+  { key: "total_purchases", label: "Purchases", icon: ShoppingCart },
+  { key: "estimated_profit", label: "Estimated profit", icon: Banknote },
 ] as const;
 
 // Helper: Monthly line chart renderer. Note: backend doesn't provide historical series by default.
@@ -71,66 +107,88 @@ function renderMonthlyLine(stats: DashboardStatsType) {
   // If backend provides `monthly_series` (array of { month, sales_total, refunds_total, purchases_total }), use it.
   // Otherwise fallback to a single-point chart showing current month totals.
   const monthlySeries = (stats as any).monthly_series as
-    | Array<{ month: string; sales_total: string; refunds_total: string; purchases_total: string }>
+    | Array<{
+        month: string;
+        sales_total: string;
+        refunds_total: string;
+        purchases_total: string;
+      }>
     | undefined;
 
   const labels = monthlySeries
     ? monthlySeries.map((m) => m.month)
-    : [new Date().toLocaleString('default', { month: 'short', year: 'numeric' })];
+    : [
+        new Date().toLocaleString("default", {
+          month: "short",
+          year: "numeric",
+        }),
+      ];
 
-  const salesData = monthlySeries ? monthlySeries.map((m) => Number(m.sales_total || 0)) : [Number(stats.current_month.sales_total || 0)];
-  const refundsData = monthlySeries ? monthlySeries.map((m) => Number(m.refunds_total || 0)) : [Number(stats.current_month.refunds_total || 0)];
-  const purchasesData = monthlySeries ? monthlySeries.map((m) => Number(m.purchases_total || 0)) : [Number(stats.current_month.purchases_total || 0)];
+  const salesData = monthlySeries
+    ? monthlySeries.map((m) => Number(m.sales_total || 0))
+    : [Number(stats.current_month.sales_total || 0)];
+  const refundsData = monthlySeries
+    ? monthlySeries.map((m) => Number(m.refunds_total || 0))
+    : [Number(stats.current_month.refunds_total || 0)];
+  const purchasesData = monthlySeries
+    ? monthlySeries.map((m) => Number(m.purchases_total || 0))
+    : [Number(stats.current_month.purchases_total || 0)];
 
   const data = {
     labels,
     datasets: [
       {
-        label: 'Sales',
+        label: "Sales",
         data: salesData,
-        borderColor: '#10b981',
+        borderColor: "#10b981",
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx as CanvasRenderingContext2D;
           const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-          gradient.addColorStop(0, 'rgba(16,185,129,0.22)');
-          gradient.addColorStop(1, 'rgba(16,185,129,0.02)');
+          gradient.addColorStop(0, "rgb(16,185,129)");
+          gradient.addColorStop(1, "rgb(16,185,129)");
           return gradient;
         },
         tension: 0.36,
-        pointRadius: 0,
-        pointHoverRadius: 6,
+        hoverOffset: 12,
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 36,
         fill: true,
       },
       {
-        label: 'Refunds',
+        label: "Refunds",
         data: refundsData,
-        borderColor: '#ef4444',
+        borderColor: "#ef4444",
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx as CanvasRenderingContext2D;
           const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-          gradient.addColorStop(0, 'rgba(239,68,68,0.18)');
-          gradient.addColorStop(1, 'rgba(239,68,68,0.02)');
+          gradient.addColorStop(0, "rgb(239,68,68)");
+          gradient.addColorStop(1, "rgb(239,68,68)");
           return gradient;
         },
         tension: 0.36,
-        pointRadius: 0,
-        pointHoverRadius: 6,
+        hoverOffset: 12,
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 36,
         fill: true,
       },
       {
-        label: 'Purchases',
+        label: "Purchases",
         data: purchasesData,
-        borderColor: '#3b82f6',
+        borderColor: "#3b82f6",
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx as CanvasRenderingContext2D;
           const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-          gradient.addColorStop(0, 'rgba(59,130,246,0.16)');
-          gradient.addColorStop(1, 'rgba(59,130,246,0.02)');
+          gradient.addColorStop(0, "rgb(59,130,246)");
+          gradient.addColorStop(1, "rgb(59,130,246)");
           return gradient;
         },
         tension: 0.36,
-        pointRadius: 0,
-        pointHoverRadius: 6,
+        hoverOffset: 12,
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 36,
         fill: true,
       },
     ],
@@ -141,12 +199,12 @@ function renderMonthlyLine(stats: DashboardStatsType) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    interaction: { intersect: false, mode: 'index' as const },
+    interaction: { intersect: false, mode: "index" as const },
     plugins: {
       legend: {
-        position: 'top' as const,
-        align: 'end' as const,
-        labels: { boxWidth: 10, usePointStyle: true, padding: 12 },
+        position: "top" as const,
+        align: "end" as const,
+        labels: { boxWidth: 10, usePointStyle: true, padding: 10, margin: 12 },
       },
       tooltip: {
         padding: 10,
@@ -155,17 +213,24 @@ function renderMonthlyLine(stats: DashboardStatsType) {
         titleFont: { weight: 600 as any },
         bodyFont: { weight: 600 as any },
         callbacks: {
-          label: (context: any) => `${Number(context.parsed.y ?? 0).toLocaleString()} DH`,
+          label: (context: any) =>
+            `${Number(context.parsed.y ?? 0).toLocaleString()} DH`,
         },
       },
     },
     scales: (() => {
       const theme = getChartTheme();
       return {
-        x: { grid: { display: false }, ticks: { color: theme.muted, maxRotation: 0, minRotation: 0 } },
+        x: {
+          grid: { display: false },
+          ticks: { color: theme.muted, maxRotation: 0, minRotation: 0 },
+        },
         y: {
           grid: { color: theme.grid },
-          ticks: { callback: (v: any) => `${Number(v).toLocaleString()}`, color: theme.muted },
+          ticks: {
+            callback: (v: any) => `${Number(v).toLocaleString()}`,
+            color: theme.muted,
+          },
           beginAtZero: true,
           suggestedMax: maxVal > 0 ? Math.ceil(maxVal * 1.12) : undefined,
         },
@@ -173,10 +238,13 @@ function renderMonthlyLine(stats: DashboardStatsType) {
     })(),
   };
 
-  return <Line data={data} options={options} />;
+  return <Bar data={data} options={options} />;
 }
 
-function renderStatusDoughnut(values: Record<string, number>, purchases = false) {
+function renderStatusDoughnut(
+  values: Record<string, number>,
+  purchases = false,
+) {
   const labels = Object.keys(values);
   const data = {
     labels,
@@ -184,15 +252,21 @@ function renderStatusDoughnut(values: Record<string, number>, purchases = false)
       {
         data: Object.values(values),
         backgroundColor: labels.map((l) => {
-          if (purchases) return l === 'pending' ? '#f59e0b' : '#10b981';
+          if (purchases) return l === "pending" ? "#f59e0b" : "#10b981";
           // sales statuses
-          if (l === 'paid') return '#10b981';
-          if (l === 'unpaid') return '#f59e0b';
-          if (l === 'refunded') return '#ef4444';
-          return '#94a3b8';
+          if (l === "paid") return "#10b981";
+          if (l === "unpaid") return "#f59e0b";
+          if (l === "refunded") return "#ef4444";
+          if (l === "partially_paid") return "#5e44ef";
+          if (l === "partial_refunded") return "#074391";
+          return "#94a3b8";
         }),
-        borderWidth: 0,
+        tension: 0.36,
         hoverOffset: 12,
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 36,
+        fill: true,
       },
     ],
   };
@@ -200,20 +274,38 @@ function renderStatusDoughnut(values: Record<string, number>, purchases = false)
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '60%',
+    cutout: "40%",
     plugins: (() => {
       const theme = getChartTheme();
       return {
-        legend: { display: true, position: 'bottom' as const, labels: { boxWidth: 10, padding: 8, color: theme.muted } },
-        tooltip: { padding: 8, cornerRadius: 8, backgroundColor: theme.tooltipBg, titleColor: theme.tooltipColor, bodyColor: theme.tooltipColor },
+        legend: {
+          display: true,
+          position: "bottom" as const,
+          labels: {
+            cornerRadius: 10,
+            boxWidth: 10,
+            padding: 8,
+            margin: 8,
+            color: theme.muted,
+          },
+        },
+        tooltip: {
+          padding: 8,
+          cornerRadius: 10,
+          backgroundColor: theme.tooltipBg,
+          titleColor: theme.tooltipColor,
+          bodyColor: theme.tooltipColor,
+        },
       };
     })(),
   };
 
-  return <Pie data={data} options={options} />;
+  return <Doughnut data={data} options={options} />;
 }
 
-function renderTopProductsBar(products: DashboardStatsType['top_selling_products']) {
+function renderTopProductsBar(
+  products: DashboardStatsType["top_selling_products"],
+) {
   // show only top N products to keep chart compact
   const top = products.slice(0, 6);
   const labels = top.map((p) => p.name);
@@ -221,13 +313,13 @@ function renderTopProductsBar(products: DashboardStatsType['top_selling_products
     labels,
     datasets: [
       {
-        label: 'Quantity Sold',
+        label: "Quantity Sold",
         data: top.map((p) => p.quantity_sold),
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx as CanvasRenderingContext2D;
           const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
-          gradient.addColorStop(0, 'rgba(59,130,246,0.95)');
-          gradient.addColorStop(1, 'rgba(99,102,241,0.85)');
+          gradient.addColorStop(0, "rgba(59,130,246,0.95)");
+          gradient.addColorStop(1, "rgba(99,102,241,0.85)");
           return gradient;
         },
         borderRadius: 8,
@@ -238,18 +330,33 @@ function renderTopProductsBar(products: DashboardStatsType['top_selling_products
   };
 
   const options = {
-    indexAxis: 'x' as const,
+    indexAxis: "x" as const,
     responsive: true,
     maintainAspectRatio: false,
     plugins: (() => {
       const theme = getChartTheme();
-      return { legend: { display: false }, tooltip: { padding: 8, cornerRadius: 8, backgroundColor: theme.tooltipBg, titleColor: theme.tooltipColor, bodyColor: theme.tooltipColor } };
+      return {
+        legend: { display: false },
+        tooltip: {
+          padding: 8,
+          cornerRadius: 8,
+          backgroundColor: theme.tooltipBg,
+          titleColor: theme.tooltipColor,
+          bodyColor: theme.tooltipColor,
+        },
+      };
     })(),
     scales: (() => {
       const theme = getChartTheme();
       return {
-        x: { grid: { display: false }, ticks: { color: theme.muted, maxRotation: 0 } },
-        y: { grid: { color: theme.grid }, ticks: { precision: 0, color: theme.muted } },
+        x: {
+          grid: { display: false },
+          ticks: { color: theme.muted, maxRotation: 0 },
+        },
+        y: {
+          grid: { color: theme.grid },
+          ticks: { precision: 0, color: theme.muted },
+        },
       };
     })(),
   };
@@ -257,20 +364,24 @@ function renderTopProductsBar(products: DashboardStatsType['top_selling_products
   return <Bar data={data} options={options} />;
 }
 
-function renderLowStockHorizontal(products: DashboardStatsType['low_stock_products']) {
-  const sorted = [...products].sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0)).slice(0, 6);
+function renderLowStockHorizontal(
+  products: DashboardStatsType["low_stock_products"],
+) {
+  const sorted = [...products]
+    .sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0))
+    .slice(0, 6);
   const labels = sorted.map((p) => p.name);
   const data = {
     labels,
     datasets: [
       {
-        label: 'Stock',
+        label: "Stock",
         data: sorted.map((p) => p.stock ?? 0),
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx as CanvasRenderingContext2D;
           const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
-          gradient.addColorStop(0, 'rgba(239,68,68,0.95)');
-          gradient.addColorStop(1, 'rgba(245,158,11,0.85)');
+          gradient.addColorStop(0, "rgba(239,68,68,0.95)");
+          gradient.addColorStop(1, "rgba(245,158,11,0.85)");
           return gradient;
         },
         borderRadius: 8,
@@ -281,16 +392,93 @@ function renderLowStockHorizontal(products: DashboardStatsType['low_stock_produc
   };
 
   const options = {
-    indexAxis: 'y' as const,
+    indexAxis: "y" as const,
     responsive: true,
     maintainAspectRatio: false,
     plugins: (() => {
       const theme = getChartTheme();
-      return { legend: { display: false }, tooltip: { padding: 8, cornerRadius: 8, backgroundColor: theme.tooltipBg, titleColor: theme.tooltipColor, bodyColor: theme.tooltipColor } };
+      return {
+        legend: { display: false },
+        tooltip: {
+          padding: 8,
+          cornerRadius: 8,
+          backgroundColor: theme.tooltipBg,
+          titleColor: theme.tooltipColor,
+          bodyColor: theme.tooltipColor,
+        },
+      };
     })(),
     scales: (() => {
       const theme = getChartTheme();
-      return { x: { grid: { color: theme.grid }, ticks: { color: theme.muted, stepSize: 1, precision: 0 }, min: 0, max: 5 }, y: { grid: { display: false }, ticks: { color: theme.muted } } };
+      return {
+        x: {
+          grid: { color: theme.grid },
+          ticks: { color: theme.muted, stepSize: 1, precision: 0 },
+          min: 0,
+          max: 5,
+        },
+        y: { grid: { display: false }, ticks: { color: theme.muted } },
+      };
+    })(),
+  };
+
+  return <Bar data={data} options={options} />;
+}
+
+function renderDevisStatusBar(values: Record<string, number>) {
+  const order = ["draft", "sent", "accepted", "rejected", "expired"];
+  const labels = order.filter((label) => label in values);
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Devis",
+        data: labels.map((label) => values[label] ?? 0),
+        backgroundColor: labels.map((label) => {
+          if (label === "draft") return "#6366f1";
+          if (label === "sent") return "#3b82f6";
+          if (label === "accepted") return "#10b981";
+          if (label === "rejected") return "#ef4444";
+          if (label === "expired") return "#f59e0b";
+          return "#94a3b8";
+        }),
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 40,
+      },
+    ],
+  };
+
+  const options = {
+    indexAxis: "y" as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: (() => {
+      const theme = getChartTheme();
+      return {
+        legend: { display: false },
+        tooltip: {
+          padding: 8,
+          cornerRadius: 8,
+          backgroundColor: theme.tooltipBg,
+          titleColor: theme.tooltipColor,
+          bodyColor: theme.tooltipColor,
+        },
+      };
+    })(),
+    scales: (() => {
+      const theme = getChartTheme();
+      return {
+        x: {
+          beginAtZero: true,
+          grid: { color: theme.grid },
+          ticks: { precision: 0, color: theme.muted },
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: theme.muted },
+        },
+      };
     })(),
   };
 
@@ -301,6 +489,7 @@ export function DashboardStats() {
   const [stats, setStats] = useState<DashboardStatsType | null>(null);
   const [status, setStatus] = useState<Status>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation("dashboard");
 
   async function loadStats() {
     setLoading(true);
@@ -309,7 +498,7 @@ export function DashboardStats() {
     try {
       setStats(await getDashboardStats());
     } catch (error) {
-      setStatus({ type: 'error', text: errorMessage(error) });
+      setStatus({ type: "error", text: errorMessage(error) });
     } finally {
       setLoading(false);
     }
@@ -325,7 +514,7 @@ export function DashboardStats() {
       })
       .catch((error: unknown) => {
         if (!active) return;
-        setStatus({ type: 'error', text: errorMessage(error) });
+        setStatus({ type: "error", text: errorMessage(error) });
       })
       .finally(() => {
         if (!active) return;
@@ -339,13 +528,18 @@ export function DashboardStats() {
 
   return (
     <div className="admin-dashboard dashboard-stats">
-      <PageHeader 
-        title="Statistics Overview" 
-        eyebrow="Dashboard"
+      <PageHeader
+        title={t("statistics_overview")}
+        eyebrow={t("title")}
         actions={
-          <button className="secondary-action" disabled={loading} onClick={() => void loadStats()} type="button">
+          <button
+            className="secondary-action"
+            disabled={loading}
+            onClick={() => void loadStats()}
+            type="button"
+          >
             <RefreshCw size={17} aria-hidden="true" />
-            Reload
+            {t("reload")}
           </button>
         }
       />
@@ -353,7 +547,7 @@ export function DashboardStats() {
       <StatusMessage status={status} />
 
       {loading && !stats ? (
-        <p className="empty-state">Loading dashboard statistics...</p>
+        <p className="empty-state">{t("loading_stats")}</p>
       ) : stats ? (
         <div className="stats-layout fade-in">
           <section className="stats-card-grid">
@@ -364,7 +558,7 @@ export function DashboardStats() {
                     <Icon size={20} aria-hidden="true" />
                   </div>
                   <div>
-                    <span>{label}</span>
+                    <span>{t(label)}</span>
                     <strong>{formatCurrency(stats.summary[key])}</strong>
                   </div>
                 </article>
@@ -373,32 +567,52 @@ export function DashboardStats() {
           </section>
 
           <section className="kpi-row">
-            <Card title="Daily Movement" subtitle="Today" className="kpi-card-wrapper">
+            <Card
+              title={t("kpi.daily_movement")}
+              subtitle={t("kpi.today")}
+              className="kpi-card-wrapper"
+            >
               <div className="kpi-values">
                 <div className="kpi-item sales">
-                  <span className="kpi-label">Sales</span>
-                  <strong className="kpi-value green">{stats.today.sales} ({formatCurrency(stats.today.sales_total)})</strong>
+                  <span className="kpi-label">{t("kpi.sales")}</span>
+                  <strong className="kpi-value green">
+                    {stats.today.sales} (
+                    {formatCurrency(stats.today.sales_total)})
+                  </strong>
                 </div>
                 <div className="kpi-item refunds">
-                  <span className="kpi-label">Refunds</span>
-                  <strong className="kpi-value red">{stats.today.refunds} ({formatCurrency(stats.today.refunds_total)})</strong>
+                  <span className="kpi-label">{t("kpi.refunds")}</span>
+                  <strong className="kpi-value red">
+                    {stats.today.refunds} (
+                    {formatCurrency(stats.today.refunds_total)})
+                  </strong>
                 </div>
               </div>
             </Card>
 
-            <Card title="Monthly Totals" subtitle="Current Month" className="kpi-card-wrapper">
+            <Card
+              title={t("kpi.monthly_totals")}
+              subtitle={t("kpi.current_month")}
+              className="kpi-card-wrapper"
+            >
               <div className="kpi-values">
                 <div className="kpi-item sales">
-                  <span className="kpi-label">Sales</span>
-                  <strong className="kpi-value green">{formatCurrency(stats.current_month.sales_total)}</strong>
+                  <span className="kpi-label">{t("kpi.sales")}</span>
+                  <strong className="kpi-value green">
+                    {formatCurrency(stats.current_month.sales_total)}
+                  </strong>
                 </div>
                 <div className="kpi-item refunds">
-                  <span className="kpi-label">Refunds</span>
-                  <strong className="kpi-value red">{formatCurrency(stats.current_month.refunds_total)}</strong>
+                  <span className="kpi-label">{t("kpi.refunds")}</span>
+                  <strong className="kpi-value red">
+                    {formatCurrency(stats.current_month.refunds_total)}
+                  </strong>
                 </div>
                 <div className="kpi-item purchases">
-                  <span className="kpi-label">Purchases</span>
-                  <strong className="kpi-value blue">{formatCurrency(stats.current_month.purchases_total)}</strong>
+                  <span className="kpi-label">{t("kpi.purchases")}</span>
+                  <strong className="kpi-value blue">
+                    {formatCurrency(stats.current_month.purchases_total)}
+                  </strong>
                 </div>
               </div>
             </Card>
@@ -408,8 +622,8 @@ export function DashboardStats() {
             <div className="admin-section chart-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Trend</p>
-                  <h2>Monthly Totals</h2>
+                  <p className="eyebrow">{t("charts.trend")}</p>
+                  <h2>{t("charts.monthly_totals")}</h2>
                 </div>
               </div>
               <div className="chart-wrap">{renderMonthlyLine(stats)}</div>
@@ -418,50 +632,93 @@ export function DashboardStats() {
             <div className="admin-section chart-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Status</p>
-                  <h2>Sales Status</h2>
+                  <p className="eyebrow">{t("charts.status")}</p>
+                  <h2>{t("charts.sales_status")}</h2>
                 </div>
-                <span>{Object.values(stats.sales_by_status).reduce((a,b)=>a+b,0)}</span>
+                <span>
+                  {Object.values(stats.sales_by_status).reduce(
+                    (a, b) => a + b,
+                    0,
+                  )}
+                </span>
               </div>
-              <div className="chart-wrap">{renderStatusDoughnut(stats.sales_by_status)}</div>
+              <div className="chart-wrap">
+                {renderStatusDoughnut(stats.sales_by_status)}
+              </div>
             </div>
 
             <div className="admin-section chart-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Status</p>
-                  <h2>Purchases Status</h2>
+                  <p className="eyebrow">{t("charts.status")}</p>
+                  <h2>{t("charts.purchases_status")}</h2>
                 </div>
-                <span>{Object.values(stats.purchases_by_status).reduce((a,b)=>a+b,0)}</span>
+                <span>
+                  {Object.values(stats.purchases_by_status).reduce(
+                    (a, b) => a + b,
+                    0,
+                  )}
+                </span>
               </div>
-              <div className="chart-wrap">{renderStatusDoughnut(stats.purchases_by_status, true)}</div>
+              <div className="chart-wrap">
+                {renderStatusDoughnut(stats.purchases_by_status, true)}
+              </div>
             </div>
+
+            {stats.devis_by_status && (
+              <div className="admin-section chart-card">
+                <div className="section-heading">
+                  <div>
+                    <p className="eyebrow">{t("charts.status")}</p>
+                    <h2>{t("charts.devis_status")}</h2>
+                  </div>
+                  <span>
+                    {Object.values(stats.devis_by_status).reduce(
+                      (a, b) => a + b,
+                      0,
+                    )}
+                  </span>
+                </div>
+                <div className="chart-wrap">
+                  {renderDevisStatusBar(stats.devis_by_status)}
+                </div>
+              </div>
+            )}
 
             <div className="chart-pair">
               <div className="admin-section chart-card">
                 <div className="section-heading">
                   <div>
-                    <p className="eyebrow">Products</p>
-                    <h2>Top Selling Products</h2>
+                    <p className="eyebrow">
+                      {t("charts.top_selling_products")}
+                    </p>
+                    <h2>{t("charts.top_selling_products")}</h2>
                   </div>
                 </div>
-                <div className="chart-wrap">{renderTopProductsBar(stats.top_selling_products)}</div>
+                <div className="chart-wrap">
+                  {renderTopProductsBar(stats.top_selling_products)}
+                </div>
               </div>
 
               <div className="admin-section chart-card">
                 <div className="section-heading">
                   <div>
-                    <p className="eyebrow">Inventory</p>
-                    <h2>Low Stock Products</h2>
+                    <p className="eyebrow">{t("charts.low_stock_products")}</p>
+                    <h2>{t("charts.low_stock_products")}</h2>
                   </div>
                 </div>
-                <div className="chart-wrap">{renderLowStockHorizontal(stats.low_stock_products)}</div>
+                <div className="chart-wrap">
+                  {renderLowStockHorizontal(stats.low_stock_products)}
+                </div>
               </div>
             </div>
           </section>
 
           <section className="stats-split">
-            <ProductsTable title="Top Selling Products" products={stats.top_selling_products} />
+            <ProductsTable
+              title="Top Selling Products"
+              products={stats.top_selling_products}
+            />
             <LowStockTable products={stats.low_stock_products} />
           </section>
 
@@ -475,7 +732,13 @@ export function DashboardStats() {
   );
 }
 
-function StatusBreakdown({ title, values }: { title: string; values: Record<string, number> }) {
+function StatusBreakdown({
+  title,
+  values,
+}: {
+  title: string;
+  values: Record<string, number>;
+}) {
   const total = Object.values(values).reduce((sum, value) => sum + value, 0);
 
   return (
@@ -499,14 +762,28 @@ function StatusBreakdown({ title, values }: { title: string; values: Record<stri
   );
 }
 
-function ProductsTable({ title, products }: { title: string; products: DashboardStatsType['top_selling_products'] }) {
-  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(products);
+function ProductsTable({
+  title,
+  products,
+}: {
+  title: string;
+  products: DashboardStatsType["top_selling_products"];
+}) {
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
+    goToPage,
+  } = usePagination(products);
+  const { t } = useTranslation("dashboard");
   return (
     <div className="admin-section">
       <div className="section-heading">
         <div>
           <p className="eyebrow">Products</p>
-          <h2>{title}</h2>
+          <h2>{t("charts.top_selling_products")}</h2>
         </div>
       </div>
       <div className="table-wrap compact-table">
@@ -520,14 +797,21 @@ function ProductsTable({ title, products }: { title: string; products: Dashboard
           </thead>
           <tbody>
             {products.length === 0 ? (
-              <tr><td colSpan={3}>No sales yet.</td></tr>
-            ) : paginatedData.map((product) => (
-              <tr key={product.id}>
-                <td>{product.name}<span>{product.reference || 'No reference'}</span></td>
-                <td>{product.quantity_sold}</td>
-                <td>{formatCurrency(product.sales_total)}</td>
+              <tr>
+                <td colSpan={3}>No sales yet.</td>
               </tr>
-            ))}
+            ) : (
+              paginatedData.map((product) => (
+                <tr key={product.id}>
+                  <td>
+                    {product.name}
+                    <span>{product.reference || "No reference"}</span>
+                  </td>
+                  <td>{product.quantity_sold}</td>
+                  <td>{formatCurrency(product.sales_total)}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -544,14 +828,26 @@ function ProductsTable({ title, products }: { title: string; products: Dashboard
   );
 }
 
-function LowStockTable({ products }: { products: DashboardStatsType['low_stock_products'] }) {
-  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(products);
+function LowStockTable({
+  products,
+}: {
+  products: DashboardStatsType["low_stock_products"];
+}) {
+  const { t } = useTranslation("dashboard");
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
+    goToPage,
+  } = usePagination(products);
   return (
     <div className="admin-section">
       <div className="section-heading">
         <div>
           <p className="eyebrow">Inventory</p>
-          <h2>Low Stock Products</h2>
+          <h2>{t("charts.low_stock_products")}</h2>
         </div>
       </div>
       <div className="table-wrap compact-table">
@@ -565,14 +861,21 @@ function LowStockTable({ products }: { products: DashboardStatsType['low_stock_p
           </thead>
           <tbody>
             {products.length === 0 ? (
-              <tr><td colSpan={3}>No low stock products.</td></tr>
-            ) : paginatedData.map((product) => (
-              <tr key={product.id}>
-                <td>{product.name}<span>{product.reference || 'No reference'}</span></td>
-                <td>{product.stock ?? 0}</td>
-                <td>{product.min_stock ?? 0}</td>
+              <tr>
+                <td colSpan={3}>No low stock products.</td>
               </tr>
-            ))}
+            ) : (
+              paginatedData.map((product) => (
+                <tr key={product.id}>
+                  <td>
+                    {product.name}
+                    <span>{product.reference || "No reference"}</span>
+                  </td>
+                  <td>{product.stock ?? 0}</td>
+                  <td>{product.min_stock ?? 0}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -589,37 +892,60 @@ function LowStockTable({ products }: { products: DashboardStatsType['low_stock_p
   );
 }
 
-function RecentSalesTable({ sales }: { sales: DashboardStatsType['recent_sales'] }) {
-  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(sales);
+function RecentSalesTable({
+  sales,
+}: {
+  sales: DashboardStatsType["recent_sales"];
+}) {
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
+    goToPage,
+  } = usePagination(sales);
+  const { t } = useTranslation("dashboard");
   return (
     <div className="admin-section">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Sales</p>
-          <h2>Recent Sales</h2>
+          <p className="eyebrow">{t("tables.recent_sales")}</p>
+          <h2>{t("tables.recent_sales")}</h2>
         </div>
       </div>
       <div className="table-wrap compact-table">
         <table>
           <thead>
             <tr>
-              <th>Reference</th>
-              <th>Client</th>
-              <th>Total</th>
-              <th>Status</th>
+              <th>{t("tables.reference")}</th>
+              <th>{t("tables.client")}</th>
+              <th>{t("tables.total")}</th>
+              <th>{t("tables.status")}</th>
             </tr>
           </thead>
           <tbody>
             {sales.length === 0 ? (
-              <tr><td colSpan={4}>No recent sales.</td></tr>
-            ) : paginatedData.map((sale) => (
-              <tr key={sale.id}>
-                <td>{sale.reference || `Sale #${sale.id}`}<span>{formatDate(sale.created_at)}</span></td>
-                <td>{sale.client?.name ?? 'Unknown client'}</td>
-                <td>{formatCurrency(sale.total)}</td>
-                <td><span className={`status-pill ${sale.status}`}>{sale.status}</span></td>
+              <tr>
+                <td colSpan={4}>{t("no_recent_sales")}</td>
               </tr>
-            ))}
+            ) : (
+              paginatedData.map((sale) => (
+                <tr key={sale.id}>
+                  <td>
+                    {sale.reference || `Sale #${sale.id}`}
+                    <span>{formatDate(sale.created_at)}</span>
+                  </td>
+                  <td>{sale.client?.name ?? t("tables.unknown_client")}</td>
+                  <td>{formatCurrency(sale.total)}</td>
+                  <td>
+                    <span className={`status-pill ${sale.status}`}>
+                      {sale.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -636,14 +962,26 @@ function RecentSalesTable({ sales }: { sales: DashboardStatsType['recent_sales']
   );
 }
 
-function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_refunds'] }) {
-  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(refunds);
+function RecentRefundsTable({
+  refunds,
+}: {
+  refunds: DashboardStatsType["recent_refunds"];
+}) {
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    nextPage,
+    prevPage,
+    goToPage,
+  } = usePagination(refunds);
+  const { t } = useTranslation("dashboard");
   return (
     <div className="admin-section">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">Refunds</p>
-          <h2>Recent Refunds</h2>
+          <p className="eyebrow">{t("stats.refunds")}</p>
+          <h2>{t("tables.recent_refunds")}</h2>
         </div>
       </div>
       <div className="table-wrap compact-table">
@@ -658,15 +996,22 @@ function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_r
           </thead>
           <tbody>
             {refunds.length === 0 ? (
-              <tr><td colSpan={4}>No recent refunds.</td></tr>
-            ) : paginatedData.map((refund) => (
-              <tr key={refund.id}>
-                <td>{refund.sale?.reference || `Sale #${refund.sale_id}`}<span>{formatDate(refund.created_at)}</span></td>
-                <td>{refund.sale?.client?.name ?? 'Unknown client'}</td>
-                <td>{formatCurrency(refund.total)}</td>
-                <td>{refund.reason || 'No reason'}</td>
+              <tr>
+                <td colSpan={4}>No recent refunds.</td>
               </tr>
-            ))}
+            ) : (
+              paginatedData.map((refund) => (
+                <tr key={refund.id}>
+                  <td>
+                    {refund.sale?.reference || `Sale #${refund.sale_id}`}
+                    <span>{formatDate(refund.created_at)}</span>
+                  </td>
+                  <td>{refund.sale?.client?.name ?? "Unknown client"}</td>
+                  <td>{formatCurrency(refund.total)}</td>
+                  <td>{refund.reason || "No reason"}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -682,4 +1027,3 @@ function RecentRefundsTable({ refunds }: { refunds: DashboardStatsType['recent_r
     </div>
   );
 }
-

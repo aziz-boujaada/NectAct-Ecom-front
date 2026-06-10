@@ -4,15 +4,17 @@ import { ModuleType, SubViewType } from '../layout/Sidebar';
 import { DashboardStats } from './DashboardStats';
 import { StatusMessage } from '../StatusMessage';
 import { useAdminCatalog } from './useAdminCatalog';
+import { SettingsPage } from '../settings/SettingsPage';
 
 // Module Imports
 import { InventoryModule } from '../../modules/inventory/InventoryModule';
 import { SalesModule } from '../../modules/sales/SalesModule';
 import { PurchasingModule } from '../../modules/purchasing/PurchasingModule';
+import { DevisModule } from '../../modules/devis/DevisModule';
 import { AdminModule } from '../../modules/admin/AdminModule';
 import { ProfileModule } from '../../modules/profile/ProfileModule';
 import { ReportsModule } from '../../modules/reports/ReportsModule';
-
+import PaymentModule from '../../modules/payments/PaymentModule';
 import type { PasswordFormValues, ProfileFormValues, Status, User } from '../../types';
 
 type DashboardProps = {
@@ -28,6 +30,7 @@ type DashboardProps = {
   onPasswordSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onLogout: () => void;
   onThemeToggle: () => void;
+  onShowTutorial: () => void;
 };
 
 export function Dashboard({
@@ -43,6 +46,7 @@ export function Dashboard({
   onPasswordSubmit,
   onLogout,
   onThemeToggle,
+  onShowTutorial,
 }: DashboardProps) {
   const [activeModule, setActiveModule] = useState<ModuleType>('dashboard');
   const [activeView, setActiveView] = useState<SubViewType>('overview');
@@ -66,6 +70,8 @@ export function Dashboard({
       refunds: { module: 'sales', view: 'refunds' },
       purchases: { module: 'purchasing', view: 'purchases-list' },
       suppliers: { module: 'purchasing', view: 'suppliers' },
+      devises: { module: 'devises', view: 'devis-list' },
+      payments: { module: 'payments', view: 'payments' },
       users: { module: 'admin', view: 'users' },
       permissions: { module: 'admin', view: 'permissions' },
       profile: { module: 'profile', view: 'account' },
@@ -74,6 +80,11 @@ export function Dashboard({
       'inventory-report': { module: 'reports', view: 'inventory-report' },
       'sales-report': { module: 'reports', view: 'sales-report' },
       'purchasing-report': { module: 'reports', view: 'purchasing-report' },
+      'devis-report': { module: 'reports', view: 'devis-report' },
+      company: { module: 'settings', view: 'company' },
+      appearance: { module: 'settings', view: 'appearance' },
+      references: { module: 'settings', view: 'references' },
+      chat: { module: 'ai', view: 'chat' },
     };
 
     const target = mapping[tab];
@@ -112,11 +123,19 @@ export function Dashboard({
       )}
 
       {activeModule === 'sales' && (
-        <SalesModule 
-          activeView={activeView} 
-          catalog={catalog} 
-          onTabChange={handleLegacyTabChange} 
-        />
+        (activeView === 'devis-list' ? (
+          <DevisModule
+            activeView={activeView}
+            catalog={catalog}
+            onTabChange={handleLegacyTabChange}
+          />
+        ) : (
+          <SalesModule 
+            activeView={activeView} 
+            catalog={catalog} 
+            onTabChange={handleLegacyTabChange} 
+          />
+        ))
       )}
 
       {activeModule === 'purchasing' && (
@@ -125,6 +144,18 @@ export function Dashboard({
           catalog={catalog} 
           onTabChange={handleLegacyTabChange} 
         />
+      )}
+
+      {activeModule === 'devises' && (
+        <DevisModule
+          activeView={activeView}
+          catalog={catalog}
+          onTabChange={handleLegacyTabChange}
+        />
+      )}
+
+      {activeModule === 'payments' && (
+        <PaymentModule onSalesChanged={catalog.refreshSales} />
       )}
 
       {activeModule === 'admin' && (
@@ -142,11 +173,16 @@ export function Dashboard({
           onPasswordChange={onPasswordChange}
           onProfileSubmit={onProfileSubmit}
           onPasswordSubmit={onPasswordSubmit}
+          onShowTutorial={onShowTutorial}
         />
       )}
 
       {activeModule === 'reports' && (
         <ReportsModule activeView={activeView} />
+      )}
+
+      {activeModule === 'settings' && (
+        <SettingsPage activeView={activeView === 'references' ? 'references' : activeView === 'appearance' ? 'appearance' : 'company'} />
       )}
     </MainLayout>
   );

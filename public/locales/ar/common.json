@@ -1,0 +1,51 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "loading": "جاري التحميل...",
+    "actions": "إجراءات",
+    "status": "الحالة",
+    "date": "التاريخ",
+    "amount": "المبلغ",
+    "no_data": "لا توجد بيانات متاحة",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "success": "نجاح",
+    "error": "خطأ",
+    "warning": "تحذير",
+    "info": "معلومات",
+    "logout": "تسجيل الخروج",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "help": "مساعدة",
+    "notifications": "الإشعارات",
+    "all": "الكل",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "shown": "معروض",
+    "total": "الإجمالي",
+    "no_reference": "لا يوجد مرجع",
+    "unknown_client": "عميل غير معروف",
+    "no_reason": "بدون سبب",
+    "id": "المعرف",
+    "image": "الصورة",
+    "stock": "المخزون",
+    "clear_filters": "مسح الفلاتر"
+  },
+  "tagline": "نظام تخطيط موارد المؤسسات",
+  "app": {
+    "loadingAuth": "جاري تحميل الجلسة...",
+    "somethingWentWrong": "حدث خطأ ما"
+  },
+  "status": {
+    "loginSuccess": "تم تسجيل الدخول بنجاح",
+    "accountCreated": "تم إنشاء الحساب بنجاح",
+    "loggedOut": "تم تسجيل الخروج",
+    "loading": "جاري التحميل..."
+  }
+}

@@ -1,4 +1,6 @@
 import { FormEvent } from "react";
+import { HelpCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { ProfileFormValues, UserRole } from "../../types";
 import type { User } from "../../types";
 
@@ -9,6 +11,7 @@ type ProfileFormProps = {
   loading: boolean;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   authUser: User;
+  onShowTutorial?: () => void;
 };
 
 export function ProfileForm({
@@ -17,13 +20,28 @@ export function ProfileForm({
   onChange,
   onSubmit,
   authUser,
+  onShowTutorial,
 }: ProfileFormProps) {
-console.log(typeof(authUser))
+  const { t } = useTranslation("auth");
+
   return (
     <form onSubmit={onSubmit}>
-      <h2>Profile</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h2 style={{ margin: 0 }}>{t("profile.title")}</h2>
+        {onShowTutorial && (
+          <button 
+            type="button" 
+            className="secondary-action" 
+            onClick={onShowTutorial}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}
+          >
+            <HelpCircle size={16} />
+            {t("profile.replay_tutorial")}
+          </button>
+        )}
+      </div>
       <label>
-        Name
+        {t("profile.name")}
         <input
           value={form.name}
           onChange={(event) => onChange({ ...form, name: event.target.value })}
@@ -31,7 +49,7 @@ console.log(typeof(authUser))
         />
       </label>
       <label>
-        Email
+        {t("profile.email")}
         <input
           type="email"
           value={form.email}
@@ -42,7 +60,7 @@ console.log(typeof(authUser))
 
       {authUser?.role === 'admin' && (
         <label>
-          Role
+          {t("profile.role")}
           <select
             value={form.role}
             onChange={(event) =>
@@ -52,14 +70,14 @@ console.log(typeof(authUser))
               })
             }
           >
-            <option value="employee">Employee</option>
-            <option value="admin">Admin</option>
+            <option value="employee">{t("profile.roles.employee")}</option>
+            <option value="admin">{t("profile.roles.admin")}</option>
           </select>
         </label>
       )}
 
       <button className="primary-action" disabled={loading} type="submit">
-        Save profile
+        {t("profile.save")}
       </button>
     </form>
   );

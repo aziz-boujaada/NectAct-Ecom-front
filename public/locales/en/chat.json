@@ -1,0 +1,37 @@
+{
+  "title": "ERP AI Assistant",
+  "nexta": "Nexta AI",
+  "details": "Details",
+  "returnToChat": "Return to Chat",
+  "viewDetails": "View AI Details",
+  "welcome": "Welcome to ERP Assistant",
+  "askMeAbout": "Ask me about your business data, analytics, or stock levels.",
+  "sessionNote": "the messages will be removed after a session .",
+  "inputPlaceholder": "Type your ERP query...",
+  "tagline": "The future of ERP Intelligence",
+  "mission": "Nexta AI is designed to bridge the gap between complex business data and human decision-making. By leveraging advanced LLMs, we transform raw ERP entries into meaningful narratives.",
+  "capabilities": "Capabilities",
+  "features": {
+    "natural": {
+      "title": "Natural Interaction",
+      "desc": "Communicate with your ERP using natural language queries. No complex filters required."
+    },
+    "insights": {
+      "title": "Actionable Insights",
+      "desc": "Receive strategic recommendations based on your real-time business performance."
+    },
+    "anomaly": {
+      "title": "Anomaly Detection",
+      "desc": "Automatically identify inconsistencies, stock-outs, and financial outliers."
+    },
+    "expertise": {
+      "title": "Module Expertise",
+      "desc": "Deep vertical knowledge across Sales, Inventory, Purchasing, and Financials."
+    }
+  },
+  "hints": "Use exact keywords like sales, inventory, financial, purchasing, or devis to get more accurate results.",
+  "mistakes": "MISTAKES",
+  "errors": {
+    "connectionFailed": "I failed to connect to the ERP backend. Please ensure the service is running at http://127.0.0.1:8000."
+  }
+}

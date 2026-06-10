@@ -12,6 +12,13 @@ export type FinancialReport = {
       net_revenue: string;
       confirmed_purchases: string;
       estimated_gross_profit: string;
+      net_profit: string;
+    };
+    refunds_summary: {
+      refunds_total_all_time: string;
+      refunds_period: string;
+      refunds_today: string;
+      refunds_month: string;
     };
     balance_sheet: {
       assets: {
@@ -157,6 +164,51 @@ export type PurchasingReport = {
         quantity: number;
         total_spend: string;
       }>;
+    };
+  };
+};
+
+export type DevisReport = {
+  status: string;
+  message?: string;
+  data: {
+    period: {
+      from: string;
+      to: string;
+    };
+    total_devis: number;
+    status_distribution: {
+      draft: number;
+      sent: number;
+      accepted: number;
+      rejected: number;
+      expired: number;
+    };
+    financial_aggregations: {
+      draft_total: string;
+      sent_total: string;
+      accepted_total: string;
+      rejected_total: string;
+      expired_total: string;
+    };
+    conversion_metrics: {
+      acceptance_rate: number;
+      conversion_to_sale_rate: number;
+    };
+    pipeline_metrics: {
+      sent_pending: number;
+      sent_total_value: string;
+    };
+    lost_opportunity_metrics: {
+      rejected_count: number;
+      rejected_total: string;
+      expired_count: number;
+      expired_total: string;
+      lost_total: string;
+    };
+    aging_metrics: {
+      sent_over_7_days: number;
+      sent_over_30_days: number;
     };
   };
 };

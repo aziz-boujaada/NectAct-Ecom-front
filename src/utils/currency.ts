@@ -1,3 +1,5 @@
+import i18n from "../i18n";
+
 /**
  * Format a number as Moroccan Dirham currency with thousand separators
  * @param value - The numeric value to format
@@ -10,11 +12,20 @@ export function formatCurrency(value: string | number | null | undefined): strin
     return String(value ?? '');
   }
   
+  // Use the current language from i18n, default to 'fr-MA' if not available
+  const currentLang = i18n.language || 'fr';
+  const locale = currentLang === 'ar' ? 'ar-MA' : (currentLang === 'en' ? 'en-US' : 'fr-MA');
+  
   // Format with thousand separators and 2 decimal places
-  const formatted = amount.toLocaleString('fr-MA', {
+  const formatted = amount.toLocaleString(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+  
+  // Handle RTL for Arabic
+  if (currentLang === 'ar') {
+    return `${formatted} د.م.`;
+  }
   
   return `${formatted} DH`;
 }

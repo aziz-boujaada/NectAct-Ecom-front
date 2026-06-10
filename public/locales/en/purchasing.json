@@ -1,0 +1,32 @@
+{
+  "title": "Purchasing",
+  "purchases": "Purchases",
+  "purchase_orders": "Purchase Orders",
+  "suppliers": "Suppliers",
+  "add_purchase": "Add purchase",
+  "add_supplier": "New Supplier",
+  "total_purchases": "Total Purchases",
+  "no_purchases_found": "No purchases found.",
+  "helper_create_supplier": "Create at least one supplier before saving purchases.",
+  "items_count": "Items",
+  "created_at": "Created at",
+  "view_purchase": "View purchase",
+  "edit_purchase": "Edit purchase",
+  "delete_purchase": "Delete purchase",
+  "purchase_details": "Purchase Details",
+  "details_and_items": "Details and items",
+  "edit_purchase_item": "Edit Purchase Item",
+  "item_details": "Item Details",
+  "not_set": "Not set",
+  "supplier": "Supplier",
+  "name": "Name",
+  "contact": "Contact",
+  "no_phone": "No phone",
+  "no_address": "No address",
+  "status": {
+    "pending": "Pending",
+    "confirmed": "confermed",
+    "cancelled": "Cancelled",
+    "received": "Received"
+  }
+}

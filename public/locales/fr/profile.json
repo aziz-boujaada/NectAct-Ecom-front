@@ -1,0 +1,33 @@
+{
+  "title": "Profil",
+  "account": "Détails du compte",
+  "security": "Sécurité",
+  "personalInfo": "Informations personnelles",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "email": "Adresse e-mail",
+  "phone": "Numéro de téléphone",
+  "role": "Rôle",
+  "roles": {
+    "admin": "Administrateur",
+    "manager": "Gestionnaire",
+    "user": "Utilisateur",
+    "cashier": "Caissier",
+    "sales": "Ventes",
+    "inventory": "Inventaire"
+  },
+  "updateProfile": "Mettre à jour le profil",
+  "changePassword": "Changer le mot de passe",
+  "currentPassword": "Mot de passe actuel",
+  "newPassword": "Nouveau mot de passe",
+  "confirmPassword": "Confirmer le nouveau mot de passe",
+  "updatePassword": "Mettre à jour le mot de passe",
+  "success": {
+    "profile": "Profil mis à jour avec succès",
+    "password": "Mot de passe mis à jour avec succès"
+  },
+  "tutorial": {
+    "title": "Tutoriel",
+    "show": "Afficher le tutoriel d'intégration"
+  }
+}

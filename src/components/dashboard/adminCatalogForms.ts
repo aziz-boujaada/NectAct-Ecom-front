@@ -5,6 +5,10 @@ import type {
   ContactFormValues,
   Product,
   ProductFormValues,
+  Devis,
+  DevisFormValues,
+  DevisItem,
+  DevisItemDraftValues,
   Purchase,
   PurchaseFormValues,
   PurchaseItem,
@@ -57,9 +61,25 @@ export const emptyPurchaseItemDraft: PurchaseItemDraftValues = {
   quantity: '1',
 };
 
+export const emptyDevisForm: DevisFormValues = {
+  client_id: '',
+  expires_at: '',
+  notes: '',
+  discount: '0',
+  tax: '0',
+};
+
+export const emptyDevisItemDraft: DevisItemDraftValues = {
+  product_id: '',
+  price: '',
+  quantity: '1',
+};
+
 export const emptySaleForm: SaleFormValues = {
   client_id: '',
   status: 'unpaid',
+  discount: '0',
+  tax: '0',
 };
 
 export const emptySaleItemDraft: SaleItemDraftValues = {
@@ -124,10 +144,30 @@ export function formFromPurchaseItem(purchaseItem: PurchaseItem): PurchaseItemFo
   };
 }
 
+export function formFromDevis(devis: Devis): DevisFormValues {
+  return {
+    client_id: String(devis.client_id),
+    expires_at: devis.expires_at ?? '',
+    notes: devis.notes ?? '',
+    discount: String(devis.discount ?? 0),
+    tax: String(devis.tax ?? 0),
+  };
+}
+
+export function formFromDevisItem(devisItem: DevisItem): DevisItemDraftValues {
+  return {
+    product_id: String(devisItem.product_id),
+    price: String(devisItem.price),
+    quantity: String(devisItem.quantity),
+  };
+}
+
 export function formFromSale(sale: Sale): SaleFormValues {
   return {
     client_id: String(sale.client_id),
     status: sale.status,
+    discount: String(sale.discount ?? 0),
+    tax: String(sale.tax ?? 0),
   };
 }
 

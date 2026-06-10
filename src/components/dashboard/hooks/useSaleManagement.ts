@@ -1,6 +1,8 @@
 import { FormEvent, useState } from 'react';
 import { createSaleWithItems, deleteSale, deleteSaleItem, updateSale } from '../../../api/catalog';
+import { useCompanySettings } from '../../../context/CompanySettingsContext';
 import type { Product, Sale, SaleItem, SaleItemDraftValues, Status } from '../../../types';
+import { referenceSettingsFromCompanySettings } from '../../../utils/referenceSettings';
 import { emptySaleForm, emptySaleItemDraft, formFromSale } from '../adminCatalogForms';
 import { errorMessage } from './adminCatalogUtils';
 
@@ -22,6 +24,8 @@ export function useSaleManagement({
   refreshSales,
   refreshProducts,
 }: SaleManagementOptions) {
+  const { companySettings } = useCompanySettings();
+  const referenceSettings = referenceSettingsFromCompanySettings(companySettings);
   const [saleForm, setSaleForm] = useState(emptySaleForm);
   const [saleItemDrafts, setSaleItemDrafts] = useState<SaleItemDraftValues[]>([{ ...emptySaleItemDraft }]);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -65,6 +69,10 @@ export function useSaleManagement({
         const sale = await createSaleWithItems(
           saleForm,
           saleItemDrafts.filter((item) => item.product_id && item.quantity),
+          {
+            referencePrefix: referenceSettings.sale_reference_prefix,
+            paymentReferencePrefix: referenceSettings.payment_reference_prefix,
+          },
         );
         if (sale) {
           setSales((current) => [sale, ...current]);

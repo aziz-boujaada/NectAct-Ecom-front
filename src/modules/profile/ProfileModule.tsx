@@ -14,6 +14,7 @@ interface ProfileModuleProps {
   onPasswordChange: (form: PasswordFormValues) => void;
   onProfileSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onPasswordSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onShowTutorial: () => void;
 }
 
 export const ProfileModule: React.FC<ProfileModuleProps> = ({
@@ -25,7 +26,8 @@ export const ProfileModule: React.FC<ProfileModuleProps> = ({
   onProfileChange,
   onPasswordChange,
   onProfileSubmit,
-  onPasswordSubmit
+  onPasswordSubmit,
+  onShowTutorial
 }) => {
   return (
     <div className="fade-in forms-stack">
@@ -36,6 +38,7 @@ export const ProfileModule: React.FC<ProfileModuleProps> = ({
           onChange={onProfileChange}
           onSubmit={onProfileSubmit}
           authUser={user}
+          onShowTutorial={onShowTutorial}
         />
       )}
       {activeView === 'security' && (

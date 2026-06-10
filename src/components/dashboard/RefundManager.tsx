@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
 import { Eye, Plus, ReceiptText, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Refund, RefundFormValues, RefundItem, Sale, SaleItem } from '../../types';
 import { RefundEntryForm } from './forms/RefundEntryForm';
 import { RefundDetails } from './RefundDetails';
@@ -23,16 +24,170 @@ type RefundManagerProps = {
   onSetViewingRefund: (refund: Refund | null) => void;
 };
 
-function formatDate(date?: string) {
-  if (!date) return 'Not set';
+export function RefundManager({
+  isAddingRefund,
+  loading,
+  refundForm,
+  refunds,
+  sales,
+  viewingRefund,
+  onAddRefund,
+  onCancelRefundEdit,
+  onChangeRefund,
+  onDeleteRefund,
+  onSubmitRefund,
+  onSetViewingRefund,
+}: RefundManagerProps) {
+  const { t, i18n } = useTranslation('sales');
 
-  return new Date(date).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  function formatDate(date?: string) {
+    if (!date) return t('not_set');
+
+    return new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : i18n.language === 'fr' ? 'fr-FR' : 'en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+
+  const selectedSale = sales.find((sale) => sale.id === Number(refundForm.sale_id));
+  const soldItems = getSoldItems(selectedSale);
+  const availableByProduct = getAvailableByProduct(selectedSale, refunds);
+  const items = refundItems(refunds);
+  const missingRelations = sales.length === 0;
+  const canSubmit = canSubmitRefund(refundForm, availableByProduct);
+  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(refunds);
+
+  return (
+    <div className="purchase-workspace">
+      <section className="admin-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">{t('returns')}</p>
+            <h2>{t('refunds')}</h2>
+          </div>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <span>{refunds.length} {t('total')}</span>
+            {!isAddingRefund && (
+              <button className="primary-action" onClick={onAddRefund} type="button">
+                <Plus size={17} /> {t('add_refund')}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {missingRelations && isAddingRefund && (
+          <p className="helper-note">{t('helper_create_sale_refund')}</p>
+        )}
+
+        {isAddingRefund ? (
+          <RefundEntryForm
+            availableByProduct={availableByProduct}
+            canSubmit={canSubmit}
+            form={refundForm}
+            loading={loading}
+            missingRelations={missingRelations}
+            sales={sales}
+            selectedSale={selectedSale}
+            soldItems={soldItems}
+            onCancelEdit={onCancelRefundEdit}
+            onChange={onChangeRefund}
+            onSubmit={onSubmitRefund}
+          />
+        ) : (
+          <>
+            <div className="table-wrap fade-in">
+              <table>
+              <thead>
+                <tr>
+                  <th>{t('id')}</th>
+                  <th>{t('sale')}</th>
+                  <th>{t('client')}</th>
+                  <th>{t('total')}</th>
+                  <th>{t('items_count')}</th>
+                  <th>{t('reason')}</th>
+                  <th>{t('created_at')}</th>
+                  <th aria-label="Actions" />
+                </tr>
+              </thead>
+              <tbody>
+                {refunds.length === 0 ? (
+                  <tr>
+                    <td colSpan={8}>{t('no_refunds_found')}</td>
+                  </tr>
+                ) : (
+                  [...paginatedData]
+                    .sort((a, b) => b.id - a.id)
+                    .map((refund) => (
+                      <tr key={refund.id}>
+                        <td>#{refund.id}</td>
+                        <td>#{refund.sale_id}</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <ReceiptText size={18} className="text-muted" aria-hidden="true" />
+                            <strong>{refund.sale?.client?.name ?? refund.sale?.client_id ?? t('unknown_client')}</strong>
+                          </div>
+                        </td>
+                        <td>{formatCurrency(refund.total)}</td>
+                        <td>{refund.items?.length ?? 0}</td>
+                        <td>{refund.reason || t('no_reason')}</td>
+                        <td>{formatDate(refund.created_at)}</td>
+                        <td>
+                          <div className="row-actions">
+                            <Can permission="view_refunds">
+                              <button
+                                aria-label={`${t('view_sale')} ${refund.id}`}
+                                disabled={loading}
+                                onClick={() => onSetViewingRefund(refund)}
+                                type="button"
+                              >
+                                <Eye size={16} aria-hidden="true" />
+                              </button>
+                            </Can>
+                            <Can permission="delete_refunds">
+                              <button
+                                aria-label={`${t('delete_sale')} ${refund.id}`}
+                                className="danger-action"
+                                disabled={loading}
+                                onClick={() => onDeleteRefund(refund)}
+                                type="button"
+                              >
+                                <Trash2 size={16} aria-hidden="true" />
+                              </button>
+                            </Can>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={prevPage}
+            onNext={nextPage}
+            onPageChange={goToPage}
+          />
+          </>
+        )}
+      </section>
+
+      {viewingRefund && (
+        <RefundDetails
+          loading={loading}
+          refund={viewingRefund}
+          refunds={refunds}
+          sales={sales}
+          onClose={() => onSetViewingRefund(null)}
+          onDelete={onDeleteRefund}
+        />
+      )}
+    </div>
+  );
 }
 
 function refundItems(refunds: Refund[]) {
@@ -80,157 +235,5 @@ function canSubmitRefund(form: RefundFormValues, availableByProduct: Map<number,
       seen.add(productId);
       return valid;
     })
-  );
-}
-
-export function RefundManager({
-  isAddingRefund,
-  loading,
-  refundForm,
-  refunds,
-  sales,
-  viewingRefund,
-  onAddRefund,
-  onCancelRefundEdit,
-  onChangeRefund,
-  onDeleteRefund,
-  onSubmitRefund,
-  onSetViewingRefund,
-}: RefundManagerProps) {
-  const selectedSale = sales.find((sale) => sale.id === Number(refundForm.sale_id));
-  const soldItems = getSoldItems(selectedSale);
-  const availableByProduct = getAvailableByProduct(selectedSale, refunds);
-  const items = refundItems(refunds);
-  const missingRelations = sales.length === 0;
-  const canSubmit = canSubmitRefund(refundForm, availableByProduct);
-  const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(refunds);
-
-  return (
-    <div className="purchase-workspace">
-      <section className="admin-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Returns</p>
-            <h2>Refunds</h2>
-          </div>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <span>{refunds.length} total</span>
-            {!isAddingRefund && (
-              <button className="primary-action" onClick={onAddRefund} type="button">
-                <Plus size={17} /> Add refund
-              </button>
-            )}
-          </div>
-        </div>
-
-        {missingRelations && isAddingRefund && (
-          <p className="helper-note">Create at least one sale with sale items before saving refunds.</p>
-        )}
-
-        {isAddingRefund ? (
-          <RefundEntryForm
-            availableByProduct={availableByProduct}
-            canSubmit={canSubmit}
-            form={refundForm}
-            loading={loading}
-            missingRelations={missingRelations}
-            sales={sales}
-            selectedSale={selectedSale}
-            soldItems={soldItems}
-            onCancelEdit={onCancelRefundEdit}
-            onChange={onChangeRefund}
-            onSubmit={onSubmitRefund}
-          />
-        ) : (
-          <>
-            <div className="table-wrap fade-in">
-              <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Sale</th>
-                  <th>Client</th>
-                  <th>Total</th>
-                  <th>Items</th>
-                  <th>Reason</th>
-                  <th>Created at</th>
-                  <th aria-label="Actions" />
-                </tr>
-              </thead>
-              <tbody>
-                {refunds.length === 0 ? (
-                  <tr>
-                    <td colSpan={8}>No refunds found.</td>
-                  </tr>
-                ) : (
-                  [...paginatedData]
-                    .sort((a, b) => b.id - a.id)
-                    .map((refund) => (
-                      <tr key={refund.id}>
-                        <td>#{refund.id}</td>
-                        <td>#{refund.sale_id}</td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <ReceiptText size={18} className="text-muted" aria-hidden="true" />
-                            <strong>{refund.sale?.client?.name ?? refund.sale?.client_id ?? 'Unknown client'}</strong>
-                          </div>
-                        </td>
-                        <td>{formatCurrency(refund.total)}</td>
-                        <td>{refund.items?.length ?? 0}</td>
-                        <td>{refund.reason || 'No reason'}</td>
-                        <td>{formatDate(refund.created_at)}</td>
-                        <td>
-                          <div className="row-actions">
-                            <Can permission="view_refunds">
-                              <button
-                                aria-label={`View refund ${refund.id}`}
-                                disabled={loading}
-                                onClick={() => onSetViewingRefund(refund)}
-                                type="button"
-                              >
-                                <Eye size={16} aria-hidden="true" />
-                              </button>
-                            </Can>
-                            <Can permission="delete_refunds">
-                              <button
-                                aria-label={`Delete refund ${refund.id}`}
-                                className="danger-action"
-                                disabled={loading}
-                                onClick={() => onDeleteRefund(refund)}
-                                type="button"
-                              >
-                                <Trash2 size={16} aria-hidden="true" />
-                              </button>
-                            </Can>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPrevious={prevPage}
-            onNext={nextPage}
-            onPageChange={goToPage}
-          />
-          </>
-        )}
-      </section>
-
-      {viewingRefund && (
-        <RefundDetails
-          loading={loading}
-          refund={viewingRefund}
-          refunds={refunds}
-          sales={sales}
-          onClose={() => onSetViewingRefund(null)}
-          onDelete={onDeleteRefund}
-        />
-      )}
-    </div>
   );
 }

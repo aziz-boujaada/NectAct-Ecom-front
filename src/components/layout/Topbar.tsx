@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { ThemeToggle } from '../ThemeToggle';
-import { ChevronRight, Bell, Search, HelpCircle } from 'lucide-react';
+import { HelpCircle, Search, Bell, ChevronRight } from 'lucide-react';
 import { useAlerts } from '../../hooks/useAlerts';
 import { AlertsPanel } from '../notifications/AlertsPanel';
+import { useCompanySettings } from '../../context/CompanySettingsContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 interface TopbarProps {
   theme: 'dark' | 'light';
@@ -19,10 +22,15 @@ export const Topbar: React.FC<TopbarProps> = ({
 }) => {
   const [isAlertsPanelOpen, setIsAlertsPanelOpen] = useState(false);
   const { alerts, unreadCount, refetch } = useAlerts();
+  const { companySettings } = useCompanySettings();
+  const { t } = useTranslation();
 
   return (
     <header className="erp-topbar">
       <div className="topbar-left">
+        <div className="topbar-brand" style={{ marginRight: '12px', fontWeight: 700, color: 'var(--primary)' }}>
+          {companySettings?.company_name || 'NextAct'}
+        </div>
         <div className="breadcrumbs">
           <span className="breadcrumb-item">{moduleLabel}</span>
           <ChevronRight size={14} />
@@ -31,15 +39,13 @@ export const Topbar: React.FC<TopbarProps> = ({
       </div>
 
       <div className="topbar-right">
-        <div className="search-bar-placeholder">
-          <Search size={18} />
-          <input type="text" placeholder="Global search..." disabled />
-        </div>
-        
+       
+        <LanguageSwitcher />
+
         <div style={{ position: 'relative' }}>
           <button 
             className="icon-action-btn" 
-            title="Notifications"
+            title={t('common.notifications')}
             onClick={() => setIsAlertsPanelOpen(!isAlertsPanelOpen)}
           >
             <Bell size={20} />
@@ -57,7 +63,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           />
         </div>
         
-        <button className="icon-action-btn" title="Help">
+        <button className="icon-action-btn" title={t('common.help')}>
           <HelpCircle size={20} />
         </button>
 

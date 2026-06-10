@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
 import { KeyRound } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { LoginFormValues } from '../../types';
 
 type LoginFormProps = {
@@ -10,10 +11,12 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ form, loading, onChange, onSubmit }: LoginFormProps) {
+  const { t } = useTranslation('auth');
+
   return (
     <form onSubmit={onSubmit}>
       <label>
-        Email
+        {t('email')}
         <input
           autoComplete="email"
           type="email"
@@ -23,7 +26,7 @@ export function LoginForm({ form, loading, onChange, onSubmit }: LoginFormProps)
         />
       </label>
       <label>
-        Password
+        {t('password')}
         <input
           autoComplete="current-password"
           type="password"
@@ -34,7 +37,7 @@ export function LoginForm({ form, loading, onChange, onSubmit }: LoginFormProps)
       </label>
       <button className="primary-action" disabled={loading} type="submit">
         <KeyRound size={18} aria-hidden="true" />
-        {loading ? 'Signing in...' : 'Sign in'}
+        {loading ? t('common:loading') : t('sign_in')}
       </button>
     </form>
   );

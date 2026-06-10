@@ -1,0 +1,51 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date",
+    "amount": "Amount",
+    "no_data": "No data available",
+    "confirm": "Confirm",
+    "back": "Back",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help",
+    "notifications": "Notifications",
+    "all": "All",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "shown": "shown",
+    "total": "total",
+    "no_reference": "No reference",
+    "unknown_client": "Unknown client",
+    "no_reason": "No reason",
+    "id": "ID",
+    "image": "Image",
+    "stock": "Stock",
+    "clear_filters": "Clear filters"
+  },
+  "tagline": "Enterprise ERP",
+  "app": {
+    "loadingAuth": "Loading auth session...",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "status": {
+    "loginSuccess": "Login successful",
+    "accountCreated": "Account created successfully",
+    "loggedOut": "Logged out",
+    "loading": "Loading..."
+  }
+}

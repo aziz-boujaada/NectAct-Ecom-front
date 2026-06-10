@@ -80,6 +80,7 @@ export type Client = {
   id: number;
   name: string;
   phone?: string | null;
+  email: string;
   address?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -129,11 +130,60 @@ export type PurchaseItem = {
   updated_at?: string;
 };
 
-export type SaleStatus = 'paid' | 'unpaid' | 'refunded';
+export type DevisStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+
+export type DevisTimelineEntry = {
+  status: DevisStatus;
+  created_at?: string;
+  note?: string | null;
+};
+
+export type Devis = {
+  id: number;
+  reference: string;
+  client_id: number;
+  subtotal?: string | number | null;
+  discount?: string | number | null;
+  tax?: string | number | null;
+  total?: string | number | null;
+  status: DevisStatus;
+  expires_at?: string | null;
+  notes?: string | null;
+  client?: Client | null;
+  items?: DevisItem[];
+  timeline?: DevisTimelineEntry[];
+  created_by?: User | null;
+  sale?: Sale | null;
+  sent_at?: string | null;
+  accepted_at?: string | null;
+  rejected_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DevisItem = {
+  id: number;
+  devis_id: number;
+  product_id: number;
+  price: string | number;
+  quantity: number;
+  total?: string | number | null;
+  devis?: Devis | null;
+  product?: Product | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type SaleStatus = 'paid' | 'unpaid' | 'partial_refund' | 'refunded';
+
+export type RefundStatus = 'none' | 'partial' | 'refunded';
 
 export type Sale = {
   id: number;
   client_id: number;
+  subtotal?: string | number | null;
+  discount_amount?: string | number | null;
+  tax_amount?: string | number | null;
   total?: string | number | null;
   status: SaleStatus;
   client?: Client | null;
@@ -150,6 +200,9 @@ export type SaleItem = {
   price: string | number;
   quantity: number;
   total?: string | number | null;
+  refund_quantity?: number;
+  refund_total?: string | number | null;
+  refund_status?: RefundStatus;
   sale?: Sale | null;
   product?: Product | null;
   created_at?: string;
@@ -225,6 +278,7 @@ export type DashboardStats = {
   };
   sales_by_status: Record<SaleStatus, number>;
   purchases_by_status: Record<PurchaseStatus, number>;
+  devis_by_status?: Record<DevisStatus, number>;
   top_selling_products: Array<{
     id: number;
     reference?: string | null;
@@ -260,6 +314,7 @@ export type CategoryFormValues = {
 
 export type ContactFormValues = {
   name: string;
+  email:string;
   phone: string;
   address: string;
 };
@@ -299,6 +354,8 @@ export type PurchaseItemDraftValues = {
 export type SaleFormValues = {
   client_id: string;
   status: SaleStatus;
+  discount: string;
+  tax: string;
 };
 
 export type SaleItemFormValues = {
@@ -312,6 +369,27 @@ export type SaleItemDraftValues = {
   quantity: string;
 };
 
+export type DevisFormValues = {
+  client_id: string;
+  expires_at: string;
+  notes: string;
+  discount: string;
+  tax: string;
+};
+
+export type DevisItemFormValues = {
+  devis_id: string;
+  product_id: string;
+  price: string;
+  quantity: string;
+};
+
+export type DevisItemDraftValues = {
+  product_id: string;
+  price: string;
+  quantity: string;
+};
+
 export type RefundItemFormValues = {
   product_id: string;
   quantity: string;
@@ -321,6 +399,90 @@ export type RefundFormValues = {
   sale_id: string;
   reason: string;
   items: RefundItemFormValues[];
+};
+
+// Payment System Types
+export type PaymentMethod = 'cash' | 'stripe';
+export type PaymentStatus = 'pending' | 'approved' | 'rejected';
+
+export type Payment = {
+  id: number;
+  sale_id: number;
+  client_id: number;
+  amount: string | number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  created_by: number | null;
+  approved_by: number | null;
+  approved_at?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  allocations?: PaymentAllocation[];
+  client?: Client | null;
+  approver?: User | null;
+  creator?: User | null;
+};
+
+export type PaymentAllocationPayableType = 'Sale' | 'Invoice' | 'Purchase' | 'PurchaseInvoice';
+
+export type PaymentAllocation = {
+  id: number;
+  payment_id: number;
+  payable_type: string; 
+  payable_id: number;
+  amount_applied: string | number;
+  created_at?: string;
+  updated_at?: string;
+  payable?: {
+    id: number;
+    reference?: string;
+    total?: string | number;
+  } | null;
+};
+
+export type CashLogAction = 'created' | 'approved' | 'updated' | 'deleted' | 'status_changed';
+
+export type CashLog = {
+  id: number;
+  payment_id: number;
+  user_id: number;
+  action: CashLogAction;
+  description: string;
+  old_value?: Record<string, any> | null;
+  new_value?: Record<string, any> | null;
+  ip_address: string;
+  created_at?: string;
+  updated_at?: string;
+  user?: User | null;
+  payment?: Payment | null;
+};
+
+export type CashLogStatistics = {
+  total_logs: number;
+  by_action: Array<{
+    action: CashLogAction;
+    count: number;
+  }>;
+  by_user: Array<{
+    user_id: number;
+    count: number;
+    user?: User | null;
+  }>;
+  period: {
+    from: string;
+    to: string;
+  };
+};
+
+export type PaymentFormValues = {
+  payable_type: PaymentAllocationPayableType;
+  payable_id: string;
+  amount_applied: string;
+};
+
+export type PaymentAllocationUpdateValues = {
+  amount_applied: string;
 };
 
 export type AuthPayload = {

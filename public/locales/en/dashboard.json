@@ -1,0 +1,75 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome",
+  "statistics_overview": "Statistics Overview",
+  "reload": "Reload",
+  "loading_stats": "Loading dashboard statistics...",
+  "no_sales": "No sales yet.",
+  "no_low_stock": "No low stock products.",
+  "no_recent_sales": "No recent sales.",
+  "no_recent_refunds": "No recent refunds.",
+  "metrics": {
+    "net_sales": "Net sales",
+    "refunds": "Refunds",
+    "purchases": "Purchases",
+    "estimated_profit": "Estimated profit"
+  },
+  "kpi": {
+    "daily_movement": "Daily Movement",
+    "monthly_totals": "Monthly Totals",
+    "today": "Today",
+    "current_month": "Current Month",
+    "sales": "Sales",
+    "refunds": "Refunds",
+    "purchases": "Purchases"
+  },
+  "charts": {
+    "trend": "Trend",
+    "monthly_totals": "Monthly Totals",
+    "status": "Status",
+    "sales_status": "Sales Status",
+    "purchases_status": "Purchases Status",
+    "devis_status": "Quotes Status",
+    "top_selling_products": "Top Selling Products",
+    "low_stock_products": "Low Stock Products"
+  },
+  "tables": {
+    "product": "Product",
+    "sold": "Sold",
+    "total": "Total",
+    "reference": "Reference",
+    "client": "Client",
+    "status": "Status",
+    "stock": "Stock",
+    "minimum": "Minimum",
+    "reason": "Reason",
+    "recent_sales": "Recent Sales",
+    "recent_refunds": "Recent Refunds"
+  },
+  "stats": {
+    "sales": "Sales",
+    "refunds": "Refunds",
+    "purchases": "Purchases",
+    "quantitySold": "Quantity Sold",
+    "stock": "Stock",
+    "recentSales": "Recent Sales",
+    "recentRefunds": "Recent Refunds",
+    "products": "Products",
+    "inventory": "Inventory",
+    "status": "Status",
+    "lowStock": "Low Stock Items",
+    "revenue": "Revenue",
+    "noSales": "No sales yet.",
+    "noRefunds": "No recent refunds.",
+    "noLowStock": "No low stock products."
+  },
+  "products": {
+    "noMatch": "No products match the selected filters.",
+    "notFound": "No products found in the catalog.",
+    "noDescription": "No description",
+    "outOfStock": "Out of stock",
+    "lowStock": "Low stock",
+    "inStock": "In stock",
+    "na": "N/A"
+  }
+}

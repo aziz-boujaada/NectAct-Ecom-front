@@ -16,8 +16,10 @@ import {
   updateClient,
   updateSupplier,
 } from '../../api/catalog';
-import type { Category, Client, Product, Purchase, PurchaseItem, Refund, Sale, SaleItem, Status, Supplier } from '../../types';
+import { listDevises, normalizeDevisList } from '../../api/devis';
+import type { Category, Client, Devis, Product, Purchase, PurchaseItem, Refund, Sale, SaleItem, Status, Supplier } from '../../types';
 import { errorMessage } from './hooks/adminCatalogUtils';
+import { useDevisManagement } from './hooks/useDevisManagement';
 import { useCategoryManagement } from './hooks/useCategoryManagement';
 import { useContactManagement } from './hooks/useContactManagement';
 import { useProductManagement } from './hooks/useProductManagement';
@@ -31,6 +33,7 @@ async function fetchCatalog() {
     listProducts(),
     listPurchases(),
     listPurchaseItems(),
+    listDevises().then((response) => normalizeDevisList(response).data),
     listSales(),
     listSaleItems(),
     listRefunds(),
@@ -44,6 +47,7 @@ async function fetchCatalog() {
     Product[],
     Purchase[],
     PurchaseItem[],
+    Devis[],
     Sale[],
     SaleItem[],
     Refund[],
@@ -57,6 +61,7 @@ export function useAdminCatalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [purchaseItems, setPurchaseItems] = useState<PurchaseItem[]>([]);
+  const [devises, setDevises] = useState<Devis[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [saleItems, setSaleItems] = useState<SaleItem[]>([]);
   const [refunds, setRefunds] = useState<Refund[]>([]);
@@ -70,6 +75,7 @@ export function useAdminCatalog() {
     nextProducts,
     nextPurchases,
     nextPurchaseItems,
+    nextDevises,
     nextSales,
     nextSaleItems,
     nextRefunds,
@@ -80,6 +86,7 @@ export function useAdminCatalog() {
     setProducts(nextProducts);
     setPurchases(nextPurchases);
     setPurchaseItems(nextPurchaseItems);
+    setDevises(nextDevises);
     setSales(nextSales);
     setSaleItems(nextSaleItems);
     setRefunds(nextRefunds);
@@ -185,6 +192,17 @@ export function useAdminCatalog() {
     refreshProducts,
   });
 
+  const devisManagement = useDevisManagement({
+    clients,
+    products,
+    setDevises,
+    setSales,
+    setSaleItems,
+    setLoading,
+    setStatus,
+    refreshSales,
+  });
+
   const refundManagement = useRefundManagement({
     setRefunds,
     setProducts,
@@ -228,6 +246,7 @@ export function useAdminCatalog() {
     products,
     purchases,
     purchaseItems,
+    devises,
     sales,
     saleItems,
     refunds,
@@ -236,11 +255,13 @@ export function useAdminCatalog() {
     status,
     loading,
     loadCatalog,
+    refreshSales,
     ...categoryManagement,
     ...productManagement,
     ...purchaseManagement,
     ...saleManagement,
     ...refundManagement,
+    ...devisManagement,
     supplierForm: supplierManagement.contactForm,
     editingSupplier: supplierManagement.editingContact,
     isAddingSupplier: supplierManagement.isAddingContact,

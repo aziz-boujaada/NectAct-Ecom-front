@@ -29,10 +29,17 @@ export function ContactForm({
         Name
         <input value={form.name} onChange={(event) => onChange({ ...form, name: event.target.value })} required />
       </label>
+
       <label>
+        Email
+        <input value={form.email} onChange={(event) => onChange({ ...form, email: event.target.value })} required/>
+      </label>
+
+       <label>
         Phone
         <input value={form.phone} onChange={(event) => onChange({ ...form, phone: event.target.value })} />
       </label>
+
       <label className="full-field">
         Address
         <textarea value={form.address} onChange={(event) => onChange({ ...form, address: event.target.value })} rows={3} />

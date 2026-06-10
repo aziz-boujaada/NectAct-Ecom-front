@@ -68,61 +68,61 @@ export function CategoryManager({
         <>
           <div className="table-wrap fade-in">
             <table>
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th>Description</th>
-                <th aria-label="Actions" />
-              </tr>
-            </thead>
-            <tbody>
-              {categories.length === 0 ? (
+              <thead>
                 <tr>
-                  <td colSpan={3}>No categories found.</td>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th aria-label="Actions" />
                 </tr>
-              ) : (
-                [...paginatedData].sort((a, b) => b.id - a.id).map((category) => (
-                  <tr key={category.id}>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Folder size={18} className="text-muted" aria-hidden="true" />
-                        <strong>{category.name}</strong>
-                      </div>
-                    </td>
-                    <td>{category.description || 'No description'}</td>
-                    <td>
-                      <div className="row-actions">
-                        <Can permission="edit_categories">
-                          <button aria-label={`Edit ${category.name}`} disabled={loading} onClick={() => onEdit(category)} type="button">
-                            <Edit3 size={16} aria-hidden="true" />
-                          </button>
-                        </Can>
-                        <Can permission="delete_categories">
-                          <button
-                            aria-label={`Delete ${category.name}`}
-                            className="danger-action"
-                            disabled={loading}
-                            onClick={() => onDelete(category)}
-                            type="button"
-                          >
-                            <Trash2 size={16} aria-hidden="true" />
-                          </button>
-                        </Can>
-                      </div>
-                    </td>
+              </thead>
+              <tbody>
+                {categories.length === 0 ? (
+                  <tr>
+                    <td colSpan={3}>No categories found.</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        <PaginationControls
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={prevPage}
-          onNext={nextPage}
-          onPageChange={goToPage}
-        />
+                ) : (
+                  [...paginatedData].sort((a, b) => b.id - a.id).map((category) => (
+                    <tr key={category.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Folder size={18} className="text-muted" aria-hidden="true" />
+                          <strong>{category.name}</strong>
+                        </div>
+                      </td>
+                      <td>{category.description || 'No description'}</td>
+                      <td>
+                        <div className="row-actions">
+                          <Can permission="edit_categories">
+                            <button aria-label={`Edit ${category.name}`} disabled={loading} onClick={() => onEdit(category)} type="button">
+                              <Edit3 size={16} aria-hidden="true" />
+                            </button>
+                          </Can>
+                          <Can permission="delete_categories">
+                            <button
+                              aria-label={`Delete ${category.name}`}
+                              className="danger-action"
+                              disabled={loading}
+                              onClick={() => onDelete(category)}
+                              type="button"
+                            >
+                              <Trash2 size={16} aria-hidden="true" />
+                            </button>
+                          </Can>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={prevPage}
+            onNext={nextPage}
+            onPageChange={goToPage}
+          />
         </>
       )}
     </section>

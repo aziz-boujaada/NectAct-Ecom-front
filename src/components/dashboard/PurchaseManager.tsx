@@ -6,6 +6,7 @@ import {
   ShoppingCart,
   Trash2,
 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 import type {
   Product,
   Purchase,
@@ -86,6 +87,7 @@ export function PurchaseManager({
   onCreateSupplier,
   onTabChange,
 }: PurchaseManagerProps) {
+  const { t, i18n } = useTranslation(['purchasing', 'common']);
   const showPurchaseForm = isAddingPurchase || editingPurchase !== null;
   const showItemForm = editingPurchaseItem !== null;
   const missingPurchaseRelations = suppliers.length === 0;
@@ -107,10 +109,10 @@ export function PurchaseManager({
   };
   const formatDate = (date?: string) => {
     if (!date) {
-      return 'Not set';
+      return t('purchasing:not_set');
     }
 
-    return new Date(date).toLocaleDateString("en-GB", {
+    return new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : i18n.language === 'fr' ? 'fr-FR' : 'en-GB', {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -124,11 +126,11 @@ export function PurchaseManager({
       <section className="admin-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Purchasing</p>
-            <h2>Purchases</h2>
+            <p className="eyebrow">{t('purchasing:title')}</p>
+            <h2>{t('purchasing:purchases')}</h2>
           </div>
           <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-            <span>{purchases.length} total</span>
+            <span>{purchases.length} {t('common:common.total')}</span>
             {!showPurchaseForm && (
               <Can permission="create_purchases">
                 <button
@@ -136,7 +138,7 @@ export function PurchaseManager({
                   onClick={onAddPurchase}
                   type="button"
                 >
-                  <Plus size={17} /> Add purchase
+                  <Plus size={17} /> {t('purchasing:add_purchase')}
                 </button>
               </Can>
             )}
@@ -145,7 +147,7 @@ export function PurchaseManager({
 
         {missingPurchaseRelations && showPurchaseForm && (
           <p className="helper-note">
-            Create at least one supplier before saving purchases.
+            {t('purchasing:helper_create_supplier')}
           </p>
         )}
 
@@ -172,19 +174,19 @@ export function PurchaseManager({
               <table>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Supplier</th>
-                  <th>Status</th>
-                  <th>Total</th>
-                  <th>Items</th>
-                  <th>Created at</th>
-                  <th aria-label="Actions" />
+                  <th>{t('common:common.id')}</th>
+                  <th>{t('purchasing:supplier')}</th>
+                  <th>{t('common:common.status')}</th>
+                  <th>{t('common:common.total')}</th>
+                  <th>{t('purchasing:items_count')}</th>
+                  <th>{t('purchasing:created_at')}</th>
+                  <th aria-label={t('common:common.actions')} />
                 </tr>
               </thead>
               <tbody>
                 {purchases.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>No purchases found.</td>
+                    <td colSpan={6}>{t('purchasing:no_purchases_found')}</td>
                   </tr>
                 ) : (
                   [...paginatedData]
@@ -212,7 +214,7 @@ export function PurchaseManager({
                         </td>
                         <td>
                           <span className={`status-pill ${purchase.status}`}>
-                            {purchase.status}
+                            {t(`purchasing:status.${purchase.status}`)}
                           </span>
                         </td>
                         <td>{formatCurrency(purchase.total)}</td>
@@ -226,7 +228,7 @@ export function PurchaseManager({
                         <td>
                           <div className="row-actions">
                             <button
-                              aria-label={`View purchase ${purchase.id}`}
+                              aria-label={`${t('purchasing:view_purchase')} ${purchase.id}`}
                               disabled={loading}
                               onClick={() => onSetViewingPurchase(purchase)}
                               type="button"
@@ -234,7 +236,7 @@ export function PurchaseManager({
                               <Eye size={16} aria-hidden="true" />
                             </button>
                             <button
-                              aria-label={`Edit purchase ${purchase.id}`}
+                              aria-label={`${t('purchasing:edit_purchase')} ${purchase.id}`}
                               disabled={loading}
                               onClick={() => onEditPurchase(purchase)}
                               type="button"
@@ -242,7 +244,7 @@ export function PurchaseManager({
                               <Edit3 size={16} aria-hidden="true" />
                             </button>
                             <button
-                              aria-label={`Delete purchase ${purchase.id}`}
+                              aria-label={`${t('purchasing:delete_purchase')} ${purchase.id}`}
                               className="danger-action"
                               disabled={loading}
                               onClick={() => onDeletePurchase(purchase)}
@@ -273,8 +275,8 @@ export function PurchaseManager({
         <section className="admin-section">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Edit Purchase Item</p>
-              <h2>Item Details</h2>
+              <p className="eyebrow">{t('purchasing:edit_purchase_item')}</p>
+              <h2>{t('purchasing:item_details')}</h2>
             </div>
           </div>
 

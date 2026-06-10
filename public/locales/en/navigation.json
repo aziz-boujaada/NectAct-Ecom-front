@@ -1,0 +1,59 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "products": "Products",
+    "categories": "Categories",
+    "stock": "Stock Movements"
+  },
+  "sales": {
+    "title": "Sales",
+    "list": "Sales List",
+    "clients": "Clients",
+    "refunds": "Returns & Refunds"
+  },
+  "purchasing": {
+    "title": "Purchasing",
+    "list": "Purchasing List",
+    "suppliers": "Suppliers"
+  },
+  "devises": {
+    "title": "Quotations",
+    "list": "Quotations List"
+  },
+  "payments": {
+    "title": "Payments",
+    "list": "Transactions"
+  },
+  "reports": {
+    "title": "Reports",
+    "financials": "Financial Reports",
+    "inventory": "Inventory Reports",
+    "sales": "Sales Reports",
+    "purchasing": "Purchasing Reports",
+    "devis": "Quotation Reports"
+  },
+  "ai": {
+    "title": "AI Assistant",
+    "chat": "AI Chat"
+  },
+  "admin": {
+    "title": "Administration",
+    "users": "Users",
+    "permissions": "Permissions"
+  },
+  "settings": {
+    "title": "Settings",
+    "company": "Company",
+    "appearance": "Appearance",
+    "references": "Reference Settings"
+  },
+  "profile": {
+    "title": "Profile",
+    "account": "Account",
+    "security": "Security"
+  }
+}

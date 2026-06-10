@@ -4,6 +4,7 @@ import { FinancialReport } from '../../components/reports/FinancialReport';
 import { InventoryReport } from '../../components/reports/InventoryReport';
 import { SalesReport } from '../../components/reports/SalesReport';
 import { PurchasingReport } from '../../components/reports/PurchasingReport';
+import { DevisReport } from '../../components/reports/DevisReport';
 import { usePermission } from '../../hooks/permissions';
 
 interface ReportsModuleProps {
@@ -19,6 +20,7 @@ export function ReportsModule({ activeView }: ReportsModuleProps) {
       {activeView === 'inventory-report' && <InventoryReport />}
       {activeView === 'sales-report' && <SalesReport />}
       {activeView === 'purchasing-report' && <PurchasingReport />}
+      {activeView === 'devis-report' && <DevisReport />}
     </div>
   );
 }

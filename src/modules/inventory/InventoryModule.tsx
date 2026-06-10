@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CategoryManager } from '../../components/dashboard/CategoryManager';
 import { ProductManager } from '../../components/dashboard/ProductManager';
 import StockMovements from '../../components/dashboard/StockHistory';
@@ -11,6 +12,7 @@ interface InventoryModuleProps {
 }
 
 export const InventoryModule: React.FC<InventoryModuleProps> = ({ activeView, catalog, onTabChange }) => {
+  const { t } = useTranslation('inventory');
   return (
     <div className="fade-in">
       {activeView === 'categories' && (

@@ -1,0 +1,26 @@
+{
+  "title": "Administration",
+  "users": "Utilisateurs",
+  "permissions": "Autorisations",
+  "roles": "Rôles",
+  "catalog": "Catalogue Admin",
+  "manageUsers": "Gérer les utilisateurs",
+  "managePermissions": "Gérer les autorisations",
+  "manageRoles": "Gérer les rôles",
+  "addUser": "Ajouter un utilisateur",
+  "editUser": "Modifier l'utilisateur",
+  "deleteUser": "Supprimer l'utilisateur",
+  "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet utilisateur ?",
+  "table": {
+    "name": "Nom",
+    "email": "E-mail",
+    "role": "Rôle",
+    "status": "Statut",
+    "actions": "Actions",
+    "created": "Créé le"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif"
+  }
+}

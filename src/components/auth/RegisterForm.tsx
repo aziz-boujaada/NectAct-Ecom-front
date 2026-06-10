@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
 import { UserPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { RegisterFormValues } from '../../types';
 
 type RegisterFormProps = {
@@ -10,10 +11,12 @@ type RegisterFormProps = {
 };
 
 export function RegisterForm({ form, loading, onChange, onSubmit }: RegisterFormProps) {
+  const { t } = useTranslation('auth');
+
   return (
     <form onSubmit={onSubmit}>
       <label>
-        Name
+        {t('name')}
         <input
           autoComplete="name"
           value={form.name}
@@ -23,7 +26,7 @@ export function RegisterForm({ form, loading, onChange, onSubmit }: RegisterForm
         />
       </label>
       <label>
-        Email
+        {t('email')}
         <input
           autoComplete="email"
           type="email"
@@ -33,7 +36,7 @@ export function RegisterForm({ form, loading, onChange, onSubmit }: RegisterForm
         />
       </label>
       <label>
-        Password
+        {t('password')}
         <input
           autoComplete="new-password"
           type="password"
@@ -45,7 +48,7 @@ export function RegisterForm({ form, loading, onChange, onSubmit }: RegisterForm
       </label>
       <button className="primary-action" disabled={loading} type="submit">
         <UserPlus size={18} aria-hidden="true" />
-        {loading ? 'Creating account...' : 'Create account'}
+        {loading ? t('common:loading') : t('sign_up')}
       </button>
     </form>
   );

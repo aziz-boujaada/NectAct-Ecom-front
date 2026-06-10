@@ -7,6 +7,7 @@ import { DashboardPreviewSection, VideoDemoSection, DemoAccessSection } from '..
 import { SecuritySection, PricingSection, FooterSection } from '../landing/SupportSections';
 import type { AuthMode, LoginFormValues, RegisterFormValues, Status } from '../../types';
 import type { FormEvent } from 'react';
+import { LanguageSwitcher } from '../layout/LanguageSwitcher';
 
 interface LandingPageProps {
   onTestClick: () => void;
@@ -67,15 +68,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <nav className="landing-nav" aria-label="Primary">
-            <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#auth-access">Demo</a>
-            <a href="#docs">Docs</a>
+            <a href="#features">{('features')}</a>
+            <a href="#pricing">{('pricing')}</a>
+            <a href="#auth-access">{('demo')}</a>
+            <a href="#docs">{('docs')}</a>
           </nav>
 
           <div className="landing-cta">
-            <button className="btn btn-demo" onClick={onDemoClick}>Voir la démo</button>
-            <button className="btn btn-get-started" onClick={onTestClick}>Tester</button>
+            <LanguageSwitcher />
+            <button className="btn btn-demo" onClick={onDemoClick}>{('view_demo')}</button>
+            <button className="btn btn-get-started" onClick={onTestClick}>{('test')}</button>
             <button aria-label="Toggle theme" className="btn btn-theme-toggle" onClick={toggleTheme}>
               {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
@@ -133,3 +135,5 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     </main>
   );
 };
+    <FooterSection />
+  

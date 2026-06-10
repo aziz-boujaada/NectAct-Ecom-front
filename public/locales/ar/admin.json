@@ -1,0 +1,26 @@
+{
+  "title": "الإدارة",
+  "users": "المستخدمين",
+  "permissions": "الصلاحيات",
+  "roles": "الأدوار",
+  "catalog": "كتالوج الإدارة",
+  "manageUsers": "إدارة المستخدمين",
+  "managePermissions": "إدارة الصلاحيات",
+  "manageRoles": "إدارة الأدوار",
+  "addUser": "إضافة مستخدم",
+  "editUser": "تعديل مستخدم",
+  "deleteUser": "حذف مستخدم",
+  "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا المستخدم؟",
+  "table": {
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "role": "الدور",
+    "status": "الحالة",
+    "actions": "إجراءات",
+    "created": "تاريخ الإنشاء"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط"
+  }
+}

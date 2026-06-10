@@ -12,6 +12,7 @@ import {
   ReceiptText,
   RotateCcw,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { ThemeToggle } from "../ThemeToggle";
 import { ProtectedRoute } from "../permissions";
@@ -20,7 +21,7 @@ import { Can } from "../../context/PermissionContext";
 import type { User } from "../../types";
 import type { TabOption } from "./Dashboard";
 
-import logoUrl from "src/assets/NextGestCologo1.png;
+import logoUrl from "src/assets/NextGestCologo1.png";
 
 type AccountCardProps = {
   user: User;
@@ -50,7 +51,7 @@ export function AccountCard({
   onLogout,
   onThemeToggle,
 }: AccountCardProps) {
-  console.log("USER DATA =>", user);
+  const { t } = useTranslation("auth");
 
   return (
     <aside className="sidebar">
@@ -62,7 +63,7 @@ export function AccountCard({
 
       <nav className="sidebar-nav">
         {/* DASHBOARD */}
-        <p className="sidebar-label">DASHBOARD</p>
+        <p className="sidebar-label">{t("sidebar.dashboard")}</p>
 
         <Can permission="view_dashboard">
           <button
@@ -71,12 +72,12 @@ export function AccountCard({
             type="button"
           >
             <BarChart3 size={20} />
-            <span>Overview</span>
+            <span>{t("sidebar.overview")}</span>
           </button>
         </Can>
 
         {/* CATALOG */}
-        <p className="sidebar-label">CATALOG</p>
+        <p className="sidebar-label">{t("sidebar.catalog")}</p>
 
         <Can permission="view_products">
           <button
@@ -85,7 +86,7 @@ export function AccountCard({
             type="button"
           >
             <Package size={20} />
-            <span>Products</span>
+            <span>{t("sidebar.products")}</span>
           </button>
         </Can>
 
@@ -96,7 +97,7 @@ export function AccountCard({
             type="button"
           >
             <ShoppingCart size={20} />
-            <span>Purchases</span>
+            <span>{t("sidebar.purchases")}</span>
           </button>
         </Can>
 
@@ -107,7 +108,7 @@ export function AccountCard({
             type="button"
           >
             <ReceiptText size={20} />
-            <span>Sales</span>
+            <span>{t("sidebar.sales")}</span>
           </button>
         </Can>
 
@@ -118,7 +119,7 @@ export function AccountCard({
             type="button"
           >
             <RotateCcw size={20} />
-            <span>Refunds</span>
+            <span>{t("sidebar.refunds")}</span>
           </button>
         </Can>
 
@@ -131,7 +132,7 @@ export function AccountCard({
             type="button"
           >
             <Tags size={20} />
-            <span>Categories</span>
+            <span>{t("sidebar.categories")}</span>
           </button>
         </Can>
 
@@ -144,7 +145,7 @@ export function AccountCard({
             type="button"
           >
             <Truck size={20} />
-            <span>Suppliers</span>
+            <span>{t("sidebar.suppliers")}</span>
           </button>
         </Can>
 
@@ -155,7 +156,7 @@ export function AccountCard({
             type="button"
           >
             <Users size={20} />
-            <span>Clients</span>
+            <span>{t("sidebar.clients")}</span>
           </button>
         </Can>
 
@@ -166,13 +167,13 @@ export function AccountCard({
             type="button"
           >
             <Package size={20} />
-            <span>Stock Movements</span>
+            <span>{t("sidebar.stock_movements")}</span>
           </button>
         </Can>
 
         {/* SETTINGS */}
         <p className="sidebar-label" style={{ marginTop: "16px" }}>
-          SETTINGS
+          {t("sidebar.settings")}
         </p>
 
         <button
@@ -181,7 +182,7 @@ export function AccountCard({
           type="button"
         >
           <UserCircle size={20} />
-          <span>Profile</span>
+          <span>{t("sidebar.profile")}</span>
         </button>
 
         <button
@@ -190,12 +191,12 @@ export function AccountCard({
           type="button"
         >
           <Shield size={20} />
-          <span>Security</span>
+          <span>{t("sidebar.security")}</span>
         </button>
 
         <Can permission={["view_users", "manage_users"]}>
           <p style={{ fontSize: '0.75rem', fontWeight: '700', letterSpacing: '0.05em', color: 'var(--text-muted)', marginTop: '16px', marginBottom: '8px', paddingLeft: '16px', textTransform: 'uppercase' }}>
-            ADMINISTRATION
+            {t("sidebar.administration")}
           </p>
 
           <button
@@ -204,7 +205,7 @@ export function AccountCard({
             type="button"
           >
             <UserCircle size={20} />
-            <span>Employees</span>
+            <span>{t("sidebar.employees")}</span>
           </button>
         </Can>
 
@@ -215,7 +216,7 @@ export function AccountCard({
             type="button"
           >
             <Lock size={20} />
-            <span>Permissions</span>
+            <span>{t("sidebar.permissions")}</span>
           </button>
         </Can>
       </nav>
@@ -228,7 +229,7 @@ export function AccountCard({
 
           <div className="user-info">
             <span className="user-name">{user.name}</span>
-            <span className="user-role">{user.role || "Admin"}</span>
+            <span className="user-role">{user.role ? (user.role === 'admin' ? t("profile.roles.admin") : t("profile.roles.employee")) : t("profile.roles.admin")}</span>
           </div>
         </div>
 
@@ -238,7 +239,7 @@ export function AccountCard({
             disabled={loading}
             type="button"
             className="action-btn danger-action"
-            title="Logout"
+            title={t("logout")}
           >
             <LogOut size={17} aria-hidden="true" />
           </button>

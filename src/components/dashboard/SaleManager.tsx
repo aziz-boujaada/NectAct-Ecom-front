@@ -1,5 +1,6 @@
 import { FormEvent } from 'react';
 import { Edit3, Eye, Plus, ReceiptText, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Client, Product, Sale, SaleFormValues, SaleItem, SaleItemDraftValues } from '../../types';
 import { SaleEntryForm } from './forms/SaleEntryForm';
 import { SaleDetails } from './SaleDetails';
@@ -61,14 +62,15 @@ export function SaleManager({
   onCreateProduct,
   onTabChange,
 }: SaleManagerProps) {
+  const { t, i18n } = useTranslation(['sales', 'common']);
   const showSaleForm = isAddingSale || editingSale !== null;
   const missingSaleRelations = clients.length === 0;
   const { paginatedData, currentPage, totalPages, nextPage, prevPage, goToPage } = usePagination(sales);
 
   const formatDate = (date?: string) => {
-    if (!date) return 'Not set';
+    if (!date) return t('not set');
 
-    return new Date(date).toLocaleDateString('en-GB', {
+    return new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : i18n.language === 'fr' ? 'fr-FR' : 'en-GB', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -92,15 +94,15 @@ export function SaleManager({
       <section className="admin-section">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Sales</p>
-            <h2>Sales</h2>
+            <p className="eyebrow">{t('title')}</p>
+            <h2>{t('title')}</h2>
           </div>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <span>{sales.length} total</span>
+            <span>{sales.length} {t('common:common.total')}</span>
             {!showSaleForm && (
               <Can permission="create_sales">
                 <button className="primary-action" onClick={onAddSale} type="button">
-                  <Plus size={17} /> Add sale
+                  <Plus size={17} /> {t('add sale')}
                 </button>
               </Can>
             )}
@@ -108,7 +110,7 @@ export function SaleManager({
         </div>
 
         {missingSaleRelations && showSaleForm && (
-          <p className="helper-note">Create at least one client before saving sales.</p>
+          <p className="helper-note">{t('helper create client')}</p>
         )}
 
         {showSaleForm ? (
@@ -135,19 +137,19 @@ export function SaleManager({
               <table>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Client</th>
-                  <th>Status</th>
-                  <th>Total</th>
-                  <th>Items</th>
-                  <th>Created at</th>
-                  <th aria-label="Actions" />
+                  <th>{t('common:common.id')}</th>
+                  <th>{t('clients')}</th>
+                  <th>{t('common:common.status')}</th>
+                  <th>{t('common:common.total')}</th>
+                  <th>{t('items count')}</th>
+                  <th>{t('created at')}</th>
+                  <th aria-label={t('common:common.actions')} />
                 </tr>
               </thead>
               <tbody>
                 {sales.length === 0 ? (
                   <tr>
-                    <td colSpan={7}>No sales found.</td>
+                    <td colSpan={7}>{t('no sales found')}</td>
                   </tr>
                 ) : (
                   [...paginatedData]
@@ -162,7 +164,7 @@ export function SaleManager({
                           </div>
                         </td>
                         <td>
-                          <span className={`status-pill ${sale.status}`}>{sale.status}</span>
+                          <span className={`status-pill ${sale.status}`}>{t(`status.${sale.status}`)}</span>
                         </td>
                         <td>{formatCurrency(sale.total)}</td>
                         <td>{sale.items?.length ?? saleItems.filter((item) => item.sale_id === sale.id).length}</td>
@@ -170,7 +172,7 @@ export function SaleManager({
                         <td>
                           <div className="row-actions">
                             <button
-                              aria-label={`View sale ${sale.id}`}
+                              aria-label={`${t('view sale')} ${sale.id}`}
                               disabled={loading}
                               onClick={() => onSetViewingSale(sale)}
                               type="button"
@@ -178,7 +180,7 @@ export function SaleManager({
                               <Eye size={16} aria-hidden="true" />
                             </button>
                             <button
-                              aria-label={`Edit sale ${sale.id}`}
+                              aria-label={`${t('edit sale')} ${sale.id}`}
                               disabled={loading}
                               onClick={() => onEditSale(sale)}
                               type="button"
@@ -186,7 +188,7 @@ export function SaleManager({
                               <Edit3 size={16} aria-hidden="true" />
                             </button>
                             <button
-                              aria-label={`Delete sale ${sale.id}`}
+                              aria-label={`${t('delete sale')} ${sale.id}`}
                               className="danger-action"
                               disabled={loading}
                               onClick={() => onDeleteSale(sale)}

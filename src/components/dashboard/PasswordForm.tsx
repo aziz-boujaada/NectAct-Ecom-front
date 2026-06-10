@@ -1,4 +1,5 @@
 import { FormEvent } from 'react';
+import { useTranslation } from "react-i18next";
 import type { PasswordFormValues } from '../../types';
 
 type PasswordFormProps = {
@@ -9,11 +10,13 @@ type PasswordFormProps = {
 };
 
 export function PasswordForm({ form, loading, onChange, onSubmit }: PasswordFormProps) {
+  const { t } = useTranslation("auth");
+
   return (
     <form onSubmit={onSubmit}>
-      <h2>Password</h2>
+      <h2>{t("password_form.title")}</h2>
       <label>
-        Current password
+        {t("password_form.current")}
         <input
           autoComplete="current-password"
           type="password"
@@ -23,7 +26,7 @@ export function PasswordForm({ form, loading, onChange, onSubmit }: PasswordForm
         />
       </label>
       <label>
-        New password
+        {t("password_form.new")}
         <input
           autoComplete="new-password"
           type="password"
@@ -34,7 +37,7 @@ export function PasswordForm({ form, loading, onChange, onSubmit }: PasswordForm
         />
       </label>
       <label>
-        Confirm new password
+        {t("password_form.confirm")}
         <input
           autoComplete="new-password"
           type="password"
@@ -45,7 +48,7 @@ export function PasswordForm({ form, loading, onChange, onSubmit }: PasswordForm
         />
       </label>
       <button className="primary-action" disabled={loading} type="submit">
-        Update password
+        {t("password_form.update")}
       </button>
     </form>
   );
