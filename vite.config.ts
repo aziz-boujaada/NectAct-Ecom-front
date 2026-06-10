@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
 
-  base: '/NectAct-Ecom-front/',
+  base: import.meta.env.BASE_URL + '/NectAct-Ecom-front/',
 
   server: {
     host: '127.0.0.1',
