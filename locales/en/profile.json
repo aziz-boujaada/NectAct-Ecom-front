@@ -1,0 +1,33 @@
+{
+  "title": "Profile",
+  "account": "Account Details",
+  "security": "Security",
+  "personalInfo": "Personal Information",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "email": "Email Address",
+  "phone": "Phone Number",
+  "role": "Role",
+  "roles": {
+    "admin": "Administrator",
+    "manager": "Manager",
+    "user": "User",
+    "cashier": "Cashier",
+    "sales": "Sales",
+    "inventory": "Inventory"
+  },
+  "updateProfile": "Update Profile",
+  "changePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm New Password",
+  "updatePassword": "Update Password",
+  "success": {
+    "profile": "Profile updated successfully",
+    "password": "Password updated successfully"
+  },
+  "tutorial": {
+    "title": "Tutorial",
+    "show": "Show Onboarding Tutorial"
+  }
+}

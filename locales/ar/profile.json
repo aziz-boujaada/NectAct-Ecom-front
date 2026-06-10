@@ -1,0 +1,33 @@
+{
+  "title": "الملف الشخصي",
+  "account": "تفاصيل الحساب",
+  "security": "الأمان",
+  "personalInfo": "المعلومات الشخصية",
+  "firstName": "الاسم الأول",
+  "lastName": "اسم العائلة",
+  "email": "البريد الإلكتروني",
+  "phone": "رقم الهاتف",
+  "role": "الدور",
+  "roles": {
+    "admin": "مسؤول",
+    "manager": "مدير",
+    "user": "مستخدم",
+    "cashier": "صراف",
+    "sales": "مبيعات",
+    "inventory": "مخزون"
+  },
+  "updateProfile": "تحديث الملف الشخصي",
+  "changePassword": "تغيير كلمة المرور",
+  "currentPassword": "كلمة المرور الحالية",
+  "newPassword": "كلمة المرور الجديدة",
+  "confirmPassword": "تأكيد كلمة المرور الجديدة",
+  "updatePassword": "تحديث كلمة المرور",
+  "success": {
+    "profile": "تم تحديث الملف الشخصي بنجاح",
+    "password": "تم تحديث كلمة المرور بنجاح"
+  },
+  "tutorial": {
+    "title": "برنامج تعليمي",
+    "show": "عرض البرنامج التعليمي"
+  }
+}

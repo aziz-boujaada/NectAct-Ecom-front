@@ -1,0 +1,26 @@
+{
+  "title": "Administration",
+  "users": "Users",
+  "permissions": "Permissions",
+  "roles": "Roles",
+  "catalog": "Admin Catalog",
+  "manageUsers": "Manage Users",
+  "managePermissions": "Manage Permissions",
+  "manageRoles": "Manage Roles",
+  "addUser": "Add User",
+  "editUser": "Edit User",
+  "deleteUser": "Delete User",
+  "confirmDelete": "Are you sure you want to delete this user?",
+  "table": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "created": "Created At"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  }
+}

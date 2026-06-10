@@ -1,0 +1,32 @@
+{
+  "title": "Achats",
+  "purchases": "Achats",
+  "purchase_orders": "Bons de commande",
+  "suppliers": "Fournisseurs",
+  "add_purchase": "Nouvel achat",
+  "add_supplier": "Nouveau fournisseur",
+  "total_purchases": "Achats totaux",
+  "no_purchases_found": "Aucun achat trouvé.",
+  "helper_create_supplier": "Créez au moins un fournisseur avant d'enregistrer des achats.",
+  "items_count": "Articles",
+  "created_at": "Créé le",
+  "view_purchase": "Voir l'achat",
+  "edit_purchase": "Modifier l'achat",
+  "delete_purchase": "Supprimer l'achat",
+  "purchase_details": "Détails de l'achat",
+  "details_and_items": "Détails et articles",
+  "edit_purchase_item": "Modifier l'article d'achat",
+  "item_details": "Détails de l'article",
+  "not_set": "Non défini",
+  "supplier": "Fournisseur",
+  "name": "Nom",
+  "contact": "Contact",
+  "no_phone": "Pas de téléphone",
+  "no_address": "Pas d'adresse",
+  "status": {
+    "pending": "En attente",
+    "confirmed": "confirmé",
+    "cancelled": "Annulé",
+    "received": "Reçu"
+  }
+}

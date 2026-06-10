@@ -1,0 +1,67 @@
+{
+  "title": "Inventory",
+  "stock_movements": "Stock Movements",
+  "products": {
+    "title": "Products",
+    "add": "Add product",
+    "edit": "Edit product",
+    "name": "Product Name",
+    "price": "Price",
+    "quantity": "Quantity",
+    "sku": "SKU",
+    "category": "Category",
+    "supplier": "Supplier",
+    "description": "Description",
+    "save": "Save product",
+    "delete_confirm": "Are you sure you want to delete this product?"
+  },
+  "categories": {
+    "title": "Categories",
+    "add": "Add Category",
+    "edit": "Edit Category",
+    "name": "Category Name",
+    "description": "Description",
+    "save": "Save Category",
+    "delete_confirm": "Are you sure you want to delete this category?"
+  },
+  "filters": {
+    "reference": "Reference",
+    "name": "Name",
+    "category": "Category",
+    "supplier": "Supplier",
+    "stock_status": "Stock Status",
+    "all_categories": "All Categories",
+    "all_suppliers": "All Suppliers",
+    "all_stock": "All Status"
+  },
+  "stock_status": {
+    "in_stock": "In Stock",
+    "low_stock": "Low Stock",
+    "out_of_stock": "Out of Stock"
+  },
+  "import_export": {
+    "import": "Import CSV",
+    "export": "Export CSV"
+  },
+  "history": {
+    "unknown": "Unknown",
+    "stock_in": "Stock in",
+    "stock_out": "Stock out",
+    "manual": "Manual",
+    "fetch_error": "Failed to fetch stock movements",
+    "id": "ID",
+    "product": "Product",
+    "movement": "Movement",
+    "quantity": "Quantity",
+    "source": "Source",
+    "date": "Date",
+    "loading": "Loading stock movements...",
+    "no_movements": "No stock movements found.",
+    "product_label": "Product #{{id}}",
+    "no_reference": "No reference",
+    "prev": "Prev",
+    "next": "Next",
+    "page_info": "Page {{page}} / {{lastPage}}"
+  }
+}
+

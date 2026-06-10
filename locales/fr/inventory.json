@@ -1,0 +1,66 @@
+{
+  "title": "Inventaire",
+  "stock_movements": "Mouvements de stock",
+  "products": {
+    "title": "Produits",
+    "add": "Ajouter un produit",
+    "edit": "Modifier le produit",
+    "name": "Nom du produit",
+    "price": "Prix",
+    "quantity": "Quantité",
+    "sku": "SKU",
+    "category": "Catégorie",
+    "supplier": "Fournisseur",
+    "description": "Description",
+    "save": "Enregistrer le produit",
+    "delete_confirm": "Êtes-vous sûr de vouloir supprimer ce produit ?"
+  },
+  "categories": {
+    "title": "Catégories",
+    "add": "Ajouter une catégorie",
+    "edit": "Modifier la catégorie",
+    "name": "Nom de la catégorie",
+    "description": "Description",
+    "save": "Enregistrer la catégorie",
+    "delete_confirm": "Êtes-vous sûr de vouloir supprimer cette catégorie ?"
+  },
+  "filters": {
+    "reference": "Référence",
+    "name": "Nom",
+    "category": "Catégorie",
+    "supplier": "Fournisseur",
+    "stock_status": "État du stock",
+    "all_categories": "Toutes les catégories",
+    "all_suppliers": "Tous les fournisseurs",
+    "all_stock": "Tous les états"
+  },
+  "stock_status": {
+    "in_stock": "En stock",
+    "low_stock": "Stock faible",
+    "out_of_stock": "En rupture"
+  },
+  "import_export": {
+    "import": "Importer CSV",
+    "export": "Exporter CSV"
+  },
+  "history": {
+    "unknown": "Inconnu",
+    "stock_in": "Entrée de stock",
+    "stock_out": "Sortie de stock",
+    "manual": "Manuel",
+    "fetch_error": "Échec de la récupération des mouvements de stock",
+    "id": "ID",
+    "product": "Produit",
+    "movement": "Mouvement",
+    "quantity": "Quantité",
+    "source": "Source",
+    "date": "Date",
+    "loading": "Chargement des mouvements de stock...",
+    "no_movements": "Aucun mouvement de stock trouvé.",
+    "product_label": "Produit #{{id}}",
+    "no_reference": "Pas de référence",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "page_info": "Page {{page}} / {{lastPage}}"
+  }
+}

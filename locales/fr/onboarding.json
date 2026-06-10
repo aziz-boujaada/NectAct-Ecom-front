@@ -1,0 +1,98 @@
+{
+  "welcome": {
+    "title": "Bienvenue sur Nexta ERP",
+    "description": "Nexta vous aide à gérer les ventes, les stocks, les achats, les finances et les devis dans un espace de travail intelligent.",
+    "overview": "Aperçu de l'ERP",
+    "overviewText": "Un système unifié pour gérer l'ensemble de vos opérations commerciales en toute fluidité.",
+    "unified": "Gestion unifiée",
+    "unifiedText": "Connectez chaque département et arrêtez de jongler entre des outils déconnectés.",
+    "aiPowered": "Propulsé par l'IA",
+    "aiPoweredText": "Des informations intelligentes qui vous aident à prendre de meilleures décisions plus rapidement.",
+    "aiContext": "L'IA Nexta agit comme votre analyste commercial virtuel, traitant vos données en temps réel."
+  },
+  "sales": {
+    "title": "Ventes et CRM",
+    "description": "Le module des ventes suit les revenus, les commandes et l'activité des clients pour soutenir la croissance de votre entreprise.",
+    "revenue": "Suivi des revenus",
+    "revenueText": "Surveillez chaque dollar entrant dans votre entreprise grâce à des rapports précis.",
+    "product": "Performance des produits",
+    "productText": "Identifiez vos articles les plus vendus et vos stocks sous-performants.",
+    "trends": "Tendances des ventes",
+    "trendsText": "Visualisez automatiquement les modèles de croissance et les fluctuations saisonnières.",
+    "aiContext": "L'IA Nexta utilise les rapports de vente pour identifier les opportunités de croissance et prédire les tendances futures."
+  },
+  "inventory": {
+    "title": "Données de base et stocks",
+    "description": "Le module des stocks permet de surveiller les niveaux de stock et la disponibilité des produits dans votre entrepôt.",
+    "liveStock": "Niveaux de stock en direct",
+    "liveStockText": "Sachez exactement ce que vous avez sous la main à tout moment, mis à jour en temps réel.",
+    "lowStock": "Alertes de stock faible",
+    "lowStockText": "Soyez averti avant d'être en rupture de stock, pour ne jamais manquer une vente.",
+    "turnover": "Métriques de rotation",
+    "turnoverText": "Suivez la vitesse de rotation de vos stocks et optimisez votre espace de stockage.",
+    "aiContext": "De meilleures données d'inventaire conduisent à des recommandations de stock et des alertes de réapprovisionnement plus précises."
+  },
+  "purchasing": {
+    "title": "Achats et approvisionnement",
+    "description": "Le module des achats suit les dépenses auprès des fournisseurs et l'activité d'approvisionnement pour optimiser vos coûts.",
+    "supplier": "Performance des fournisseurs",
+    "supplierText": "Évaluez vos fournisseurs en fonction de leur fiabilité, de leurs prix et de leur rapidité de livraison.",
+    "po": "Bons de commande",
+    "poText": "Créez et suivez des bons de commande professionnels, du brouillon à la confirmation de livraison.",
+    "spending": "Efficacité des dépenses",
+    "spendingText": "Analysez où va votre argent et identifiez les opportunités de réduction des coûts.",
+    "aiContext": "Nexta analyse le comportement d'achat et l'efficacité des dépenses pour améliorer vos marges bénéficiaires."
+  },
+  "finance": {
+    "title": "Intelligence financière",
+    "description": "Les rapports financiers résument la santé de l'entreprise grâce à des relevés automatisés et des comptes de résultat.",
+    "cashFlow": "Flux de trésorerie",
+    "cashFlowText": "Surveillez clairement les entrées et les sorties d'argent de votre entreprise.",
+    "profitability": "Rentabilité",
+    "profitabilityText": "Visualisez votre véritable bénéfice net après comptabilisation de toutes les dépenses et remboursements.",
+    "revenueAnalytics": "Analyse des revenus",
+    "revenueAnalyticsText": "Plongez au cœur de vos sources de revenus et des tendances de vos performances financières.",
+    "aiContext": "Les informations financières dépendent de registres précis. Plus vos données sont propres, meilleurs sont les conseils de l'IA."
+  },
+  "devis": {
+    "title": "Devis",
+    "description": "Les devis gèrent votre pipeline de propositions et aident à convertir les prospects en clients fidèles.",
+    "pipeline": "Gestion du pipeline",
+    "pipelineText": "Suivez les devis du statut de brouillon à envoyé, accepté ou rejeté.",
+    "autoConversion": "Conversion automatique",
+    "autoConversionText": "Les devis acceptés sont instantanément et automatiquement convertis en commandes de vente.",
+    "opportunity": "Analyse des opportunités",
+    "opportunityText": "Identifiez pourquoi des offres sont perdues et concentrez-vous sur les prospects ayant la plus forte probabilité.",
+    "aiContext": "Nexta détecte les performances des devis et identifie les opportunités de revenus inexploitées dans votre pipeline."
+  },
+  "data": {
+    "title": "Aidez Nexta à comprendre",
+    "description": "L'IA Nexta n'invente PAS les informations. C'est un moteur puissant qui analyse l'activité réelle de votre entreprise.",
+    "realData": "Analyse de données réelles",
+    "realDataText": "L'IA étudie vos rapports ERP pour trouver des modèles qui pourraient vous échapper.",
+    "accuracy": "L'importance de la précision",
+    "accuracyText": "Ajoutez des produits, suivez les stocks et enregistrez chaque vente pour obtenir les meilleurs résultats.",
+    "dataDriven": "Qualité basée sur les données",
+    "dataDrivenText": "La qualité de l'IA dépend directement de l'exhaustivité de vos données commerciales.",
+    "aiContext": "Plus vos données ERP sont complètes, plus l'analyse de l'IA devient précise et utile."
+  },
+  "ready": {
+    "title": "Vous êtes prêt !",
+    "description": "Vous comprenez maintenant comment fonctionne Nexta et comment l'IA génère des informations commerciales à partir de vos données.",
+    "explore": "Commencer l'exploration",
+    "exploreText": "Le tableau de bord est maintenant sous vos commandes. Bienvenue à bord !",
+    "aiWaiting": "L'IA vous attend",
+    "aiWaitingText": "Au fur et à mesure que vous ajoutez des données, l'IA commencera à fournir des informations plus approfondies.",
+    "support": "Support",
+    "supportText": "Notre équipe est toujours là si vous avez besoin d'aide pour naviguer sur la plateforme.",
+    "aiContext": "Prêt à transformer les données de votre entreprise en intelligence exploitable ?"
+  },
+  "controls": {
+    "step": "Étape {{current}} / {{total}}",
+    "skip": "Passer le tutoriel",
+    "previous": "Précédent",
+    "next": "Étape suivante",
+    "replay": "Revoir le tutoriel",
+    "start": "Commencer avec Nexta"
+  }
+}

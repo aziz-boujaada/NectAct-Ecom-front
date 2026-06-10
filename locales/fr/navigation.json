@@ -1,0 +1,59 @@
+{
+  "dashboard": {
+    "title": "Tableau de bord",
+    "overview": "Aperçu"
+  },
+  "inventory": {
+    "title": "Inventaire",
+    "products": "Produits",
+    "categories": "Catégories",
+    "stock": "Mouvements de stock"
+  },
+  "sales": {
+    "title": "Ventes",
+    "list": "Liste des ventes",
+    "clients": "Clients",
+    "refunds": "Retours & Remboursements"
+  },
+  "purchasing": {
+    "title": "Achats",
+    "list": "Liste des achats",
+    "suppliers": "Fournisseurs"
+  },
+  "devises": {
+    "title": "Devis",
+    "list": "Liste des devis"
+  },
+  "payments": {
+    "title": "Paiements",
+    "list": "Transactions"
+  },
+  "reports": {
+    "title": "Rapports",
+    "financials": "Rapports financiers",
+    "inventory": "Rapports d'inventaire",
+    "sales": "Rapports de ventes",
+    "purchasing": "Rapports d'achats",
+    "devis": "Rapports de devis"
+  },
+  "ai": {
+    "title": "Assistant IA",
+    "chat": "Chat IA"
+  },
+  "admin": {
+    "title": "Administration",
+    "users": "Utilisateurs",
+    "permissions": "Permissions"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "company": "Entreprise",
+    "appearance": "Apparence",
+    "references": "Références"
+  },
+  "profile": {
+    "title": "Profil",
+    "account": "Compte",
+    "security": "Sécurité"
+  }
+}

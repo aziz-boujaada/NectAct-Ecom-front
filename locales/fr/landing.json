@@ -1,0 +1,20 @@
+{
+  "brandName": "Next Gestco",
+  "tagline": "ERP d'Entreprise",
+  "features": "Fonctionnalités",
+  "pricing": "Tarification",
+  "demo": "Démo",
+  "docs": "Documentation",
+  "viewDemo": "Voir la démo",
+  "test": "Tester le bac à sable",
+  "secureAccess": "Accès Sécurisé",
+  "enterSystem": "Entrez dans le système en toute sécurité",
+  "enterSystemDesc": "Utilisez l'expérience d'authentification existante pour accéder au tableau de bord ou créer un nouveau compte.",
+  "sandbox": "Bac à sable prêt",
+  "sandboxDesc": "L'environnement de démonstration est préchargé avec des données commerciales, des autorisations et des flux d'accès sécurisés.",
+  "featuresList": {
+    "sso": "Prêt pour l'authentification unique (SSO)",
+    "roles": "Autorisations basées sur les rôles",
+    "audit": "Flux de travail adaptés à l'audit"
+  }
+}

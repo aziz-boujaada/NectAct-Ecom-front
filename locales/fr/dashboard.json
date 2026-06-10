@@ -1,0 +1,75 @@
+{
+  "title": "Tableau de bord",
+  "welcome": "Bienvenue",
+  "statistics_overview": "Aperçu des statistiques",
+  "reload": "Recharger",
+  "loading_stats": "Chargement des statistiques du tableau de bord...",
+  "no_sales": "Aucune vente pour le moment.",
+  "no_low_stock": "Aucun produit en stock faible.",
+  "no_recent_sales": "Aucune vente récente.",
+  "no_recent_refunds": "Aucun remboursement récent.",
+  "metrics": {
+    "net_sales": "Ventes nettes",
+    "refunds": "Remboursements",
+    "purchases": "Achats",
+    "estimated_profit": "Profit estimé"
+  },
+  "kpi": {
+    "daily_movement": "Mouvement quotidien",
+    "monthly_totals": "Totaux mensuels",
+    "today": "Aujourd'hui",
+    "current_month": "Mois en cours",
+    "sales": "Ventes",
+    "refunds": "Remboursements",
+    "purchases": "Achats"
+  },
+  "charts": {
+    "trend": "Tendance",
+    "monthly_totals": "Totaux mensuels",
+    "status": "Statut",
+    "sales_status": "Statut des ventes",
+    "purchases_status": "Statut des achats",
+    "devis_status": "Statut des devis",
+    "top_selling_products": "Produits les plus vendus",
+    "low_stock_products": "Produits en stock faible"
+  },
+  "tables": {
+    "product": "Produit",
+    "sold": "Vendu",
+    "total": "Total",
+    "reference": "Référence",
+    "client": "Client",
+    "status": "Statut",
+    "stock": "Stock",
+    "minimum": "Minimum",
+    "reason": "Raison",
+    "recent_sales": "Ventes récentes",
+    "recent_refunds": "Remboursements récents"
+  },
+  "stats": {
+    "sales": "Ventes",
+    "refunds": "Remboursements",
+    "purchases": "Achats",
+    "quantitySold": "Quantité Vendue",
+    "stock": "Stock",
+    "recentSales": "Ventes Récentes",
+    "recentRefunds": "Remboursements Récents",
+    "products": "Produits",
+    "inventory": "Inventaire",
+    "status": "Statut",
+    "lowStock": "Articles à faible stock",
+    "revenue": "Revenus",
+    "noSales": "Aucune vente pour le moment.",
+    "noRefunds": "Aucun remboursement récent.",
+    "noLowStock": "Aucun produit en rupture de stock."
+  },
+  "products": {
+    "noMatch": "Aucun produit ne correspond aux filtres sélectionnés.",
+    "notFound": "Aucun produit trouvé dans le catalogue.",
+    "noDescription": "Aucune description",
+    "outOfStock": "Rupture de stock",
+    "lowStock": "Stock faible",
+    "inStock": "En stock",
+    "na": "N/A"
+  }
+}

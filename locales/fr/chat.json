@@ -1,0 +1,37 @@
+{
+  "title": "Assistant IA ERP",
+  "nexta": "Nexta IA",
+  "details": "Détails",
+  "returnToChat": "Retour au chat",
+  "viewDetails": "Voir les détails de l'IA",
+  "welcome": "Bienvenue dans l'Assistant ERP",
+  "askMeAbout": "Posez-moi des questions sur les données de votre entreprise, les analyses ou les niveaux de stock.",
+  "sessionNote": "les messages seront supprimés après la session.",
+  "inputPlaceholder": "Tapez votre requête ERP...",
+  "tagline": "L'avenir de l'intelligence ERP",
+  "mission": "Nexta IA est conçu pour combler le fossé entre les données commerciales complexes et la prise de décision humaine. En exploitant des LLM avancés, nous transformons les entrées ERP brutes en récits significatifs.",
+  "capabilities": "Capacités",
+  "features": {
+    "natural": {
+      "title": "Interaction Naturelle",
+      "desc": "Communiquez avec votre ERP en utilisant des requêtes en langage naturel. Aucun filtre complexe requis."
+    },
+    "insights": {
+      "title": "Informations Exploitables",
+      "desc": "Recevez des recommandations stratégiques basées sur les performances en temps réel de votre entreprise."
+    },
+    "anomaly": {
+      "title": "Détection d'Anomalies",
+      "desc": "Identifiez automatiquement les incohérences, les ruptures de stock et les valeurs aberrantes financières."
+    },
+    "expertise": {
+      "title": "Expertise des Modules",
+      "desc": "Connaissance approfondie des ventes, des stocks, des achats et des finances."
+    }
+  },
+  "hints": "Utilisez des mots-clés exacts tels que ventes, stock, finance, achats ou devis pour obtenir des résultats plus précis.",
+  "mistakes": "ERREURS",
+  "errors": {
+    "connectionFailed": "Échec de la connexion au backend de l'ERP. Veuillez vous assurer que le service est en cours d'exécution sur http://127.0.0.1:8000."
+  }
+}

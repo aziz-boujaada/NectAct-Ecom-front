@@ -1,0 +1,20 @@
+{
+  "brandName": "Next Gestco",
+  "tagline": "Enterprise ERP",
+  "features": "Features",
+  "pricing": "Pricing",
+  "demo": "Demo",
+  "docs": "Docs",
+  "viewDemo": "View Demo",
+  "test": "Test Sandbox",
+  "secureAccess": "Secure Access",
+  "enterSystem": "Enter the system securely",
+  "enterSystemDesc": "Use the existing authentication experience to access the dashboard or create a new account.",
+  "sandbox": "Sandbox ready",
+  "sandboxDesc": "The demo environment is preloaded with business data, permissions, and secure access flows.",
+  "featuresList": {
+    "sso": "Single sign-on ready",
+    "roles": "Role-based permissions",
+    "audit": "Audit-friendly workflows"
+  }
+}
